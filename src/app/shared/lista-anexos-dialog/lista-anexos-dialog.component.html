@@ -1,0 +1,64 @@
+
+
+
+<h2>Anexos Solicitud  <!-- {{solicitud.nombre}} --> </h2>
+<div class="contentDialog">
+<form [formGroup]="dialogForm" #cabeceraForm="ngForm" *ngIf="editarAnexo">
+    <mat-grid-list cols="3" rowHeight="75px">
+        <mat-grid-tile colspan="2">
+            <div class="izquierda">
+                <input type="file" class="file-input" formControlName="fileAnexoSolicitud" name="fileAnexoSolicitud" #fileUpload4 (change)="onSelectAnexoSolicitud($event)">
+                <div class="file-upload">
+                    <span class="fontLabel"> Cargar anexo:</span>
+                    &nbsp;&nbsp;
+                    <button mat-icon-button color="accent" type="button" 
+                    class="upload-btn" 
+                    (click)="fileUpload4.click()"  
+                    matTooltip="Cargar Anexo" 
+                    >
+                        <mat-icon>upload</mat-icon>
+                    </button>
+                    
+                </div>
+            </div>
+        </mat-grid-tile>
+    </mat-grid-list>
+</form>
+
+
+
+<div class="content-table">
+    <table mat-table [dataSource]="listadoAnexos" class="at-elevation-z8">
+        <!-- Rol Column -->
+        <ng-container matColumnDef="etiqueta">
+            <th mat-header-cell *matHeaderCellDef> Anexo</th>
+            <td mat-cell *matCellDef="let element">
+                {{element.etiqueta}} </td>
+        </ng-container>
+        <ng-container matColumnDef="rol">
+            <th mat-header-cell *matHeaderCellDef> Rol</th>
+            <td mat-cell *matCellDef="let element">
+                {{element.rol.nombre}} </td>
+        </ng-container>  
+
+        
+        <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef> Acciones </th>
+            <td mat-cell *matCellDef="let element">
+                <button mat-icon-button color="accent" (click)="eliminarAnexo(element)" *ngIf="editarAnexo"><mat-icon>delete</mat-icon></button>
+                <button mat-icon-button color="accent" (click)="descargarAnexo(element)"><mat-icon>file_download</mat-icon></button>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+</div>
+<br>
+
+<div class="dialogButton">
+    <button mat-raised-button color="default"  type="button" (click)="cerrarDialog('CONFIRM_DLG_NO')">Cerrar Ventana</button>
+</div>
+
+
+</div>

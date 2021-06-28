@@ -1,0 +1,15 @@
+.spinner {
+    position: relative;
+    display: block;
+    margin-left: 448px;
+    margin-bottom: 10px;
+}
+
+.contenidoForm {
+    width: 500px;
+    height: auto;
+}
+
+mat-form-field {
+    width: 80%;
+}

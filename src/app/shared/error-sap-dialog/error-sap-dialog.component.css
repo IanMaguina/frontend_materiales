@@ -1,0 +1,36 @@
+
+.dialog-container{
+    display: block;
+    min-width: 400px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 20px;
+
+}
+.dialog-botones{
+    margin-top: 30px;
+    text-align: center !important;
+}
+.dialog-botones button{
+    margin-right: 10px;
+}
+.dialog-botones mat-divider{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    background-color: #1C313A;
+    
+}
+.dialog-titulo{
+    font-size: 14pt;
+    font-weight: 600;
+    color: #1C313A;
+    
+}
+/* .dialog-mensaje{
+    font-size: 14pt;
+    font-weight: 400;
+    max-height: 100px;
+    color:#a51010;
+    width: 400px;
+    overflow-y: scroll;
+} */

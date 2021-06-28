@@ -1,0 +1,12 @@
+
+.camposSolicitud {
+    padding-top: 20px;
+}
+
+.camposSolicitud mat-form-field {
+    width: 120px !important;
+}
+
+.file-input {
+    display: none;
+  }

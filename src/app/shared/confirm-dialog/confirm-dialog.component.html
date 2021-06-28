@@ -1,0 +1,13 @@
+<div class="dialog-container">
+    <div class="dialog-mensaje">
+        {{ mensaje }}
+    </div>
+
+    <div class="dialog-botones">
+        <mat-divider></mat-divider>
+
+        <button mat-raised-button color="accent" (click)="confirmar('CONFIRM_DLG_YES')">Aceptar</button>
+        <button mat-raised-button color="default" (click)="confirmar('CONFIRM_DLG_NO')">Cancelar</button>
+    </div>
+
+</div>

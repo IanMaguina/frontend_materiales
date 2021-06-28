@@ -1,0 +1,50 @@
+<div class="dialog-container">
+    <div class="dialog-mensaje">
+        {{ mensaje }}
+    </div>
+    <form [formGroup]="motivoForm">
+        <div *ngIf="id_rol_gestor==ROL_ADMINISTRADOR_MATERIAL">
+            <mat-form-field appearance="outline">
+                <mat-label>Area Derivación</mat-label>
+                <mat-select formControlName="area_derivacion" (selectionChange)="estadoADerivar()">
+                    <mat-option>Seleccione</mat-option>
+                    <mat-option *ngFor="let rol of listadoRolesAnteriores" [value]="rol.id_rol">{{ rol.nombre_rol }}
+                    </mat-option>
+                </mat-select>
+                <mat-hint>
+                    <mat-error [hidden]="!(formErrors.area_derivacion)">
+                        {{formErrors.area_derivacion}}
+                    </mat-error>
+                </mat-hint>
+            </mat-form-field>
+        </div>
+        <mat-form-field appearance="outline">
+            <mat-label>Motivo Rechazo</mat-label>
+            <mat-select formControlName="motivo_rechazo" required>
+                <mat-option>Seleccione</mat-option>
+                <mat-option *ngFor="let motivo of listadoMotivos" [value]="motivo.id">{{ motivo.nombre }}
+                </mat-option>
+            </mat-select>
+            <mat-hint>
+                <mat-error [hidden]="!(formErrors.motivo_rechazo)">
+                    {{formErrors.motivo_rechazo}}
+                </mat-error>
+            </mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>Texto Adicional</mat-label>
+            <textarea matInput formControlName="texto_adicional"></textarea>
+        </mat-form-field>
+
+    </form>
+    <div class="dialog-botones">
+        <mat-divider></mat-divider>
+        <br>
+        <button mat-raised-button color="accent" type="button"
+            (click)="confirmar('CONFIRM_DLG_YES',motivoForm.value)">Aceptar</button> &nbsp;
+        <button mat-raised-button color="default" type="button"
+            (click)="cerrar('CONFIRM_DLG_NO',motivoForm.value)">Cancelar</button>
+    </div>
+
+
+</div>

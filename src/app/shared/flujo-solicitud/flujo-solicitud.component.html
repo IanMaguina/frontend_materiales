@@ -1,0 +1,24 @@
+<div >
+    <table mat-table [dataSource]="listadoFlujo" class="mat-elevation-z8">
+        <ng-container [matColumnDef]="column" *ngFor="let column of displayedColumns">
+            <mat-icon>save</mat-icon>
+            <div *ngIf="column=='Completado'">
+                <th mat-header-cell *matHeaderCellDef> {{column}} </th>
+                <td mat-cell *matCellDef="let element; ">
+                    <span *ngIf="element.nombre_estado_real"><mat-icon>done</mat-icon></span>
+                </td>
+            </div>
+            <div *ngIf="column=='Proceso'">
+                <th mat-header-cell *matHeaderCellDef> {{column}} </th>
+                <td mat-cell *matCellDef="let element; ">{{element.nombre_estado_real?element.nombre_estado_real:element.nombre_estado}}</td>
+            </div>
+            <div *ngIf="column=='Usuario'">
+                <th mat-header-cell *matHeaderCellDef> {{column}} </th>
+                <td mat-cell *matCellDef="let element; ">{{element.nombre_usuario_real}}</td>
+            </div>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+    </table>
+</div>

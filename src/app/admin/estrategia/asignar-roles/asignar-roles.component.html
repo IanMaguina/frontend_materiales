@@ -1,0 +1,36 @@
+<!-- <div>
+    {{data.nivel3.nivel2.nivel1.sociedad.nombre}}/{{data.nivel3.nivel2.nivel1.nombre}}/{{data.nivel3.nivel2.nombre}}/{{data.nivel3.nombre}}
+</div>
+ -->
+
+
+
+<mat-form-field appearance="fill">
+    <mat-label>Seleccionar Rol</mat-label>
+    <mat-select [(ngModel)]="selectedRol" name="rol">
+        <mat-option *ngFor="let rol of listadoRoles" [value]="rol">
+            {{rol.nombre}}
+        </mat-option>
+    </mat-select>
+</mat-form-field>
+
+<div><button mat-button (click)="agregarRolEstrategia(selectedRol)" *ngIf="btnAgregarVisible">Agregar</button></div>
+<br>
+<div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+    <div class="example-box" *ngFor="let item of listadoRolesxEstrategia" cdkDrag>
+        <div class="example-custom-placeholder" *cdkDragPlaceholder>
+        </div>
+        <div>{{item.orden}}.{{item.rol.nombre}}</div>
+        <div>
+            <mat-slide-toggle [(ngModel)]="item.activo" (ngModelChange)="actualizarActivoDeEstrategiaRol()"></mat-slide-toggle>
+
+        </div>
+
+
+    </div>
+</div>
+<br>
+<mat-spinner class="spinner" *ngIf="carga" diameter="40" color="accent" strokeWidth="7"></mat-spinner>
+<button mat-button color="accent" *ngIf="btnGrabarVisible" (click)="grabarCambios()" cdkFocusInitial>Grabar
+    Cambios</button>
+<button mat-raised-button color="warn" (click)="onNoClick()">Cerrar Ventana</button>

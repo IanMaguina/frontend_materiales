@@ -1,0 +1,38 @@
+<mat-tab-group mat-align-tabs="start" *ngIf="tabs">
+    <div *ngIf="tipo=='visibility' || existe_error_sap==false">
+        <mat-tab *ngFor="let tab of tabs; index as i ">
+<!--             <div *ngIf="!isAdministrador"> -->
+                <ng-template mat-tab-label>{{tab.nombre_rol}}</ng-template>
+                <app-ver-material-ptc [data]="data" [rol]="tab"></app-ver-material-ptc>
+            <!-- </div> -->
+<!--             <div *ngIf="isAdministrador">
+                <ng-template mat-tab-label>{{tab.nombre_rol}}</ng-template>
+                <app-editar-material-ptc [data]="data" [rol]="tab"></app-editar-material-ptc>
+            </div>
+ -->        </mat-tab>
+    </div>
+    <div *ngIf="tipo!='visibility' && existe_error_sap!=false">
+        <mat-tab *ngFor="let tab of tabs; index as i ">
+            <div *ngIf="!isAdministrador">
+                <ng-template mat-tab-label>{{tab.nombre_rol}}</ng-template>
+                <div *ngIf="i+1<tabs.length">
+                    <app-ver-material-ptc [data]="data" [rol]="tab"></app-ver-material-ptc>
+                </div>
+                <div *ngIf="i+1==tabs.length">
+                    <app-editar-material-ptc [data]="data" [rol]="tab"></app-editar-material-ptc>
+                </div>
+            </div>
+            <div *ngIf="isAdministrador">
+                <ng-template mat-tab-label>{{tab.nombre_rol}}</ng-template>
+                <app-editar-material-ptc [data]="data" [rol]="tab"></app-editar-material-ptc>
+            </div>
+        </mat-tab>
+    </div>
+
+
+    <!--     <mat-tab label="First">Content 1</mat-tab>
+    <mat-tab label="Calidad">
+        <app-editar-material-ptc [data]="data"></app-editar-material-ptc>
+    </mat-tab>
+ -->
+</mat-tab-group>

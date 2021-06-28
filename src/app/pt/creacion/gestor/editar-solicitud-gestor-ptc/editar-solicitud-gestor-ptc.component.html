@@ -1,0 +1,233 @@
+<div class="contentmain">
+    <div class="breadcumb">
+        <a routerLink="/dashboard/principal">
+            <mat-icon>home</mat-icon>
+        </a>
+        <a routerLink="#"><span class="bread-item"> / Productos terminados </span></a>
+        <a routerLink="#"><span class="bread-item"> / Creación </span></a>
+        <a routerLink="/productosTerminados/consultarSolicitudes"><span class="bread-item"> / Consulta de Solicitudes
+            </span></a>
+        <a routerLink="#"><span class="bread-item"> / Editar Solicitud </span></a>
+
+        <div class="derecha" colspan="6">
+            <button mat-raised-button color="accent" type="button" (click)="seguimientoSolicitud()">Seguimiento</button>
+            &nbsp;
+            <button mat-raised-button color="accent" type="button" (click)="flujoSolicitud()">Flujo</button>
+
+            <div class="cuadro-solicitud" *ngIf="cabeceraSolicitud && listadoMateriales">
+                <div><span class="labelSolicitud">N° Solicitud:&nbsp;&nbsp;&nbsp;</span>
+                    <span class="numeroSolicitud">{{cabeceraSolicitud.correlativo}}</span>
+                </div>
+                <div><span
+                        class="labelSolicitud">Estado&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;</span>
+                    <span class="numeroSolicitud">{{estadoFlujoActualSolicitud.nombre_estado}}</span>
+                </div>
+                <!-- <div class="numeroSolicitud">{{ cabeceraSolicitud.correlativo}}</div> -->
+            </div>
+        </div>
+
+    </div>
+    <br>
+    <div class="cabecera" *ngIf="cabeceraSolicitud && listadoMateriales">
+        <form [formGroup]="solicitudForm" #cabeceraForm="ngForm">
+
+            <mat-grid-list cols="10" rowHeight="75px">
+
+                <mat-grid-tile colspan="4">
+                    <div class="izquierda">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Línea de negocio</mat-label>
+                            <mat-select formControlName="selectecLineaNegocio" [compareWith]="compareLineaNegocio"
+                                (selectionChange)="filtrarReglas()">
+                                <mat-option *ngFor="let lineaNegocio of listadoLineaNegocio" [value]="lineaNegocio">
+                                    {{ lineaNegocio.nombre }} / {{lineaNegocio.sociedad.codigo_sap}}
+                                </mat-option>
+                            </mat-select>
+                            <mat-hint>
+                                <mat-error [hidden]="!(formErrors.selectecLineaNegocio)">
+                                    {{ formErrors.selectecLineaNegocio }}
+                                </mat-error>
+                            </mat-hint>
+                        </mat-form-field>
+                        &nbsp;
+                        <mat-form-field appearance="outline">
+                            <mat-label>Descripción corta</mat-label>
+                            <input matInput placeholder="Descripción corta" formControlName="descripcion_corta">
+                            <mat-hint>
+                                <mat-error [hidden]="!(formErrors.descripcion_corta)">
+                                    {{ formErrors.descripcion_corta }}
+                                </mat-error>
+                            </mat-hint>
+                        </mat-form-field>
+                    </div>
+                </mat-grid-tile>
+
+                <mat-grid-tile colspan="2">
+                    <!-- <div class="izquierda">
+                        <div class="numeroSolicitud">{{cabeceraSolicitud.correlativo}}</div>
+                    </div> -->
+                </mat-grid-tile>
+                <mat-grid-tile colspan="4">
+                    <div class="derecha">
+                        <button mat-raised-button color="accent" type="button" [disabled]="cabeceraForm.invalid"
+                            matTooltip="anular solicitud" *ngIf="btnAnular"
+                            (click)="openDialogConfirmarAnularSolicitud(solicitudForm.value)">Anular</button>
+                        &nbsp;
+                        <button mat-raised-button color="accent" type="button"
+                            (click)="openDialogConfirmarAprobarSolicitud()"
+                            *ngIf="btnAprobar">Aprobar</button>
+                            &nbsp;
+                        <button mat-raised-button color="accent" type="button" (click)="openDialogConfirmarEnviarSAP()"
+                            *ngIf="btnEnviarSAP">Enviar a SAP</button>
+                        &nbsp;
+                        <button mat-raised-button color="accent" type="button"
+                            *ngIf="btnRechazar"
+                            (click)="openDialogConfirmarRechazarSolicitud()">Rechazar</button>
+                        &nbsp;
+                        <button mat-raised-button color="accent" type="button" (click)="openDialogFinalizarSolicitud()"
+                            *ngIf="btnFinalizar">Finalizar</button>
+
+                    </div>
+
+                </mat-grid-tile>
+                <!-- siguiente linea -->
+
+                <mat-grid-tile colspan="3">
+                    <div class="izquierda">
+<!--                         <button mat-raised-button color="accent" type="button" (click)="descargarFormato()"
+                            *ngIf="btnDescargarFormato">Descargar Formato</button>
+ -->
+
+                        <button mat-raised-button color="accent" type="button" (click)="descargarListado()"
+                            *ngIf="btnDescargarListado">Descargar Listado</button>
+                        &nbsp;
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile colspan="2">
+                    <div class="izquierda">
+                        <input type="file" class="file-input" formControlName="files" (change)="onFileSelected($event)"
+                            #fileUpload>
+                        <div class="file-upload">
+                            <button mat-raised-button color="accent" type="button" *ngIf="btnCargaMasiva" (click)="fileUpload.click()">
+                                Carga Masiva
+                            </button>
+                        </div>
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile colspan="5">
+                    <div class="derecha">
+                        <div class="file-upload">
+                            <span class="fontLabel"> Anexo Solicitud:</span>
+                            &nbsp;
+                            <button mat-mini-fab color="accent" type="button" (click)="openDialogAnexosSolicitud()"
+                                matTooltip="Descargar Anexo">
+                                <mat-icon>attach_file</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </mat-grid-tile>
+
+
+            </mat-grid-list>
+        </form>
+    </div>
+
+
+    <div class="content-table">
+        <table mat-table [dataSource]="listadoMateriales" class="mat-elevation-z8">
+            <ng-container matColumnDef="check">
+                <th mat-header-cell *matHeaderCellDef>&nbsp;</th>
+                <td mat-cell *matCellDef="let element">
+                    <span *ngIf="element[CODIGO_INTERNO_MATERIAL_CODIGO_SAP]">
+                        <mat-icon>done</mat-icon>
+                    </span>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef={{CODIGO_INTERNO_MATERIAL_CODIGO_SAP}}>
+                <th mat-header-cell *matHeaderCellDef> Código Material SAP</th>
+                <td mat-cell *matCellDef="let element">{{element[CODIGO_INTERNO_MATERIAL_CODIGO_SAP]}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef={{CODIGO_INTERNO_DENOMINACION}}>
+                <th mat-header-cell *matHeaderCellDef> Denominación </th>
+                <td mat-cell *matCellDef="let element">{{element[CODIGO_INTERNO_DENOMINACION]}}
+                </td>
+            </ng-container>
+            <ng-container *ngFor="let campo of listadoCampoReglas" matColumnDef={{campo.codigo_interno}}>
+                <!--                 <div>
+                    <th mat-header-cell *matHeaderCellDef> {{campo.etiqueta}} </th>
+                    <td mat-cell *matCellDef="let element; ">
+                        <span class="label-error"
+                            *ngIf="element[campo.codigo_interno+'_error']">{{element[campo.codigo_interno+'_valor']}}</span>
+                        <span
+                            *ngIf="!element[campo.codigo_interno+'_error']">{{element[campo.codigo_interno+'_valor']}}</span>
+                    </td>
+                </div>
+ -->
+                <div *ngIf="campo.tipo_objeto==TIPO_OBJETO_CHECKBOX">
+                    <th mat-header-cell *matHeaderCellDef> {{campo.etiqueta}} </th>
+                    <td mat-cell *matCellDef="let element; ">
+                        <span *ngIf="element[campo.codigo_interno+'_error'] && !element[campo.codigo_interno]">
+                            <mat-icon>&nbsp;</mat-icon>
+                        </span>
+                        <span *ngIf="!element[campo.codigo_interno+'_error'] && element[campo.codigo_interno]">
+                            <mat-icon>done</mat-icon>
+                        </span>
+                    </td>
+                </div>
+                <div *ngIf="campo.tipo_objeto!=TIPO_OBJETO_CHECKBOX">
+                    <th mat-header-cell *matHeaderCellDef> {{campo.etiqueta}} </th>
+                    <td mat-cell *matCellDef="let element; ">
+                        <span class="label-error" *ngIf="element[campo.codigo_interno+'_error']">
+                            {{element[campo.codigo_interno+"_valor"]}}
+                        </span>
+                        <span *ngIf="!element[campo.codigo_interno+'_error']">
+                            {{element[campo.codigo_interno+'_valor']}}
+                        </span>
+                    </td>
+                </div>
+
+            </ng-container>
+            <ng-container matColumnDef="anexos">
+                <th mat-header-cell *matHeaderCellDef> Anexos </th>
+                <td mat-cell *matCellDef="let element">
+                    <button mat-icon-button color="accent" type="button" (click)="openDialogAnexosMaterial(element)">
+                        <mat-icon>attach_file</mat-icon>
+                    </button>
+
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="equivalencias">
+                <th mat-header-cell *matHeaderCellDef> Equivalencias </th>
+                <td mat-cell *matCellDef="let element">
+                    <button mat-icon-button color="accent" type="button" (click)="openDialogEquivalencias(element)">
+                        <mat-icon>table</mat-icon>
+                    </button>
+
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let element">
+                    <button mat-icon-button color="accent" (click)="openDialogEditarMaterial(element)">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    &nbsp;
+                    <button mat-icon-button color="accent" (click)="eliminarMaterial(element)" *ngIf="btnEliminarMaterial">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                    &nbsp;
+                    <button mat-icon-button color="accent" (click)="openDialogErrorSap(element)" *ngIf="element.existe_error_sap && ROL_GESTOR==ROL_ADMINISTRADOR_MATERIAL"  matTooltip="ver error sap">
+                        <mat-icon>error</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let element; columns: displayedColumns;"></tr>
+        </table>
+
+    </div>
+
+</div>

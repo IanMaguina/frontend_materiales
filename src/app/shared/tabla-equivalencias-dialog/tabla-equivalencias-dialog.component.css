@@ -1,0 +1,21 @@
+.contentDialog{
+    display: block;
+    min-width: 500px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 20px;
+    padding-bottom: 15px;
+    /* min-height: 460px ; */
+}
+.content-table {
+    position: relative;
+    display: block;
+    min-width: 500px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 10px;
+}
+.dialogButton{
+    top:20px;
+    position: relative;
+}

@@ -1,0 +1,55 @@
+<!-- <div>
+    {{estrategia.nivel3.nivel2.nivel1.sociedad.nombre}}/{{estrategia.nivel3.nivel2.nivel1.nombre}}/{{estrategia.nivel3.nivel2.nombre}}/{{estrategia.nivel3.nombre}}
+</div> -->
+
+<mat-form-field appearance="fill">
+    <mat-label>Seleccionar Rol</mat-label>
+    <mat-select [(ngModel)]="selectedRolEstrategia" name="item">
+        <mat-option *ngFor="let item of comboRolesxEstrategia" [value]="item">
+            {{item.nombre}}
+        </mat-option>
+    </mat-select>
+</mat-form-field>
+&nbsp;
+<mat-form-field class="example-full-width" appearance="fill">
+    <mat-label>Usuario</mat-label>
+    <input type="text" matInput [formControl]="myControl" [matAutocomplete]="auto" [(ngModel)]="selectedUsuario">
+    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+        <mat-option *ngFor="let option of filteredUsuario | async" [value]="option">
+            {{option.nombre}}
+        </mat-option>
+    </mat-autocomplete>
+</mat-form-field>
+
+<div><button mat-button (click)="agregarUsuarioRol(selectedUsuario,selectedRolEstrategia)">Agregar</button></div>
+
+
+<div class="content-table">
+    <table mat-table [dataSource]="listadoUsuarioRol" class="at-elevation-z8">
+        <!-- Rol Column -->
+        <ng-container matColumnDef="rol">
+            <th mat-header-cell *matHeaderCellDef> Rol</th>
+            <td mat-cell *matCellDef="let element">
+                {{element.estrategia_rol.rol.nombre}} </td>
+        </ng-container>
+
+        <!-- Usuario Column -->
+        <ng-container matColumnDef="usuario">
+            <th mat-header-cell *matHeaderCellDef> Usuario</th>
+            <td mat-cell *matCellDef="let element">
+                {{element.usuario.nombre}} </td>
+        </ng-container>
+        <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef> Acciones </th>
+            <td mat-cell *matCellDef="let element">
+                <button mat-icon-button color="accent" (click)="eliminarUsuario(element)"><mat-icon>delete</mat-icon></button>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+</div>
+<br>
+<mat-spinner class="spinner" *ngIf="carga" diameter="40" color="accent" strokeWidth="7"></mat-spinner>
+<button mat-raised-button color="warn" (click)="onNoClick()">Cerrar Ventana</button>

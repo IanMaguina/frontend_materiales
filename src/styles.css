@@ -1,0 +1,168 @@
+/* You can add global styles to this file, and also import other style files */
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.label-error {
+    color: #dc3545;
+    margin-top: 0.5em;
+/*     width: 100%;
+    line-height: 10px;
+    font-size: 10pt;
+    padding-left: 5px; */
+}
+
+.label-error-denominacion {
+    color: #dc3545;
+    font-size: 7pt;
+    margin-top: 0mm;
+    margin-left: 0mm;
+}
+
+.contentmain {
+    padding-left: 24px;
+    padding-bottom: 40px;
+    /* min-width: 1024px; */
+    width: 97%;
+    margin-top: -10px;
+    overflow-y: auto;
+}
+
+.breadcumb {
+    position: relative;
+    display: block;
+    height: 50px;
+    border-radius: 0px 0px 5px 5px;
+    width: 99%;
+    min-width: 1300px;
+    padding-left: 10px;
+    padding-top: 16px;
+}
+
+.breadcumb a {
+    text-decoration: none;
+    color: #455a64;
+    font-size: 12pt;
+    font-weight: bold;
+}
+
+.breadcumb mat-icon {
+    font-size: 18pt;
+    display: block;
+    float: left;
+}
+
+.bread-item {
+    display: block;
+    float: left;
+    margin-top: 5px;
+}
+
+table {
+    min-width: 100%;
+}
+
+.content-table {
+    position: relative;
+    display: block;
+    min-width: 1320px;
+    width: 99%;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 10px;
+}
+
+.izquierda{
+    left:5px !important;
+    position: absolute !important;
+}
+.derecha{
+    right:5px !important;
+    position: absolute !important;
+}
+.boton-secundario {
+    background-color: #718792 !important;
+    color:#FFFFFF;
+}
+.boton-secundario:disabled, .boton-secundario[disabled] {
+    background-color: #DCDCDC !important;
+}
+
+.cabecera{
+    position: relative;
+    display: block;
+    height: 150px;
+    border-radius: 0px 0px 5px 5px;
+    width: 99%;
+    padding-left: 10px;
+    padding-top: 16px;
+    min-width: 1300px;
+}
+.numeroSolicitud{
+/*     display: block;
+    position: relative;
+    margin-left:10px; */
+    right:5px !important;
+    position: absolute !important;
+    font-weight: bold;
+    font-size: 12pt;
+    color:#1C313A !important;
+}
+.labelSolicitud{
+    font-size: 12pt;
+    color: #718792;
+    text-align: center;
+    margin-top:-5px;
+    
+}
+
+.cuadro-separador {
+    display: block;
+    position: relative;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 10px;
+    padding-bottom: 0px;
+    min-width: 1300px;
+    height: auto;
+    border-radius: 5px;
+    border-color: #1C313A;
+    border-width: 1px;
+    border-style: solid;
+}
+.cuadro-solicitud{
+    display: block;
+    position: relative;
+    float: right;
+    height: 35px;
+    margin-left:45px;
+    border-color: #1C313A !important;
+    border-width: 0px;
+    border-style: solid;
+    border-radius: 5px;
+    width: 237px;
+    /* padding: 10px; */
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 0px;    
+}
+
+.materiales-titulo {
+    font-size: 14pt;
+    font-weight: bold;
+    padding-left: 10px;
+    padding-bottom: 40px;
+}
+.fontLabel{
+    font-size: 11pt;
+    font-weight: 500;
+    color: #1C313A;
+}
+

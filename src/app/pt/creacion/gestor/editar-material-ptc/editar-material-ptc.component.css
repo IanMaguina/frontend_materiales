@@ -1,0 +1,53 @@
+.form-detail mat-form-field{
+    left:5px !important;
+    position: absolute !important;
+    /*  width: 90%;  */
+
+}
+
+
+::ng-deep .mat-select-panel {
+    min-width: calc(100% + 100px) !important;
+    font-size: 10pt !important; 
+    overflow-y: auto;
+  }
+
+  ::ng-deep .mat-autocomplete-panel {
+    min-width: calc(100% + 100px) !important;
+    font-size: 09pt !important; 
+    overflow-y: auto;
+  }
+  
+.form-sector{
+    margin-bottom: 5px;
+}
+
+.form-sector > mat-form-field {
+    left:5px !important;
+    position: absolute !important;
+    /*position: absolute !important;
+    */
+}
+section{
+    left:5px !important;
+    position: absolute !important;
+}
+
+.dialog-container{
+    display: block;
+    min-width: 800px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 20px;
+    padding-bottom: 15px;
+    /* min-height: 460px ; */
+
+}
+.seccion{
+    padding-top: 10px;
+}
+.dialog-botones{
+    /*margin-top: 30px;
+    */
+    height: 50px;
+}

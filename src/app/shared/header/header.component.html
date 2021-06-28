@@ -1,0 +1,56 @@
+<mat-sidenav-container class="sidenav-container">
+    <mat-sidenav mode="side" #drawer class="sidenav" color="primary">
+
+        <div class="tituloMenu">Menú</div>
+
+        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
+            <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
+                <li class="mat-tree-node">
+                    <!-- use a disabled button to provide padding for tree leaf -->
+                    <button mat-icon-button disabled></button> <a [routerLink]="node.link">{{node.name}}</a>
+                </li>
+            </mat-tree-node>
+            <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+                <li>
+                    <div class="mat-tree-node">
+                        <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
+                            <mat-icon class="mat-icon-rtl-mirror">
+                                {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                            </mat-icon>
+                            <a [routerLink]="node.link">{{node.name}}</a>
+                        </button> 
+                    </div>
+                    <ul [class.example-tree-invisible]="!treeControl.isExpanded(node)">
+                        <ng-container matTreeNodeOutlet></ng-container>
+                    </ul>
+                </li>
+            </mat-nested-tree-node>
+        </mat-tree>
+
+
+
+    </mat-sidenav>
+    
+    <mat-sidenav-content>
+
+        <div class="loader-container" *ngIf="loaderService.isLoading | async ">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            <!-- <mat-progress-spinner mode="indeterminate" color="accent" class="setSpinner"></mat-progress-spinner> -->
+        </div>
+
+
+        <mat-toolbar color="primary">
+            <button *ngIf="autenticacionService.loggedIn" type="button" aria-label="Toggle sidenav" mat-icon-button
+                (click)="autoClear(drawer)">
+                <mat-icon aria-label="Side nav toggle icon">menu </mat-icon>
+            </button>
+            <span>Materiales</span>
+            <span class="spacer"></span>
+            <button mat-raised-button color="primary" (click)="signOut()" *ngIf="autenticacionService.loggedIn" type="submit" >Cerrar Sesión</button>
+        </mat-toolbar>
+        <ng-container>
+            <router-outlet></router-outlet>
+            <app-footer></app-footer>
+        </ng-container>
+    </mat-sidenav-content>
+</mat-sidenav-container>

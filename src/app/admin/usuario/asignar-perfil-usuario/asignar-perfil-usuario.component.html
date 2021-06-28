@@ -1,0 +1,42 @@
+<!-- <div>
+    Asignar Perfil {{usuario.nombre}}/{{estrategia.nivel3.nivel2.nivel1.nombre}}/{{estrategia.nivel3.nivel2.nombre}}/{{estrategia.nivel3.nombre}}
+</div> -->
+<h3>Asignar Perfil Usuario : <b>{{usuario.nombre}}</b> </h3>
+<div class="contentDialog">
+<mat-form-field appearance="fill">
+    <mat-label>Seleccionar Perfil</mat-label>
+    <mat-select [(ngModel)]="selectedPerfil" name="item">
+        <mat-option *ngFor="let item of comboListadoPerfilesPendientes" [value]="item">
+            {{item.nombre}}
+        </mat-option>
+    </mat-select>
+</mat-form-field>
+&nbsp;
+<button mat-raised-button color="accent" (click)="asignarPerfil(selectedPerfil)">Agregar</button>
+
+
+<div class="content-table">
+    <table mat-table [dataSource]="listadoPerfiles" class="at-elevation-z8">
+        <!-- Rol Column -->
+        <ng-container matColumnDef="perfil">
+            <th mat-header-cell *matHeaderCellDef> Perfil</th>
+            <td mat-cell *matCellDef="let element">
+                {{element.nombre}} </td>
+        </ng-container>
+
+        
+        <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef> Acciones </th>
+            <td mat-cell *matCellDef="let element">
+                <button mat-icon-button color="accent" (click)="eliminarPerfil(element)"><mat-icon>delete</mat-icon></button>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+</div>
+<br>
+<mat-spinner class="spinner" *ngIf="carga" diameter="40" color="accent" strokeWidth="7"></mat-spinner>
+<button mat-raised-button color="default" (click)="onNoClick()">Cerrar Ventana</button>
+</div>

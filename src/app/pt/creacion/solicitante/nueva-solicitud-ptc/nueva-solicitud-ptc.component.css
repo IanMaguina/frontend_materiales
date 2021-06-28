@@ -1,0 +1,25 @@
+.camposSolicitud {
+    padding-top: 20px;
+}
+
+.camposSolicitud mat-form-field {
+    left:5px !important;
+    position: absolute !important;
+    width: 90%;  
+}
+
+
+.file-input {
+    display: none;
+  }
+
+  .contentmain {
+    padding-left: 24px;
+    padding-bottom: 40px;
+    min-width: 1024px !important; 
+    width: 97% !important; 
+    /* margin-top: -15px !important;  */
+    overflow-x: scroll !important;
+    overflow-y:auto;
+    height: 80% !important; 
+}

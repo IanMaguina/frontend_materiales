@@ -1,0 +1,49 @@
+.contentmain {
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 40px;
+    min-width: 800px;
+    margin-top: -10px;
+}
+
+.breadcumb {
+    height: 40px;
+    border-radius: 0px 0px 5px 5px;
+    width: 99%;
+    padding-left: 10px;
+    padding-top: 16px;
+}
+
+.breadcumb a {
+    text-decoration: none;
+    color: #455a64;
+    font-size: 12pt;
+    font-weight: bold;
+}
+
+mat-icon {
+    font-size: 18pt;
+    display: block;
+    float: left;
+}
+
+.bread-item {
+    display: block;
+    float: left;
+    margin-top: 5px;
+}
+
+mat-form-field {
+    width: 70%;
+}
+
+table {
+    width: 100%;
+}
+
+.content-table {
+    min-width: 800px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 10px;
+}

@@ -1,0 +1,21 @@
+table {
+    width: 100%;
+}
+
+.content-table {
+    min-width: 400px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 10px;
+}
+
+.spinner {
+    position: relative;
+    display: block;
+    margin-left: 448px;
+    margin-bottom: 10px;
+}
+
+mat-form-field {
+    width: 47%;
+}

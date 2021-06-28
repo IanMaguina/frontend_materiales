@@ -1,0 +1,592 @@
+<div class="contentmain">
+    <div class="breadcumb">
+        <a routerLink="/dashboard/principal">
+            <mat-icon>home</mat-icon>
+        </a>
+        <a routerLink="#"><span class="bread-item"> / Productos terminados </span></a>
+        <a routerLink="#"><span class="bread-item"> / Creación </span></a>
+        <a routerLink="/productosTerminados/consultarSolicitudes"><span class="bread-item"> / Consulta de Solicitudes
+            </span></a>
+        <a routerLink="#"><span class="bread-item"> / Nueva Solicitud </span></a>
+
+        <div class="cuadro-solicitud" *ngIf="estadoFlujoActualSolicitud">
+            <div><span class="labelSolicitud">N° Solicitud:&nbsp;&nbsp;&nbsp;</span>
+                <span class="numeroSolicitud">{{correlativo}}</span>
+            </div>
+            <div><span
+                    class="labelSolicitud">Estado&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;</span>
+                <span class="numeroSolicitud">{{estadoFlujoActualSolicitud.nombre_estado}}</span>
+            </div>
+            <!-- <div class="numeroSolicitud">{{ cabeceraSolicitud.correlativo}}</div> -->
+        </div>
+
+
+    </div>
+    <br>
+    <div class="cabecera">
+        <form [formGroup]="solicitudForm" #cabeceraForm="ngForm" (ngSubmit)="agregarSolicitud(solicitudForm.value)">
+            <mat-grid-list cols="10" rowHeight="75px">
+                <mat-grid-tile colspan="6">
+                    <div class="izquierda">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Línea de negocio</mat-label>
+                            <mat-select formControlName="selectecLineaNegocio" (selectionChange)="filtrarReglas()">
+                                <mat-option *ngFor="let lineaNegocio of listadoLineaNegocio" [value]="lineaNegocio">
+                                    {{ lineaNegocio.nombre }} / {{lineaNegocio.sociedad.codigo_sap}}
+                                </mat-option>
+                            </mat-select>
+                            <mat-hint>
+                                <mat-error [hidden]="!(formErrors.selectecLineaNegocio)">
+                                    {{ formErrors.selectecLineaNegocio }}
+                                </mat-error>
+                            </mat-hint>
+                        </mat-form-field>
+                        &nbsp;
+                        <mat-form-field appearance="outline">
+                            <mat-label>Descripción corta</mat-label>
+                            <input matInput placeholder="Descripción corta" formControlName="descripcion_corta">
+                            <mat-hint>
+                                <mat-error [hidden]="!(formErrors.descripcion_corta)">
+                                    {{ formErrors.descripcion_corta }}
+                                </mat-error>
+                            </mat-hint>
+                        </mat-form-field>
+                    </div>
+
+                </mat-grid-tile>
+
+
+                <mat-grid-tile colspan="4">
+                    <div class="derecha">
+                        <button mat-raised-button color="accent" type="button" [disabled]="cabeceraForm.invalid"
+                            matTooltip="anular solicitud" *ngIf="correlativo"
+                            (click)="openDialogConfirmarAnularSolicitud(solicitudForm.value)">Anular</button>
+                        &nbsp;
+                        <button mat-raised-button color="accent" type="button" [disabled]="cabeceraForm.invalid"
+                            *ngIf="!correlativo" (click)="cabeceraForm.ngSubmit.emit()">Guardar</button>
+                        &nbsp;
+                        <button mat-raised-button color="accent" type="button" [disabled]="cabeceraForm.invalid"
+                            *ngIf="correlativo"
+                            (click)="openDialogConfirmarActualizarSolicitud(solicitudForm.value)">Actualizar</button>
+                        &nbsp;
+                        <button mat-raised-button color="accent" type="button"
+                            (click)="openDialogConfirmarEnviarActualizarSolicitud(solicitudForm.value)"
+                            *ngIf="correlativo">Enviar a supervisión</button>
+                    </div>
+                </mat-grid-tile>
+
+                <!-- siguiente linea -->
+
+                <mat-grid-tile colspan="4">
+                    <div class="izquierda">
+                        <button mat-raised-button color="accent" type="button" (click)="descargarFormato()"
+                            *ngIf="listadoMateriales.length==0 && correlativo">Descargar Formato</button>
+
+                        &nbsp;
+                        <button mat-raised-button color="accent" type="button" (click)="descargarListado()"
+                            *ngIf="listadoMateriales.length>0">Descargar Listado</button>
+                        &nbsp;
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile colspan="2">
+                    <div class="izquierda">
+                        <input type="file" class="file-input" formControlName="files" (change)="onFileSelected($event)"
+                            #fileUpload>
+                        <div class="file-upload">
+                            <button mat-raised-button color="accent" type="button" (click)="fileUpload.click()"
+                                *ngIf="correlativo">
+                                Carga Masiva
+                            </button>
+                        </div>
+                    </div>
+                </mat-grid-tile>
+
+                <mat-grid-tile colspan="4">
+
+                    <div class="derecha">
+                        <div class="file-upload">
+                            <span class="fontLabel"> Anexo Solicitud:</span>
+                            &nbsp;
+                            <button mat-mini-fab color="accent" type="button" class="upload-btn"
+                                (click)="openDialogAnexosSolicitud()" matTooltip="Cargar Anexo">
+                                <mat-icon>attach_file</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                </mat-grid-tile>
+
+
+            </mat-grid-list>
+        </form>
+    </div>
+
+    <div class="cuadro-separador">
+        <div class="materiales-titulo">
+            <mat-grid-list cols="2" rowHeight="80px">
+                <mat-grid-tile>
+                    <div class="izquierda">
+
+                        Materiales 
+
+                    </div>
+                </mat-grid-tile>
+
+
+                <mat-grid-tile>
+                    <div class="derecha">
+
+                        <button mat-mini-fab class="boton-secundario"
+                            (click)="existeDenominacionSapYBdAdd(materialForm.value)" matTooltip="Agregar Material"
+                            [disabled]="itemForm.invalid || !correlativo || btnAdd">
+                            <mat-icon>add</mat-icon>
+                        </button>&nbsp;
+                        <button mat-mini-fab class="boton-secundario"
+                            (click)="existeDenominacionSapYBdUpdate(materialForm.value)" matTooltip="Guardar Material"
+                            [disabled]="itemForm.invalid || itemMaterialOld==undefined">
+                            <mat-icon>save</mat-icon>
+                        </button>&nbsp;
+                        <button mat-mini-fab class="boton-secundario" (click)="limpiarMaterial()"
+                            matTooltip="Limpiar Material">
+                            <mat-icon>clear</mat-icon>
+                        </button>
+                    </div>
+                </mat-grid-tile>
+            </mat-grid-list>
+        </div>
+        <div class="generador">
+            <form [formGroup]="filtroForm" (ngSubmit)="filtroLlenar(filtroForm.value)">
+                <mat-grid-list cols="10" rowHeight="85px">
+
+                    <mat-grid-tile colspan="5">
+
+                        <div class="izquierda">
+                            <mat-form-field appearance="outline">
+                                <mat-label>ingrese código material modelo</mat-label>
+                                <input matInput placeholder="Codigo Material" formControlName="codigoModelo">
+                                <mat-hint>
+                                    <mat-error [hidden]="!(formErrors.codigoModelo)">
+                                        {{ formErrors.codigoModelo }}
+                                    </mat-error>
+                                </mat-hint>
+                            </mat-form-field>
+
+                        </div>
+                    </mat-grid-tile>
+                    <!--                     <mat-grid-tile colspan="1">
+                        <div class="izquierda">
+                            <button mat-raised-button color="accent" class="boton-secundario" name="btnLLenardatos"
+                                [disabled]="filtroForm.invalid || !correlativo">Llenar datos</button>
+                        </div>
+                    </mat-grid-tile> -->
+
+                    <mat-grid-tile colspan="4">
+                        <div class="derecha">
+                            <div class="file-upload" *ngIf="activarEditarMaterial">
+                                <button mat-mini-fab color="accent" type="button" class="boton-secundario"
+                                    (click)="onSelectEquivalencias()" matTooltip="Ver Tabla de Equivalencias">
+                                    <mat-icon>table</mat-icon>
+                                </button>
+                                &nbsp;
+                                <button mat-mini-fab type="button" class="boton-secundario"
+                                    (click)="selectOpenAnexosMaterial()" matTooltip="Ver Lista Anexos Material">
+                                    <mat-icon>attach_file</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </mat-grid-tile>
+
+                </mat-grid-list>
+            </form>
+        </div>
+        <mat-divider></mat-divider>
+
+        <div class="camposSolicitud">
+            (*) Datos Obligatorios
+            <form [formGroup]="itemForm" #materialForm="ngForm">
+                <mat-grid-list cols="{{SOLICITUD_DETALLE_NUMERO_COLUMNAS}} " rowHeight="80px">
+                    <mat-grid-tile *ngFor="let campo of listadoCampoReglas">
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_DENOMINACION"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <input matInput type="text" #input maxlength={{campo.longitud}}
+                                formControlName={{campo.codigo_interno}} (ngModelChange)="existeDenominacion=false">
+                            <mat-hint align="end">{{input.value?.length || 0}}/{{campo.longitud}}</mat-hint>
+                            <button mat-button matSuffix mat-icon-button (click)="listadoDenominacion()">
+                                <mat-icon>explore</mat-icon>
+                            </button>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_CODIGO_EAN"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <input matInput #input maxlength={{campo.longitud}} type="text"
+                                formControlName={{campo.codigo_interno}}>
+                            <mat-hint align="end">{{input.value?.length || 0}}/{{campo.longitud}}</mat-hint>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_SECTOR"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <input matInput #input maxlength={{campo.longitud}} type="text"
+                                formControlName={{campo.codigo_interno}}>
+                            <mat-hint align="end">{{input.value?.length || 0}}/{{campo.longitud}}</mat-hint>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_RAMO"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <input matInput #input maxlength={{campo.longitud}} type="text"
+                                formControlName={{campo.codigo_interno}}>
+                            <mat-hint align="end">{{input.value?.length || 0}}/{{campo.longitud}}</mat-hint>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_PRECIO_BASE"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <input matInput type="number" formControlName={{campo.codigo_interno}}>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_PRECIO_VARIABLE"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <input matInput type="number" formControlName={{campo.codigo_interno}}>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_PESO_BRUTO"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <input matInput type="number" formControlName={{campo.codigo_interno}}>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_TEXTO_COMERCIAL"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <input matInput type="text" formControlName={{campo.codigo_interno}}>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_UNIDAD_MEDIDA_BASE"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareUnidadMedidaBase"
+                                (selectionChange)="setearUnidadMedida()">
+                                <mat-option *ngFor="let listaCampo of listadoUnidadMedidaBase" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_UNIDAD_MEDIDA_PESO"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}}
+                                [compareWith]="compareUnidadMedidaPeso">
+                                <mat-option [value]="" *ngIf="campo.regla_campo!='M'">&nbsp;&nbsp;----- SELECCIONAR
+                                    -----&nbsp;&nbsp;</mat-option>
+                                <mat-option *ngFor="let listaCampo of listadoUnidadMedidaPeso" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}}
+                                [compareWith]="compareUnidadMedidaVenta">
+                                <mat-option [value]="" *ngIf="campo.regla_campo!='M'">&nbsp;&nbsp;----- SELECCIONAR
+                                    -----&nbsp;&nbsp;</mat-option>
+                                <mat-option *ngFor="let listaCampo of listadoUnidadMedidaVenta" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}}
+                                [compareWith]="compareUnidadMedidaPedido">
+                                <mat-option [value]="" *ngIf="campo.regla_campo!='M'">&nbsp;&nbsp;----- SELECCIONAR
+                                    -----&nbsp;&nbsp;</mat-option>
+                                <mat-option *ngFor="let listaCampo of listadoUnidadMedidaPedido" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_CENTRO"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{CODIGO_INTERNO_CENTRO}} [compareWith]="compareCentro"
+                                (selectionChange)="filtrarListasPorCentro()">
+                                <mat-option *ngFor="let listaCampo of listadoCentroItem" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_ORGANIZACION_VENTAS"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}}
+                                [compareWith]="compareOrganizacionVentas">
+                                <mat-option *ngFor="let listaCampo of listadoOrganizacionVentasItem"
+                                    [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_CANAL_DISTRIBUCION"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}}
+                                [compareWith]="compareCanalDistribucion">
+                                <mat-option *ngFor="let listaCampo of listadoCanalDistribucionItem"
+                                    [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_ALMACEN"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareAlmacen">
+                                <mat-option *ngFor="let listaCampo of listadoAlmacenItem" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_CLASE_TAB"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareClase" multiple>
+                                <mat-option *ngFor="let listaCampo of listadoClasificacionItem" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_TIPO_MATERIAL"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareTipoMaterial">
+                                <mat-option *ngFor="let listaCampo of listadoTipoMaterial" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}}&nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_GRUPO_ARTICULO"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareGrupoArticulo">
+                                <mat-option *ngFor="let listaCampo of listadoGrupoArticulo" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_IDIOMA"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareIdioma">
+                                <mat-option *ngFor="let listaCampo of listadoIdioma" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}}
+                                [compareWith]="compareGrupoImputacionMaterial">
+                                <mat-option *ngFor="let listaCampo of listadoGrupoImputacionMaterial"
+                                    [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_JERARQUIA_PRODUCTO"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}}
+                                [compareWith]="compareJerarquiaProducto">
+                                <mat-option *ngFor="let listaCampo of listadoJerarquiaProducto" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_GRUPOS_MATERIAL1"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareGrupoMaterial1">
+                                <mat-option *ngFor="let listaCampo of listadoGrupoMaterial1" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_GRUPOS_MATERIAL2"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareGrupoMaterial2">
+                                <mat-option *ngFor="let listaCampo of listadoGrupoMaterial2" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_CATEGORIA_VALORACION"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}}
+                                [compareWith]="compareCategoriaValoracion">
+                                <mat-option *ngFor="let listaCampo of listadoCategoriaValoracion" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_MONEDA"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareMoneda">
+                                <mat-option *ngFor="let listaCampo of listadoMoneda" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <section
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_CHECKBOX && campo.codigo_interno==CODIGO_INTERNO_CRITICOS"
+                            class="example-form-field" appearance="outline">
+                            <mat-checkbox formControlName={{campo.codigo_interno}}>{{campo.etiqueta}}</mat-checkbox>
+                        </section>
+                        <section
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_CHECKBOX && campo.codigo_interno==CODIGO_INTERNO_ESTRATEGICOS"
+                            class="example-form-field" appearance="outline">
+                            <mat-checkbox formControlName={{campo.codigo_interno}}>{{campo.etiqueta}}</mat-checkbox>
+                        </section>
+                        <section
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_CHECKBOX && campo.codigo_interno==CODIGO_INTERNO_IND_PED_AUTOMA"
+                            class="example-form-field" appearance="outline">
+                            <mat-checkbox formControlName={{campo.codigo_interno}}>{{campo.etiqueta}}</mat-checkbox>
+                        </section>
+                        <section
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_CHECKBOX && campo.codigo_interno==CODIGO_INTERNO_EXCESO_SUM_ILIMITADO"
+                            class="example-form-field" appearance="outline">
+                            <mat-checkbox formControlName={{campo.codigo_interno}}>{{campo.etiqueta}}</mat-checkbox>
+                        </section>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_CENTRO_BENEFICIO"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}}
+                                [compareWith]="compareCentro_beneficio">
+                                <mat-option *ngFor="let listaCampo of listadoCentroBeneficio" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXTAREA && campo.codigo_interno==CODIGO_INTERNO_TEXTO_COMPRA"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <textarea matInput type="text" formControlName={{campo.codigo_interno}}></textarea>
+                        </mat-form-field>
+                        <mat-form-field *ngIf="campo.codigo_interno==CODIGO_INTERNO_PARTIDA_ARANCELARIA"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <input type="text" matInput #input maxlength={{campo.longitud}} [matAutocomplete]="auto"
+                                formControlName={{campo.codigo_interno}}>
+                            <mat-hint align="end">{{input.value?.length || 0}}/{{campo.longitud}}</mat-hint>
+                            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                                <mat-option *ngFor="let listaCampo of filteredPartidaArancelaria | async"
+                                    [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} - {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+
+                        <section
+                            *ngIf="listadoMateriales.length!=0 && campo.tipo_objeto==TIPO_OBJETO_CHECKBOX && campo.codigo_interno==CODIGO_INTERNO_AMPLIACION"
+                            class="example-form-field" appearance="outline">
+                            <mat-checkbox formControlName={{campo.codigo_interno}} >{{campo.etiqueta}}</mat-checkbox>
+                        </section>
+                    </mat-grid-tile>
+                </mat-grid-list>
+            </form>
+
+        </div>
+    </div>
+
+    <div class="content-table">
+        <table mat-table [dataSource]="listadoMateriales" class="mat-elevation-z8">
+            <ng-container *ngFor="let campo of listadoCampoReglas" matColumnDef={{campo.codigo_interno}}>
+                <div *ngIf="campo.tipo_objeto==TIPO_OBJETO_CHECKBOX">
+                    <th mat-header-cell *matHeaderCellDef> {{campo.etiqueta}} </th>
+                    <td mat-cell *matCellDef="let element; ">
+                        <span *ngIf="element[campo.codigo_interno+'_error'] && !element[campo.codigo_interno]">
+                            <mat-icon>&nbsp;</mat-icon>
+                        </span>
+                        <span *ngIf="!element[campo.codigo_interno+'_error'] && element[campo.codigo_interno]">
+                            <mat-icon>done</mat-icon>
+                        </span>
+                    </td>
+                </div>
+                <div *ngIf="campo.tipo_objeto!=TIPO_OBJETO_CHECKBOX">
+                    <th mat-header-cell *matHeaderCellDef> {{campo.etiqueta}} </th>
+                    <td mat-cell *matCellDef="let element; ">
+                        <span class="label-error" *ngIf="isErrorCampo(element,campo.codigo_interno)==true">
+                            {{element[campo.codigo_interno+"_valor"]}}
+                        </span>
+                        <span *ngIf="isErrorCampo(element,campo.codigo_interno)==false">
+                            {{element[campo.codigo_interno+'_valor']}}
+                        </span>
+                    </td>
+                </div>
+            </ng-container>
+            <ng-container matColumnDef="anexos">
+                <th mat-header-cell *matHeaderCellDef> Anexos </th>
+                <td mat-cell *matCellDef="let element">
+                    <button mat-icon-button color="accent" type="button" (click)="openDialogAnexosMaterial(element)">
+                        <mat-icon>attach_file</mat-icon>
+                    </button>
+
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="equivalencias">
+                <th mat-header-cell *matHeaderCellDef> Equivalencias </th>
+                <td mat-cell *matCellDef="let element">
+                    <button mat-icon-button color="accent" type="button" (click)="openDialogEquivalencias(element)">
+                        <mat-icon>table</mat-icon>
+                    </button>
+
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let element">
+                    <button mat-icon-button color="accent" (click)="editarMaterial(element)">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="accent" (click)="eliminarMaterial(element)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let element; columns: displayedColumns;"></tr>
+        </table>
+
+    </div>
+
+</div>

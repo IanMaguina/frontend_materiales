@@ -1,0 +1,36 @@
+.botonGoogle {
+    padding: 7px;
+    font-size: 12pt;
+}
+.background{
+    background-image: url('/assets/fondo_marca.png');
+    top:50px;
+    left: 300px;
+    right: auto;
+    position: absolute;
+    display: block;
+    width: 650px;
+    height: 650px;
+    overflow: hidden;
+}
+.loginSpace{
+    position: absolute;
+    display: block;
+    background-color: #FFF;
+    border-radius:5px;
+    top:120px;
+    width: 300px;
+    height: 100px;
+    margin-left: auto;
+    margin-right: auto;
+    
+}
+mat-card{
+    margin-top: 250px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 300px;
+}
+mat-card-actions{
+    text-align: center;
+}
