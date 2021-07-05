@@ -29,10 +29,10 @@ const TREE_DATA: MenuNode[] = [
       {
         "id": 1,
         "name": "Creación",
-        "children": [
-          { "name": "Nueva Solicitud", "link": "/productosTerminados/crearSolicitudPT/1000" },
-          { "name": "Consulta Solicitud", "link": "/productosTerminados/consultarProductosTerminados/1000" },
-          { "name": "Bandeja Pendientes", "link": "/productosTerminados/pendientesProductosTerminados/1000" },
+        "children": [ 
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/1/crearSolicitudPT/1000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/1/consultarProductosTerminados/1000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/1/pendientesProductosTerminados/1000" },
           /*{ "name": "Bandeja Pendientes Supervisor", "link": "/productosTerminados/consultarSolicitudesPendientesSupervisor" }, */
         ]
       },
@@ -40,9 +40,9 @@ const TREE_DATA: MenuNode[] = [
         "id": 2,
         "name": "Ampliación",
         "children": [
-          { "name": "Nueva Solicitud", "link": "#" },
-          { "name": "Consulta Solicitud", "link": "#" },
-          { "name": "Bandeja Borradores", "link": "#" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/2/crearSolicitudPT/1000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/2/consultarProductosTerminados/1000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/2/pendientesProductosTerminados/1000" },
         ]
       },
       {
@@ -72,9 +72,9 @@ const TREE_DATA: MenuNode[] = [
         "id": 1,
         "name": "Creación",
         "children": [
-          { "name": "Nueva Solicitud", "link": "/productosTerminados/crearSolicitudRS/2000" },
-          { "name": "Consulta Solicitud", "link": "/productosTerminados/consultarRepuestosSuministros/2000" },
-          { "name": "Bandeja Pendientes", "link": "/productosTerminados/pendientesRepuestosSuministros/2000" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/1/crearSolicitudRS/2000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/1/consultarRepuestosSuministros/2000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/1/pendientesRepuestosSuministros/2000" },
           /*{ "name": "Bandeja Pendientes Supervisor", "link": "/productosTerminados/consultarSolicitudesPendientesSupervisor" }, */
         ]
       },
@@ -114,9 +114,9 @@ const TREE_DATA: MenuNode[] = [
         "id": 1,
         "name": "Creación",
         "children": [
-          { "name": "Nueva Solicitud", "link": "/productosTerminados/crearSolicitudMP/3000" },
-          { "name": "Consulta Solicitud", "link": "/productosTerminados/consultarMateriasPrimas/3000" },
-          { "name": "Bandeja Pendientes", "link": "/productosTerminados/pendientesMateriaPrimas/3000" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/1/crearSolicitudMP/3000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/1/consultarMateriasPrimas/3000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/1/pendientesMateriaPrimas/3000" },
           /*{ "name": "Bandeja Pendientes Supervisor", "link": "/productosTerminados/consultarSolicitudesPendientesSupervisor" }, */
         ]
       },
@@ -156,9 +156,9 @@ const TREE_DATA: MenuNode[] = [
         "id": 1,
         "name": "Creación",
         "children": [
-          { "name": "Nueva Solicitud", "link": "/productosTerminados/crearSolicitudAF/4000" },
-          { "name": "Consulta Solicitud", "link": "/productosTerminados/consultarActivos/4000" },
-          { "name": "Bandeja Pendientes", "link": "/productosTerminados/pendientesActivos/4000" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/1/crearSolicitudAF/4000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/1/consultarActivos/4000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/1/pendientesActivos/4000" },
           /*{ "name": "Bandeja Pendientes Supervisor", "link": "/productosTerminados/consultarSolicitudesPendientesSupervisor" }, */
         ]
       },

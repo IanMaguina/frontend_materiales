@@ -210,6 +210,7 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
     private rutaActiva: ActivatedRoute
   ) {
     this.ESCENARIO_NIVEL1= this.rutaActiva.snapshot.params.nivelEscenario;
+    this.TIPO_SOLICITUD = this.rutaActiva.snapshot.params.tipoSolicitud;    
     this.initForm();
     this.id_solicitud = this.activatedRoute.snapshot.params.id;
     this.estadoActualSolicitud(this.id_solicitud);
@@ -495,7 +496,7 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
             verticalPosition: "top"
           });
           console.log('escenrio nivel 1--->'+this.ESCENARIO_NIVEL1)
-          this.router.navigate(['/productosTerminados/consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+          this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
         })
         
       } else {
@@ -545,7 +546,7 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
               horizontalPosition: "end",
               verticalPosition: "top"
             });
-            this.router.navigate(['/productosTerminados/consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+            this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
           }
         });
 

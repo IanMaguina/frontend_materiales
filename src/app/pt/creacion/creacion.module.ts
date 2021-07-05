@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { CreacionRoutingModule } from './creacion-routing.module';
-
+import {SharedModule} from './../../shared/shared.module';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,9 +22,9 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 
 import { NuevaSolicitudPtcComponent } from './solicitante/nueva-solicitud-ptc/nueva-solicitud-ptc.component';
 import { EditarSolicitudPtcComponent } from './solicitante/editar-solicitud-ptc/editar-solicitud-ptc.component';
-import { ListarSolicitudPtcComponent } from './solicitante/listar-solicitud-ptc/listar-solicitud-ptc.component';
-import { PendienteSolicitudPtcComponent } from './solicitante/pendiente-solicitud-ptc/pendiente-solicitud-ptc.component';
-import { BandejaSolicitudPendientePtcComponent } from './supervisor/bandeja-solicitud-pendiente-ptc/bandeja-solicitud-pendiente-ptc.component';
+import { ListarSolicitudPtcComponent } from './bandeja/listar-solicitud-ptc/listar-solicitud-ptc.component';
+
+import { BandejaSolicitudPendientePtcComponent } from './bandeja/bandeja-solicitud-pendiente-ptc/bandeja-solicitud-pendiente-ptc.component';
 import { VerSolicitudPendientePtcComponent } from './supervisor/ver-solicitud-pendiente-ptc/ver-solicitud-pendiente-ptc.component';
 
 import { EditarMaterialPtcComponent } from './gestor/editar-material-ptc/editar-material-ptc.component';
@@ -36,7 +36,6 @@ import { VerMaterialPtcComponent } from './gestor/ver-material-ptc/ver-material-
   declarations: [
     NuevaSolicitudPtcComponent,
     EditarSolicitudPtcComponent,
-    PendienteSolicitudPtcComponent,
     ListarSolicitudPtcComponent,
     BandejaSolicitudPendientePtcComponent,
     VerSolicitudPendientePtcComponent,
@@ -44,6 +43,7 @@ import { VerMaterialPtcComponent } from './gestor/ver-material-ptc/ver-material-
     EditarSolicitudGestorPtcComponent,
     ContenidoSolicitudPtcComponent,
     VerMaterialPtcComponent,
+    
     
   ],
   imports: [
@@ -67,7 +67,8 @@ import { VerMaterialPtcComponent } from './gestor/ver-material-ptc/ver-material-
     MatCheckboxModule,
     MatPaginatorModule,
     MatTabsModule,
-    MatTooltipModule
+    MatTooltipModule,
+    SharedModule
     
   ],
   exports:[

@@ -24,16 +24,6 @@
                 </div>
             </div>
         </div>
-
-        <!--         <div class="cuadro-solicitud" *ngIf="cabeceraSolicitud && listadoMateriales && estadoFlujoActualSolicitud">
-            <div><span class="labelSolicitud">N° Solicitud:&nbsp;&nbsp;&nbsp;</span>
-                <span class="numeroSolicitud">{{cabeceraSolicitud.correlativo}}</span>
-            </div>
-            <div><span class="labelSolicitud">Estado&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;</span>
-                <span class="numeroSolicitud">{{estadoFlujoActualSolicitud.nombre_estado}}</span>
-            </div>                
-        </div>
- -->
     </div>
     <br>
     <div class="cabecera" *ngIf="cabeceraSolicitud && listadoMateriales">
@@ -119,36 +109,18 @@
                 </mat-grid-tile>
 
                 <mat-grid-tile colspan="4">
-
                     <div class="derecha">
-                        <!-- <input type="file" class="file-input" name="fileAnexoSolicitud" #fileUpload2
-                            (change)="onSelectAnexoSolicitud($event)"> -->
                         <div class="file-upload">
                             <!--  {{fileName || ""}} -->
                             <span class="fontLabel"> Anexo Solicitud:</span>
                             &nbsp;&nbsp;
-                            <!-- <button mat-mini-fab color="accent" type="button" class="upload-btn"
-                                (click)="fileUpload2.click()" *ngIf="!existeAnexoSolicitud" matTooltip="Cargar Anexo">
-                                <mat-icon>attach_file</mat-icon>
-                            </button> -->
                             <button mat-mini-fab color="accent" type="button" class="upload-btn"
                                 (click)="openDialogAnexosSolicitud()" matTooltip="Cargar Anexo">
                                 <mat-icon>attach_file</mat-icon>
                             </button>
-                            <!-- <button mat-mini-fab color="accent" type="button" (click)="eliminarAnexoSolicitud()"
-                                *ngIf="existeAnexoSolicitud" matTooltip="Eliminar Anexo">
-                                <mat-icon>delete</mat-icon>
-                            </button>
-                            &nbsp;
-                            <button mat-mini-fab color="accent" type="button" (click)="descargarFileSolicitud()"
-                                *ngIf="existeAnexoSolicitud" matTooltip="Descargar Anexo">
-                                <mat-icon>file_download</mat-icon>
-                            </button> -->
                         </div>
                     </div>
-
                 </mat-grid-tile>
-
             </mat-grid-list>
         </form>
     </div>
@@ -158,16 +130,11 @@
             <mat-grid-list cols="2" rowHeight="80px">
                 <mat-grid-tile>
                     <div class="izquierda">
-
-                        Materiales 
-
+                        Materiales
                     </div>
                 </mat-grid-tile>
-
-
                 <mat-grid-tile>
                     <div class="derecha">
-
                         <button mat-mini-fab class="boton-secundario"
                             (click)="existeDenominacionSapYBdAdd(materialForm.value)" matTooltip="Agregar Material"
                             [disabled]="itemForm.invalid || !correlativo || btnAdd">
@@ -187,11 +154,10 @@
             </mat-grid-list>
         </div>
         <div class="generador">
-            <form [formGroup]="filtroForm" (ngSubmit)="filtroLlenar(filtroForm.value)">
+            <form [formGroup]="filtroForm" >
                 <mat-grid-list cols="10" rowHeight="85px">
 
                     <mat-grid-tile colspan="5">
-
                         <div class="izquierda">
                             <mat-form-field appearance="outline">
                                 <mat-label>ingrese código material modelo</mat-label>
@@ -204,12 +170,12 @@
                             </mat-form-field>
                         </div>
                     </mat-grid-tile>
-                    <!--                     <mat-grid-tile colspan="1">
+                    <mat-grid-tile colspan="1" *ngIf="TIPO_SOLICITUD!=TIPO_SOLICITUD_CREACION">
                         <div class="izquierda">
                             <button mat-raised-button color="accent" class="boton-secundario"
-                                [disabled]="filtroForm.invalid">Llenar datos</button>
+                            (click)="filtroLlenar()"    [disabled]="filtroForm.invalid">Llenar datos</button>
                         </div>
-                    </mat-grid-tile> -->
+                    </mat-grid-tile>
 
                     <mat-grid-tile colspan="4">
                         <div class="derecha">
@@ -273,14 +239,15 @@
         <mat-divider></mat-divider>
 
         <div class="camposSolicitud">
-            (*) Datos Obligatorios            
+            (*) Datos Obligatorios
             <form [formGroup]="itemForm" #materialForm="ngForm" class="form-detail">
                 <mat-grid-list cols="{{SOLICITUD_DETALLE_NUMERO_COLUMNAS}} " rowHeight="80px">
                     <mat-grid-tile *ngFor="let campo of listadoCampoReglas">
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_DENOMINACION"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <input matInput type="text" #input maxlength={{campo.longitud}}
                                 formControlName={{campo.codigo_interno}} (ngModelChange)="existeDenominacion=false">
                             <mat-hint align="end">{{input.value?.length || 0}}/{{campo.longitud}}</mat-hint>
@@ -291,7 +258,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_CODIGO_EAN"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <input matInput #input maxlength={{campo.longitud}} type="text"
                                 formControlName={{campo.codigo_interno}}>
                             <mat-hint align="end">{{input.value?.length || 0}}/{{campo.longitud}}</mat-hint>
@@ -299,7 +267,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_SECTOR"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <input matInput #input maxlength={{campo.longitud}} type="text"
                                 formControlName={{campo.codigo_interno}}>
                             <mat-hint align="end">{{input.value?.length || 0}}/{{campo.longitud}}</mat-hint>
@@ -307,7 +276,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_RAMO"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <input matInput #input maxlength={{campo.longitud}} type="text"
                                 formControlName={{campo.codigo_interno}}>
                             <mat-hint align="end">{{input.value?.length || 0}}/{{campo.longitud}}</mat-hint>
@@ -315,31 +285,36 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_PRECIO_BASE"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <input matInput type="number" formControlName={{campo.codigo_interno}}>
                         </mat-form-field>
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_PRECIO_VARIABLE"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <input matInput type="number" formControlName={{campo.codigo_interno}}>
                         </mat-form-field>
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_PESO_BRUTO"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <input matInput type="number" formControlName={{campo.codigo_interno}}>
                         </mat-form-field>
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_TEXTO_COMERCIAL"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <input matInput type="text" formControlName={{campo.codigo_interno}}>
                         </mat-form-field>
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_UNIDAD_MEDIDA_BASE"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareUnidadMedidaBase"
                                 (selectionChange)="setearUnidadMedida()">
                                 <mat-option *ngFor="let listaCampo of listadoUnidadMedidaBase" [value]="listaCampo">
@@ -350,7 +325,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_UNIDAD_MEDIDA_PESO"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}}
                                 [compareWith]="compareUnidadMedidaPeso">
                                 <mat-option [value]="" *ngIf="campo.regla_campo!='M'">&nbsp;&nbsp;----- SELECCIONAR
@@ -363,7 +339,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}}
                                 [compareWith]="compareUnidadMedidaVenta">
                                 <mat-option [value]="" *ngIf="campo.regla_campo!='M'">&nbsp;&nbsp;----- SELECCIONAR
@@ -376,7 +353,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}}
                                 [compareWith]="compareUnidadMedidaPedido">
                                 <mat-option [value]="" *ngIf="campo.regla_campo!='M'">&nbsp;&nbsp;----- SELECCIONAR
@@ -389,7 +367,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_CENTRO"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{CODIGO_INTERNO_CENTRO}} [compareWith]="compareCentro"
                                 (selectionChange)="filtrarListasPorCentro()">
                                 <mat-option *ngFor="let listaCampo of listadoCentroItem" [value]="listaCampo">
@@ -400,7 +379,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_ORGANIZACION_VENTAS"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}}
                                 [compareWith]="compareOrganizacionVentas">
                                 <mat-option *ngFor="let listaCampo of listadoOrganizacionVentasItem"
@@ -412,7 +392,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_CANAL_DISTRIBUCION"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}}
                                 [compareWith]="compareCanalDistribucion">
                                 <mat-option *ngFor="let listaCampo of listadoCanalDistribucionItem"
@@ -424,7 +405,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_ALMACEN"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareAlmacen">
                                 <mat-option *ngFor="let listaCampo of listadoAlmacenItem" [value]="listaCampo">
                                     {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
@@ -434,7 +416,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_CLASE_TAB"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareClase" multiple>
                                 <mat-option *ngFor="let listaCampo of listadoClasificacionItem" [value]="listaCampo">
                                     {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
@@ -444,7 +427,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_TIPO_MATERIAL"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareTipoMaterial">
                                 <mat-option *ngFor="let listaCampo of listadoTipoMaterial" [value]="listaCampo">
                                     {{listaCampo.codigo_sap}}&nbsp;/&nbsp; {{listaCampo.nombre}}
@@ -454,7 +438,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_GRUPO_ARTICULO"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareGrupoArticulo">
                                 <mat-option *ngFor="let listaCampo of listadoGrupoArticulo" [value]="listaCampo">
                                     {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
@@ -464,7 +449,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_IDIOMA"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareIdioma">
                                 <mat-option *ngFor="let listaCampo of listadoIdioma" [value]="listaCampo">
                                     {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
@@ -474,7 +460,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}}
                                 [compareWith]="compareGrupoImputacionMaterial">
                                 <mat-option *ngFor="let listaCampo of listadoGrupoImputacionMaterial"
@@ -486,7 +473,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_JERARQUIA_PRODUCTO"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}}
                                 [compareWith]="compareJerarquiaProducto">
                                 <mat-option *ngFor="let listaCampo of listadoJerarquiaProducto" [value]="listaCampo">
@@ -497,7 +485,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_GRUPOS_MATERIAL1"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareGrupoMaterial1">
                                 <mat-option *ngFor="let listaCampo of listadoGrupoMaterial1" [value]="listaCampo">
                                     {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
@@ -507,7 +496,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_GRUPOS_MATERIAL2"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareGrupoMaterial2">
                                 <mat-option *ngFor="let listaCampo of listadoGrupoMaterial2" [value]="listaCampo">
                                     {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
@@ -517,7 +507,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_CATEGORIA_VALORACION"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}}
                                 [compareWith]="compareCategoriaValoracion">
                                 <mat-option *ngFor="let listaCampo of listadoCategoriaValoracion" [value]="listaCampo">
@@ -528,7 +519,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_MONEDA"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareMoneda">
                                 <mat-option *ngFor="let listaCampo of listadoMoneda" [value]="listaCampo">
                                     {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
@@ -558,7 +550,8 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_CENTRO_BENEFICIO"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <mat-select formControlName={{campo.codigo_interno}}
                                 [compareWith]="compareCentro_beneficio">
                                 <mat-option *ngFor="let listaCampo of listadoCentroBeneficio" [value]="listaCampo">
@@ -569,12 +562,14 @@
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXTAREA && campo.codigo_interno==CODIGO_INTERNO_TEXTO_COMPRA"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <textarea matInput type="text" formControlName={{campo.codigo_interno}}></textarea>
                         </mat-form-field>
                         <mat-form-field *ngIf="campo.codigo_interno==CODIGO_INTERNO_PARTIDA_ARANCELARIA"
                             class="example-form-field" appearance="outline">
-                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
                             <input type="text" matInput #input maxlength={{campo.longitud}} [matAutocomplete]="auto"
                                 formControlName={{campo.codigo_interno}}>
                             <mat-hint align="end">{{input.value?.length || 0}}/{{campo.longitud}}</mat-hint>
@@ -585,7 +580,7 @@
                                 </mat-option>
                             </mat-autocomplete>
                         </mat-form-field>
-                        <section 
+                        <section
                             *ngIf="listadoMateriales.length!=0  && campo.tipo_objeto==TIPO_OBJETO_CHECKBOX && campo.codigo_interno==CODIGO_INTERNO_AMPLIACION"
                             class="example-form-field" appearance="outline">
                             <mat-checkbox formControlName={{campo.codigo_interno}}>{{campo.etiqueta}}</mat-checkbox>

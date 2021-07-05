@@ -51,7 +51,7 @@ export class VerSolicitudComponent implements OnInit {
   filtroForm!: FormGroup;
   itemForm!: FormGroup;
 
-  TIPO_SOLICITUD_CREACION: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
   ROL_SOLICITANTE: number = GlobalSettings.ROL_SOLICITANTE;
   ROL_SUPERVISOR: number = GlobalSettings.ROL_SUPERVISOR;
   ROL_ADMINISTRADOR_MATERIAL: number = GlobalSettings.ROL_ADMINISTRADOR_MATERIAL;
@@ -206,6 +206,7 @@ export class VerSolicitudComponent implements OnInit {
   ) {
     this.initForm();
     this.id_solicitud = this.activatedRoute.snapshot.params.id;
+    this.TIPO_SOLICITUD = this.activatedRoute.snapshot.params.tipoSolicitud;    
     this.estadoActualSolicitud(this.id_solicitud);  // llama al this.obtenerSolicitud();
   }
 
@@ -273,7 +274,7 @@ export class VerSolicitudComponent implements OnInit {
   filtrarReglas() {
     let selectecLineaNegocio: LineaNegocio = this.solicitudForm.get('selectecLineaNegocio').value;
     this.sociedad = selectecLineaNegocio.sociedad;
-    this.getListadoCampoReglas(selectecLineaNegocio.id, this.ROL_GESTOR, this.TIPO_SOLICITUD_CREACION); // cambio 29 marzo
+    this.getListadoCampoReglas(selectecLineaNegocio.id, this.ROL_GESTOR, this.TIPO_SOLICITUD); // cambio 29 marzo
   }
 
   async habilitarControles() {
@@ -344,7 +345,7 @@ export class VerSolicitudComponent implements OnInit {
   async getListarNivel3Solicitud() {
     let params: any = {
       "id_rol": this.ROL_SOLICITANTE,
-      "id_tipo_solicitud": this.TIPO_SOLICITUD_CREACION,
+      "id_tipo_solicitud": this.TIPO_SOLICITUD,
       "codigo_escenario_nivel1": this.ESCENARIO_NIVEL1
 
     }
@@ -542,7 +543,7 @@ export class VerSolicitudComponent implements OnInit {
           verticalPosition: "top"
         });
 
-        this.router.navigate(['/productosTerminados/consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+        this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
       }
     })
   }
@@ -613,7 +614,7 @@ export class VerSolicitudComponent implements OnInit {
                 verticalPosition: "top"
               });
 
-              this.router.navigate(['/productosTerminados/consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+              this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
             } else {
               console.log("Error encontrado: " + JSON.stringify(data.mensaje))
             }
@@ -634,7 +635,7 @@ export class VerSolicitudComponent implements OnInit {
                 verticalPosition: "top"
               });
 
-              this.router.navigate(['/productosTerminados/consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+              this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
             } else {
               console.log("Error encontrado: " + JSON.stringify(data.mensaje))
             }
@@ -656,7 +657,7 @@ export class VerSolicitudComponent implements OnInit {
       "id_escenario_nivel3": lineaNegocio.id,
       "sociedad": lineaNegocio.sociedad,
       "id_rol": this.ROL_GESTOR,
-      "id_tipo_solicitud": this.TIPO_SOLICITUD_CREACION,
+      "id_tipo_solicitud": this.TIPO_SOLICITUD,
       "orden": this.estadoFlujoActualSolicitud.orden,
       "material": material,
       "tipo":"visibility"
@@ -799,7 +800,7 @@ export class VerSolicitudComponent implements OnInit {
             horizontalPosition: "end",
             verticalPosition: "top"
           });
-          this.router.navigate(['/productosTerminados/consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+          this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
         })
       }
     })
@@ -838,7 +839,7 @@ export class VerSolicitudComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe(result => {
           if (result == "CONFIRM_DLG_YES" && res.resultado == 1) {
-            this.router.navigate(['/productosTerminados/consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+            this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
           }
         });
       })

@@ -709,6 +709,7 @@ export class EditarMaterialPtcComponent implements OnInit {
 
   async editarMaterial(item: any) {
     console.log("editar material-->" + JSON.stringify(item));
+    this.filtroForm.get("codigoModelo")?.setValue((item["material_codigo_modelo"] ? item["material_codigo_modelo"] : ""));
     //console.log(" listadoReglasVista editarMaterial-->" + JSON.stringify(this.listadoReglasVista));
     this.itemMaterialOld = item;
     this.listadoReglasVista.forEach((vista: any) => {
@@ -769,9 +770,9 @@ export class EditarMaterialPtcComponent implements OnInit {
       this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.disable();
       this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.disable();
       this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.disable();
-    }else{
-      await this.solicitudService.esPadre(this.id_solicitud,this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value).then(res=>{
-        if (res.existe && item[this.CODIGO_INTERNO_DENOMINACION + '_error']==false){
+    } else {
+      await this.solicitudService.esPadre(this.id_solicitud, this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value).then(res => {
+        if (res.existe && item[this.CODIGO_INTERNO_DENOMINACION + '_error'] == false) {
           this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.disable();
           this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.disable();
           this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.disable();
@@ -931,10 +932,23 @@ export class EditarMaterialPtcComponent implements OnInit {
           }
           if (campoRegla['tipo_objeto'] == this.TIPO_OBJETO_COMBO) {
             if (campoRegla["codigo_interno"].substr(-4) == '_tab') {//if (campoRegla['codigo_interno'] == this.CODIGO_INTERNO_CLASE_TAB) {
-              let valoresCadena = "";
+
               let valores: any[] = [];
+              let valorTab: any[] = [];
+
+              let valoresCadena = "";
               let c = 0;
-              if (form[campoRegla['codigo_interno']]) {
+              if (form[campoRegla['codigo_interno']].length) {
+                //console.log("tmr")
+                valorTab = form[campoRegla['codigo_interno']];
+              }
+              if (valorTab != []) {
+                valorTab.forEach((element: { codigo_sap: any; }) => {
+                  valores.push({ 'valor': element.codigo_sap })
+                });
+              }
+
+/*               if (form[campoRegla['codigo_interno']]) {
                 form[campoRegla['codigo_interno']].forEach((element: { codigo_sap: any; }) => {
                   c++;
                   if (c == 1) {
@@ -946,16 +960,21 @@ export class EditarMaterialPtcComponent implements OnInit {
                   valores.push({ 'valor': element.codigo_sap })
                 });
               }
-              campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valores': valores });
+ */              campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valores': valores });
             } else {
-              let valor = (form[campoRegla['codigo_interno']].codigo_sap ? form[campoRegla['codigo_interno']].codigo_sap : "")
-              valor = (valor == "null" ? "" : valor);
+              let valor = "";
+              if (form[campoRegla['codigo_interno']]) {
+                valor = (form[campoRegla['codigo_interno']].codigo_sap ? form[campoRegla['codigo_interno']].codigo_sap : "");
+              }
+              //valor = (valor == "null" ? "" : valor);
               campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valor': valor });
+
             }
           }
         }
       })
     })
+    console.log('campos--->' + JSON.stringify(campos));
     return campos;
   }
 

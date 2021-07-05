@@ -232,8 +232,6 @@
                         class="example-form-field" appearance="outline">
                         <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span></mat-label>
                         <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareAreaPlanificacion" multiple>
-                            <mat-option [value]="" *ngIf="campo.regla_campo!='M'">&nbsp;&nbsp;----- SELECCIONAR
-                                -----&nbsp;&nbsp;</mat-option>
                             <mat-option *ngFor="let listaCampo of listadoAreaPlanificacion" [value]="listaCampo">
                                 {{listaCampo.nombre}}
                             </mat-option>

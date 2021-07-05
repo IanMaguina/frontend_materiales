@@ -1,8 +1,8 @@
 export const GlobalSettings = Object.freeze({
 
-    BASE_API_URL: 'http://localhost:8080',
+    //BASE_API_URL: 'http://localhost:8080',
     //LINK DEL FRONT END DESARROLLO:'https://proyectoactividad.uc.r.appspot.com',
-    //BASE_API_URL: 'https://back-dot-pe-pacasmayo-portalmat-gcp.uk.r.appspot.com',
+    BASE_API_URL: 'https://back-dot-pe-pacasmayo-portalmat-gcp.uk.r.appspot.com',
     N_COLUMNAS_GRID: 4,
     /*     clientId: "68121155157-tkutj29srn3cbe4o2f8qpqhhgql2jqh9.apps.googleusercontent.com",
         CLIENT_ID: 'MRbHkt_oaJs-8Zh2Bvblm7Pr',

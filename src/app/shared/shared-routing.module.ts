@@ -6,7 +6,7 @@ import { VerSolicitudComponent } from './ver-solicitud/ver-solicitud.component';
 const routes: Routes = [
   {path:'', redirectTo:'header', pathMatch:'full'},
   {path:'header', component:HeaderComponent},
-  {path:'verSolicitud/:id', component:VerSolicitudComponent},
+  {path:':tipoSolicitud/verSolicitud/:id', component:VerSolicitudComponent},
 
 ];
 

@@ -155,7 +155,7 @@
             </mat-grid-list>
         </div>
         <div class="generador">
-            <form [formGroup]="filtroForm" (ngSubmit)="filtroLlenar(filtroForm.value)">
+            <form [formGroup]="filtroForm" >
                 <mat-grid-list cols="10" rowHeight="85px">
 
                     <mat-grid-tile colspan="5">
@@ -173,12 +173,12 @@
 
                         </div>
                     </mat-grid-tile>
-                    <!--                     <mat-grid-tile colspan="1">
+                    <mat-grid-tile colspan="1" *ngIf="TIPO_SOLICITUD!=TIPO_SOLICITUD_CREACION">
                         <div class="izquierda">
                             <button mat-raised-button color="accent" class="boton-secundario" name="btnLLenardatos"
-                                [disabled]="filtroForm.invalid || !correlativo">Llenar datos</button>
+                            (click)="filtroLlenar()" [disabled]="filtroForm.invalid || !correlativo">Llenar datos</button>
                         </div>
-                    </mat-grid-tile> -->
+                    </mat-grid-tile>
 
                     <mat-grid-tile colspan="4">
                         <div class="derecha">

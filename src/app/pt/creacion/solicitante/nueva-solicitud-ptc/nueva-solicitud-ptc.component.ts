@@ -82,6 +82,10 @@ export class NuevaSolicitudPtcComponent implements OnInit {
 
   TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
   ROL_SOLICITANTE: number = GlobalSettings.ROL_SOLICITANTE;
+  TIPO_SOLICITUD_CREACION: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_AMPLIACION: number = GlobalSettings.TIPO_SOLICITUD_AMPLIACION;
+  TIPO_SOLICITUD_MODIFICACION: number = GlobalSettings.TIPO_SOLICITUD_MODIFICACION;
+  TIPO_SOLICITUD_BLOQUEO: number = GlobalSettings.TIPO_SOLICITUD_BLOQUEO;
 
   //escenarios
   ESCENARIO_NIVEL1 = '';//GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
@@ -297,6 +301,7 @@ export class NuevaSolicitudPtcComponent implements OnInit {
     private rutaActiva: ActivatedRoute
   ) {
     this.ESCENARIO_NIVEL1 = this.rutaActiva.snapshot.params.nivelEscenario;
+    this.TIPO_SOLICITUD = this.rutaActiva.snapshot.params.tipoSolicitud;
     this.initForm();
 
 
@@ -783,10 +788,13 @@ export class NuevaSolicitudPtcComponent implements OnInit {
                 valores.push({ 'valor': element.codigo_sap })
               });
             }
-            campos.push({ 'codigo_interno': this.CODIGO_INTERNO_CLASE_TAB, 'valores': valores });
+            campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valores': valores });
+            //campos.push({ 'codigo_interno': this.CODIGO_INTERNO_CLASE_TAB, 'valores': valores });
           } else {
-            let valor = (form[campoRegla['codigo_interno']].codigo_sap ? form[campoRegla['codigo_interno']].codigo_sap : "")
-            valor = (valor == "null" ? "" : valor);
+            let valor = "";
+            if (form[campoRegla['codigo_interno']]) {
+              valor = (form[campoRegla['codigo_interno']].codigo_sap ? form[campoRegla['codigo_interno']].codigo_sap : "");
+            }
             campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valor': valor });
           }
         }
@@ -1248,9 +1256,10 @@ export class NuevaSolicitudPtcComponent implements OnInit {
             }
             campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valores': valores });
           } else {
-            console.log(campoRegla['codigo_interno'] + " superarsa-->" + JSON.stringify(form));
-            let valor = (form[campoRegla['codigo_interno']].codigo_sap ? form[campoRegla['codigo_interno']].codigo_sap : "")
-            valor = (valor == "null" ? "" : valor);
+            let valor = "";
+            if (form[campoRegla['codigo_interno']]) {
+              valor = (form[campoRegla['codigo_interno']].codigo_sap ? form[campoRegla['codigo_interno']].codigo_sap : "");
+            }
             campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valor': valor });
           }
         }
@@ -1360,15 +1369,19 @@ export class NuevaSolicitudPtcComponent implements OnInit {
       "motivo": ""
     }
     this.solicitudService.aprobarSolicitud(body).then(result => {
-      this.router.navigate(['/productosTerminados/consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
+      this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
     })
   }
 
   limpiarMaterial() {
     this.listadoCampoReglas.forEach(campoRegla => {
       this.itemForm.get(campoRegla['codigo_interno'])?.setValue("");
-
+      this.itemForm.get(campoRegla['codigo_interno'])?.enable();
+      if (campoRegla["codigo_interno"] == this.CODIGO_INTERNO_AMPLIACION) {
+        this.itemForm.get(campoRegla["codigo_interno"])?.disable();
+      }
     })
+
     this.initCamposMateriales();
     this.itemMaterialOld = null;
     this.camposMaterialModelo = [];
@@ -1400,7 +1413,7 @@ export class NuevaSolicitudPtcComponent implements OnInit {
               horizontalPosition: "end",
               verticalPosition: "top"
             });
-            this.router.navigate(['/productosTerminados/consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
+            this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
           }
 
         })
@@ -1594,7 +1607,7 @@ export class NuevaSolicitudPtcComponent implements OnInit {
   }
 
   async existeDenominacionSapYBdAdd(form: any) {
-    await this.filtroLlenar('');
+    await this.filtroLlenar();
     let centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value
     let almacen = this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value
     let denominacion = this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value;
@@ -1754,7 +1767,7 @@ export class NuevaSolicitudPtcComponent implements OnInit {
     //console.log("centroItem---->" + JSON.stringify(this.centroItem));
   }
 
-  async filtroLlenar(form: any) {
+  filtroLlenar() {
     let codigoModelo = this.filtroForm.get("codigoModelo")?.value;
     let body = {
       "material": {
@@ -1763,14 +1776,27 @@ export class NuevaSolicitudPtcComponent implements OnInit {
     }
     this.solicitudService.getMaterialCodigoModelo(body).then(mat => {
       this.camposMaterialModelo = mat;
-      //console.log("material modelo-->" + codigoModelo+"......."+JSON.stringify(mat));
+      //console.log("material modelo-->" + codigoModelo + "......." + JSON.stringify(mat));
+      //this.llenarDatos(this.camposMaterialModelo, [])
+      this.llenarDatosCodigoModelo(this.camposMaterialModelo);
     })
+
   }
 
 
-  async llenarDatos(mat: any[], campos: any[]) {
-    mat.forEach(campo => {
-      if (campo.codigo_interno == this.CODIGO_INTERNO_GRUPO_ARTICULO) {
+  async llenarDatos(datosCodigoModelo: any[], campos: any[]) {
+    datosCodigoModelo.forEach((campo: any, i) => {
+      if (campo.codigo_interno == this.CODIGO_INTERNO_DENOMINACION) {
+        this.itemForm.get(campo.codigo_interno)?.setValue(campo.valor)
+        //console.log(i+"-->arriba peru"+ this.itemForm.get(campo.codigo_interno)?.);
+      }
+
+      if (this.itemForm.get(campo["codigo_interno"])?.valid) {
+        this.itemForm.get(campo.codigo_interno)?.setValue(campo.valor);
+        console.log(i + "-->" + campo.codigo_interno);
+      }
+
+/*       if (campo.codigo_interno == this.CODIGO_INTERNO_GRUPO_ARTICULO) {
         //console.log("campo CODIGO_INTERNO_GRUPO_ARTICULO-->" + JSON.stringify({ codigo_sap: campo.valor }));
         this.itemForm.get(this.CODIGO_INTERNO_GRUPO_ARTICULO)?.setValue({ codigo_sap: campo.valor })
         campos.push({ 'codigo_interno': this.CODIGO_INTERNO_GRUPO_ARTICULO, 'valor': campo.valor });
@@ -1788,8 +1814,43 @@ export class NuevaSolicitudPtcComponent implements OnInit {
         this.itemForm.get(this.CODIGO_INTERNO_RAMO)?.setValue(campo.valor);
         campos.push({ 'codigo_interno': this.CODIGO_INTERNO_RAMO, 'valor': campo.valor });
       }
-    });
+ */    });
     return campos;
+  }
+
+  async llenarDatosCodigoModelo(datosCodigoModelo: any[]) {
+    this.listadoCampoReglas.forEach((campoRegla: any) => {
+      datosCodigoModelo.forEach((campo: any, i) => {
+        if (campoRegla["codigo_interno"] == campo["codigo_interno"]) {
+          this.itemForm.get(campoRegla["codigo_interno"])?.setValue("");
+          let valor = (campo["valor"] == null ? '' : campo["valor"]);
+
+          if (campoRegla["tipo_objeto"] == GlobalSettings.TIPO_OBJETO_INPUT_TEXT) {
+            this.itemForm.get(campo["codigo_interno"])?.setValue(valor);
+          }
+          if (campoRegla["tipo_objeto"] == GlobalSettings.TIPO_OBJETO_INPUT_TEXTAREA) {
+            this.itemForm.get(campo["codigo_interno"])?.setValue(valor);
+          }
+          if (campoRegla["tipo_objeto"] == GlobalSettings.TIPO_OBJETO_CHECKBOX) {
+            let check = false;
+            if (campo["codigo_interno"] == "X") {
+              check = true;
+            }
+            this.itemForm.get(campoRegla["codigo_interno"])?.setValue(check);
+          }
+          if (campoRegla["tipo_objeto"] == GlobalSettings.TIPO_OBJETO_COMBO) {
+            if (campoRegla["codigo_interno"] == this.CODIGO_INTERNO_CENTRO) {
+              this.getListarAlmacen(valor);
+            }
+            if (valor == '') {
+              this.itemForm.get(campoRegla["codigo_interno"])?.setValue('');
+            } else {
+              this.itemForm.get(campoRegla["codigo_interno"])?.setValue({ codigo_sap: valor });
+            }
+          }
+        }
+      })
+    })
   }
 
   getListarCampoVista() {

@@ -16,10 +16,10 @@
   .contentmain {
     padding-left: 24px;
     padding-bottom: 40px;
-    min-width: 1024px !important; 
+/*     min-width: 1024px !important;  */
     width: 97% !important; 
     /* margin-top: -15px !important;  */
-    overflow-x: scroll !important;
+/*     overflow-x: scroll !important;
     overflow-y:auto;
     height: 80% !important; 
-}
+ */}

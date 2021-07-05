@@ -64,7 +64,7 @@ import { ErrorSapDialogComponent } from './error-sap-dialog/error-sap-dialog.com
     {provide: HTTP_INTERCEPTORS, useClass:InterceptorService, multi:true}
   ],
   exports:[
-    HeaderComponent
+    HeaderComponent, FooterComponent
   ]
 })
 export class SharedModule { }

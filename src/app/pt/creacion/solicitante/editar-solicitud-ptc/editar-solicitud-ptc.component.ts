@@ -86,7 +86,10 @@ export class EditarSolicitudPtcComponent implements OnInit {
 
   TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
   ROL_SOLICITANTE: number = GlobalSettings.ROL_SOLICITANTE;
-
+  TIPO_SOLICITUD_CREACION: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_AMPLIACION: number = GlobalSettings.TIPO_SOLICITUD_AMPLIACION;
+  TIPO_SOLICITUD_MODIFICACION: number = GlobalSettings.TIPO_SOLICITUD_MODIFICACION;
+  TIPO_SOLICITUD_BLOQUEO: number = GlobalSettings.TIPO_SOLICITUD_BLOQUEO;
   //escenarios
   ESCENARIO_NIVEL1: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
 
@@ -273,7 +276,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
   myControl = new FormControl();
   listadoPartidaArancelaria: PartidaArancelaria[] = [];
 
-  btnAdd=false;
+  btnAdd = false;
   constructor(
     private formBuilder: FormBuilder,
     private formValidatorService: FormValidatorService,
@@ -305,8 +308,9 @@ export class EditarSolicitudPtcComponent implements OnInit {
 
   ) {
     this.ESCENARIO_NIVEL1 = this.rutaActiva.snapshot.params.nivelEscenario;
-    this.initForm();
     this.id_solicitud = this.activatedRoute.snapshot.params.id;
+    this.TIPO_SOLICITUD = parseInt(this.rutaActiva.snapshot.params.tipoSolicitud);
+    this.initForm();
     this.obtenerSolicitud();
     this.estadoActualSolicitud(this.id_solicitud);
   }
@@ -395,7 +399,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
       });
 
     this.itemForm = this.formBuilder.group({
-      denominacion: [{ value: '', disabled: true }],
+      [this.CODIGO_INTERNO_DENOMINACION]: [{ value: '', disabled: true }],
       unidad_medida_base: [{ value: '', disabled: true }],
       peso_bruto: [{ value: '', disabled: true }],
       unidad_medida_peso: [{ value: '', disabled: true }],
@@ -799,10 +803,13 @@ export class EditarSolicitudPtcComponent implements OnInit {
                 valores.push({ 'valor': element.codigo_sap })
               });
             }
-            campos.push({ 'codigo_interno': this.CODIGO_INTERNO_CLASE_TAB, 'valores': valores });
+            campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valores': valores });
+            //campos.push({ 'codigo_interno': this.CODIGO_INTERNO_CLASE_TAB, 'valores': valores });
           } else {
-            let valor = (form[campoRegla['codigo_interno']].codigo_sap ? form[campoRegla['codigo_interno']].codigo_sap : "")
-            valor = (valor == "null" ? "" : valor);
+            let valor = "";
+            if (form[campoRegla['codigo_interno']]) {
+              valor = (form[campoRegla['codigo_interno']].codigo_sap ? form[campoRegla['codigo_interno']].codigo_sap : "");
+            }
             campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valor': valor });
           }
         }
@@ -985,7 +992,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
 
   async editarMaterial(item: any) {
     this.habilitarControles();
-    this.btnAdd=false;
+    this.btnAdd = false;
     console.log("editar material-->" + JSON.stringify(item));
     //console.log(" listadoCampoReglas-->" + JSON.stringify(this.listadoCampoReglas));
     this.itemMaterialOld = item;
@@ -1044,14 +1051,14 @@ export class EditarSolicitudPtcComponent implements OnInit {
       this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.disable();
       this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.disable();
       this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.disable();
-      this.btnAdd=true;
-    }else{
-      await this.solicitudService.esPadre(this.id_solicitud,this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value).then(res=>{
-        if (res.existe && item[this.CODIGO_INTERNO_DENOMINACION + '_error']==false){
+      this.btnAdd = true;
+    } else {
+      await this.solicitudService.esPadre(this.id_solicitud, this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value).then(res => {
+        if (res.existe && item[this.CODIGO_INTERNO_DENOMINACION + '_error'] == false) {
           this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.disable();
           this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.disable();
           this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.disable();
-          this.btnAdd=true;
+          this.btnAdd = true;
         }
       })
     }
@@ -1317,10 +1324,12 @@ export class EditarSolicitudPtcComponent implements OnInit {
             }
             campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valores': valores });
           } else {
-            console.log(campoRegla['codigo_interno'] + " superarsa-->" + JSON.stringify(form));
-            let valor = (form[campoRegla['codigo_interno']].codigo_sap ? form[campoRegla['codigo_interno']].codigo_sap : "")
-            valor = (valor == "null" ? "" : valor);
+            let valor = "";
+            if (form[campoRegla['codigo_interno']]) {
+              valor = (form[campoRegla['codigo_interno']].codigo_sap ? form[campoRegla['codigo_interno']].codigo_sap : "");
+            }
             campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valor': valor });
+
           }
         }
       }
@@ -1429,15 +1438,19 @@ export class EditarSolicitudPtcComponent implements OnInit {
       "motivo": ""
     }
     this.solicitudService.aprobarSolicitud(body).then(result => {
-      this.router.navigate(['/productosTerminados/consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
+      this.router.navigate(['/productosTerminados', this.TIPO_SOLICITUD, 'consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
     })
   }
 
   limpiarMaterial() {
     this.listadoCampoReglas.forEach(campoRegla => {
       this.itemForm.get(campoRegla['codigo_interno'])?.setValue("");
-
+      this.itemForm.get(campoRegla['codigo_interno'])?.enable();
+      if (campoRegla["codigo_interno"] == this.CODIGO_INTERNO_AMPLIACION) {
+        this.itemForm.get(campoRegla["codigo_interno"])?.disable();
+      }
     })
+
     this.initCamposMateriales();
     this.itemMaterialOld = null;
     this.camposMaterialModelo = [];
@@ -1469,7 +1482,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
               horizontalPosition: "end",
               verticalPosition: "top"
             });
-            this.router.navigate(['/productosTerminados/consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
+            this.router.navigate(['/productosTerminados', this.TIPO_SOLICITUD, 'consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
           }
 
         })
@@ -1663,7 +1676,23 @@ export class EditarSolicitudPtcComponent implements OnInit {
   }
 
   async existeDenominacionSapYBdAdd(form: any) {
-    await this.filtroLlenar('');
+    switch (this.TIPO_SOLICITUD) {
+      case this.TIPO_SOLICITUD_CREACION:
+        console.log("creacion");
+        this.creacion(form);
+        break;
+      case this.TIPO_SOLICITUD_AMPLIACION:
+        console.log("ampliacion");
+        this.ampliacion(form);
+        break;
+      case this.TIPO_SOLICITUD_MODIFICACION:
+        break;
+      case this.TIPO_SOLICITUD_BLOQUEO:
+        break;
+    }
+  }
+
+  async creacion(form: any) {
     let centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value
     let almacen = this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value
     let denominacion = this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value;
@@ -1684,6 +1713,23 @@ export class EditarSolicitudPtcComponent implements OnInit {
         })
       }
     })
+
+  }
+
+  async ampliacion(form: any) {
+    let centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value
+    let almacen = this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value
+    let denominacion = this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value;
+    let ampliacion = (this.itemForm.get(this.CODIGO_INTERNO_AMPLIACION)?.value ? this.itemForm.get(this.CODIGO_INTERNO_AMPLIACION)?.value : false);
+    let centro_codigo_sap = (centro.codigo_sap ? centro.codigo_sap : "")
+    let almacen_codigo_sap = (almacen.codigo_sap ? almacen.codigo_sap : "")
+    denominacion = denominacion.toUpperCase().trim();
+    let res = await this.existeDenominacionCentroAlmacenSAP();
+    if (res) {
+      this.openSnackBarError(Messages.error.MENSAJE_ERROR_DENOMINACION_SAP, "", "mat-primary")
+    } else {
+      this.agregarMaterialAmpliacion(form);
+    }
   }
 
   async existeDenominacionSapYBdUpdate(form: any) {
@@ -1874,7 +1920,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
     //console.log("centroItem---->" + JSON.stringify(this.centroItem));
   }
 
-  async filtroLlenar(form: any) {
+  filtroLlenar() {
     let codigoModelo = this.filtroForm.get("codigoModelo")?.value;
     let body = {
       "material": {
@@ -1883,14 +1929,27 @@ export class EditarSolicitudPtcComponent implements OnInit {
     }
     this.solicitudService.getMaterialCodigoModelo(body).then(mat => {
       this.camposMaterialModelo = mat;
-      //console.log("material modelo-->" + codigoModelo+"......."+JSON.stringify(mat));
+      console.log("material modelo-->" + codigoModelo + "......." + JSON.stringify(mat));
+      //this.llenarDatos(this.camposMaterialModelo, [])
+      this.llenarDatosCodigoModelo(this.camposMaterialModelo);
     })
+
   }
 
 
-  async llenarDatos(mat: any[], campos: any[]) {
-    mat.forEach(campo => {
-      if (campo.codigo_interno == this.CODIGO_INTERNO_GRUPO_ARTICULO) {
+  async llenarDatos(datosCodigoModelo: any[], campos: any[]) {
+    datosCodigoModelo.forEach((campo: any, i) => {
+      if (campo.codigo_interno == this.CODIGO_INTERNO_DENOMINACION) {
+        this.itemForm.get(campo.codigo_interno)?.setValue(campo.valor)
+        //console.log(i+"-->arriba peru"+ this.itemForm.get(campo.codigo_interno)?.);
+      }
+
+      if (this.itemForm.get(campo["codigo_interno"])?.valid) {
+        this.itemForm.get(campo.codigo_interno)?.setValue(campo.valor);
+        console.log(i + "-->" + campo.codigo_interno);
+      }
+
+/*       if (campo.codigo_interno == this.CODIGO_INTERNO_GRUPO_ARTICULO) {
         //console.log("campo CODIGO_INTERNO_GRUPO_ARTICULO-->" + JSON.stringify({ codigo_sap: campo.valor }));
         this.itemForm.get(this.CODIGO_INTERNO_GRUPO_ARTICULO)?.setValue({ codigo_sap: campo.valor })
         campos.push({ 'codigo_interno': this.CODIGO_INTERNO_GRUPO_ARTICULO, 'valor': campo.valor });
@@ -1908,9 +1967,47 @@ export class EditarSolicitudPtcComponent implements OnInit {
         this.itemForm.get(this.CODIGO_INTERNO_RAMO)?.setValue(campo.valor);
         campos.push({ 'codigo_interno': this.CODIGO_INTERNO_RAMO, 'valor': campo.valor });
       }
-    });
+ */    });
     return campos;
   }
+
+  async llenarDatosCodigoModelo(datosCodigoModelo: any[]) {
+    this.listadoCampoReglas.forEach((campoRegla: any) => {
+      datosCodigoModelo.forEach((campo: any, i) => {
+        if (campoRegla["codigo_interno"] == campo["codigo_interno"]) {
+          this.itemForm.get(campoRegla["codigo_interno"])?.setValue("");
+          let valor = (campo["valor"] == null ? '' : campo["valor"]);
+
+          if (campoRegla["tipo_objeto"] == GlobalSettings.TIPO_OBJETO_INPUT_TEXT) {
+            this.itemForm.get(campo["codigo_interno"])?.setValue(valor);
+          }
+          if (campoRegla["tipo_objeto"] == GlobalSettings.TIPO_OBJETO_INPUT_TEXTAREA) {
+            this.itemForm.get(campo["codigo_interno"])?.setValue(valor);
+          }
+          if (campoRegla["tipo_objeto"] == GlobalSettings.TIPO_OBJETO_CHECKBOX) {
+            let check = false;
+            if (campo["codigo_interno"] == "X") {
+              check = true;
+            }
+            this.itemForm.get(campoRegla["codigo_interno"])?.setValue(check);
+          }
+          if (campoRegla["tipo_objeto"] == GlobalSettings.TIPO_OBJETO_COMBO) {
+            if (campoRegla["codigo_interno"] == this.CODIGO_INTERNO_CENTRO) {
+              this.getListarAlmacen(valor);
+            }
+            if (valor == '') {
+              this.itemForm.get(campoRegla["codigo_interno"])?.setValue('');
+            } else {
+              this.itemForm.get(campoRegla["codigo_interno"])?.setValue({ codigo_sap: valor });
+            }
+          }
+        }
+      })
+    })
+
+
+  }
+
 
   getListarCampoVista() {
     this.campoVistaService.getListarCampoVista().then((data) => {
@@ -2041,6 +2138,59 @@ export class EditarSolicitudPtcComponent implements OnInit {
     return parseInt(cadena)
   }
 
+
+  async existeDenominacionCentroAlmacenSAP() {
+    let existe = false;
+    let codigoModelo = this.filtroForm.get("codigoModelo")?.value;
+    let centro = (this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value ? this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value : "");
+    let almacen = (this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value ? this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value : "");
+    let body = {
+      "material": {
+        "codigo": codigoModelo,
+        "centro": centro,
+        "almacen": almacen,
+      }
+    }
+    this.solicitudService.getMaterialCodigoModelo(body).then((mat: any[]) => {
+      if (mat.length > 0) {
+        existe = true;
+        return existe;
+      } else {
+        existe = false;
+        return existe;
+      }
+    })
+    return existe;
+  }
+
+  async agregarMaterialAmpliacion(form: any) {
+    let codigoModelo = (this.filtroForm.get("codigoModelo")?.value ? this.filtroForm.get("codigoModelo")?.value : "");
+    if (true) {//!this.existeDenominacion
+      let campos: any[] = await this.mapearCamposMaterial(form);
+      let params = {
+        'material_codigo_sap': codigoModelo,
+        'material': { "campos": campos }
+      }
+      //console.log('material Ampliacion--->' + JSON.stringify(params));
+      this.solicitudService.agregarMaterialAmpliacion(this.id_solicitud, params).then((data) => {
+        console.log('resppuesta al agregar material amplicacion-->' + JSON.stringify(data));
+        let mensaje = this.MENSAJE_AGREGAR_MATERIAL;
+        if (data["resultado"] == 0) {
+          mensaje = data["mensaje"];
+          this.openSnackBarError(mensaje, "", "mat-primary")
+        } else {
+          this._snack.open(mensaje, 'cerrar', {
+            duration: 1800,
+            horizontalPosition: "end",
+            verticalPosition: "top"
+          });
+        }
+        this.getListadoMateriales();
+        this.limpiarMaterial()
+      })
+    }
+
+  }
 
 
 }

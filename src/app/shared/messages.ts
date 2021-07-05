@@ -14,8 +14,9 @@ export const Messages = Object.freeze({
         MENSAJE_QUITAR_EQUIVALENCIA : "Se eliminó la equivalencia!",
     },
     error: {
-        MENSAJE_ERROR_DENOMINACION_SAP: 'Denominación del material ya existe',
-        MENSAJE_ERROR_DENOMINACION_BD: 'Denominación del material ya existe en tramite de solicitud',
+        MENSAJE_ERROR_DENOMINACION_NO_EXISTE_SAP: 'Material no existe en SAP',
+        MENSAJE_ERROR_DENOMINACION_SAP: 'Material ya existe',
+        MENSAJE_ERROR_DENOMINACION_BD: 'Material ya existe en tramite de solicitud',
         MENSAJE_ERROR_DENOMINACION_SIN_INGRESAR_BD: 'No se ha creado Denominación, no se puede Ampliar',
         MSG_ERROR_INVALID_CREDENTIALS: 'Email o contrase\u00F1a incorrectas.',
         MSG_ERROR_ACCESS_URL: "Se encontro un problema al intentar acceder al archivo solicitado.",

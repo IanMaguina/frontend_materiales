@@ -286,7 +286,7 @@ export class SolicitudService {
     let id_solicitud = params.id_solicitud;
     let id_rol = params.id_rol;
     let data = params.materiales;
-    let id_usuario=this.userInfo.id
+    let id_usuario = this.userInfo.id
     //data = { "materiales": [{ "campos": [{ "codigo_interno": "denominacion", "valor": "nuevo 6" }, { "codigo_interno": "unidad_medida_base", "valor": "KG" }, { "codigo_interno": "peso_bruto", "valor": 111 }, { "codigo_interno": "unidad_medida_peso", "valor": "KG" }, { "codigo_interno": "centro", "valor": "2010" }, { "codigo_interno": "organizacion_ventas", "valor": "3000" }, { "codigo_interno": "canal_distribucion", "valor": "01" }, { "codigo_interno": "almacen", "valor": "2061" }, { "codigo_interno": "clase", "valores": [{ "valor": "00302" }] }] }] }
     console.log("sending data actualizar material..." + JSON.stringify(data));
     return new Promise(
@@ -331,7 +331,7 @@ export class SolicitudService {
       }
     );
   }
-  
+
   contarMisPendientes(params: any): Promise<any> {
 
     let body: any = {
@@ -345,7 +345,7 @@ export class SolicitudService {
       "cantidad_filas": params.cantidad_filas,
       "pagina": params.pagina
     }
-    console.log('SUPER BODY-->'+JSON.stringify(body));
+    console.log('SUPER BODY-->' + JSON.stringify(body));
     let contarFilasPorFiltros: any[] = [];
     return new Promise(
       (resolve, reject) => {
@@ -406,7 +406,7 @@ export class SolicitudService {
     );
   }
 
-  
+
   buscarMisPendientes(filtro: any): Promise<any> {
 
     let params: any = {
@@ -482,8 +482,8 @@ export class SolicitudService {
 
   getRolesAnteriores(id_solicitud: any, orden: any): Promise<any> {
     let roles: any[] = [];
-    console.log("id solicitud en el servicio : "+id_solicitud);
-    console.log(" orden en el servicio : "+orden);
+    console.log("id solicitud en el servicio : " + id_solicitud);
+    console.log(" orden en el servicio : " + orden);
     return new Promise(
       (resolve, reject) => {
         this.resourceService.getResource("/rol/listarRolesAnteriores?id_solicitud=" + id_solicitud + "&orden=" + orden).toPromise().then((data) => {
@@ -584,7 +584,7 @@ export class SolicitudService {
     );
   }
 
-  estadoADerivar(id_solicitud: number,id_rol_derivado:number): Promise<any> {
+  estadoADerivar(id_solicitud: number, id_rol_derivado: number): Promise<any> {
     //let flujo: AprobadorSolicitud[] = [];
     return new Promise(
       (resolve, reject) => {
@@ -593,7 +593,7 @@ export class SolicitudService {
             let flujo: AprobadorSolicitud[] = data['lista'];
 
             flujo.forEach((element: AprobadorSolicitud) => {
-              if (element.id_rol_real==id_rol_derivado) {
+              if (element.id_rol_real == id_rol_derivado) {
                 resolve(element);
               }
             });
@@ -613,8 +613,8 @@ export class SolicitudService {
     );
   }
 
-  ordenADerivar(id_solicitud: number,ordenActual:number): Promise<any> {
-    let orden=ordenActual-1;
+  ordenADerivar(id_solicitud: number, ordenActual: number): Promise<any> {
+    let orden = ordenActual - 1;
     //let flujo: AprobadorSolicitud[] = [];
     return new Promise(
       (resolve, reject) => {
@@ -623,7 +623,7 @@ export class SolicitudService {
             let flujo: AprobadorSolicitud[] = data['lista'];
 
             flujo.forEach((element: AprobadorSolicitud) => {
-              if (element.orden==orden) {
+              if (element.orden == orden) {
                 resolve(element);
               }
             });
@@ -718,7 +718,7 @@ export class SolicitudService {
       "aprobado": false,
       "motivo": data.motivo,
       "id_motivo_rechazo": data.id_motivo_rechazo,
-      "aprobador_derivado":data.aprobador_derivado
+      "aprobador_derivado": data.aprobador_derivado
     }
 
     console.log("sending aprobacion Solicitud..." + JSON.stringify(body));
@@ -797,10 +797,10 @@ export class SolicitudService {
     );
   }
 
-  existeDenominacionDbPadreAmpliacion(id_solicitud:number,denominacion: String, centro_codigo_sap:String,almacen_codigo_sap:String): Promise<any> {
+  existeDenominacionDbPadreAmpliacion(id_solicitud: number, denominacion: String, centro_codigo_sap: String, almacen_codigo_sap: String): Promise<any> {
     return new Promise(
       (resolve, reject) => {
-        this.resourceService.getResource("/materialSolicitud/existePadreAmpliacion?id_solicitud="+id_solicitud+"&denominacion="+denominacion+"&centro_codigo_sap="+centro_codigo_sap+"&almacen_codigo_sap=" + almacen_codigo_sap).toPromise().then((data) => {
+        this.resourceService.getResource("/materialSolicitud/existePadreAmpliacion?id_solicitud=" + id_solicitud + "&denominacion=" + denominacion + "&centro_codigo_sap=" + centro_codigo_sap + "&almacen_codigo_sap=" + almacen_codigo_sap).toPromise().then((data) => {
           console.log("existeDenominacionDbPadreAmpliacion existe.-->" + data)
           resolve(data);
         }
@@ -814,10 +814,10 @@ export class SolicitudService {
     );
   }
 
-  esPadre(id_solicitud:number,denominacion: String): Promise<any> {
+  esPadre(id_solicitud: number, denominacion: String): Promise<any> {
     return new Promise(
       (resolve, reject) => {
-        this.resourceService.getResource("/materialSolicitud/esPadre?id_solicitud="+id_solicitud+"&denominacion="+denominacion).toPromise().then((data) => {
+        this.resourceService.getResource("/materialSolicitud/esPadre?id_solicitud=" + id_solicitud + "&denominacion=" + denominacion).toPromise().then((data) => {
           console.log("esPadre existe.-->" + data)
           resolve(data);
         }
@@ -831,10 +831,10 @@ export class SolicitudService {
     );
   }
 
-  existeHijosAmpliacion(id_solicitud:number,denominacion: String, centro_codigo_sap:String,almacen_codigo_sap:String): Promise<any> {
+  existeHijosAmpliacion(id_solicitud: number, denominacion: String, centro_codigo_sap: String, almacen_codigo_sap: String): Promise<any> {
     return new Promise(
       (resolve, reject) => {
-        this.resourceService.getResource("/materialSolicitud/existeHijosAmpliacion?id_solicitud="+id_solicitud+"&denominacion="+denominacion+"&centro_codigo_sap="+centro_codigo_sap+"&almacen_codigo_sap=" + almacen_codigo_sap).toPromise().then((data) => {
+        this.resourceService.getResource("/materialSolicitud/existeHijosAmpliacion?id_solicitud=" + id_solicitud + "&denominacion=" + denominacion + "&centro_codigo_sap=" + centro_codigo_sap + "&almacen_codigo_sap=" + almacen_codigo_sap).toPromise().then((data) => {
           console.log("existeDenominacionDbPadreAmpliacion existe.-->" + data)
           resolve(data);
         }
@@ -852,7 +852,7 @@ export class SolicitudService {
     let envio: any;
     return new Promise(
       (resolve, reject) => {
-        this.resourceService.getResource("/solicitud/enviarSAP/" + id_solicitud ).toPromise().then((data) => {
+        this.resourceService.getResource("/solicitud/enviarSAP/" + id_solicitud).toPromise().then((data) => {
           if (data && Object.keys(data).length !== 0) {
             envio = data;
             resolve(envio);
@@ -878,7 +878,7 @@ export class SolicitudService {
     let solicitud: SolicitudResponse;
 
     let item = {
-      "id_material_solicitud" : id_material_solicitud
+      "id_material_solicitud": id_material_solicitud
     }
     return new Promise(
       (resolve, reject) => {
@@ -902,23 +902,23 @@ export class SolicitudService {
     );
 
   }
-  
+
   getListaAnexoSolicitud(id_solicitud: string): Promise<any> {
     let listadoAnexos: Anexo[] = [];
     let item = {
-      "id_solicitud":id_solicitud
+      "id_solicitud": id_solicitud
     }
     return new Promise(
       (resolve, reject) => {
         this.resourceService.postResource("/solicitud/obtenerAllUrlAnexoSolicitud", item).toPromise().then((data) => {
           if (data.resultado !== 0) {
-            listadoAnexos = data.lista; 
+            listadoAnexos = data.lista;
             resolve(listadoAnexos);
-           } else {
+          } else {
             console.log("no listado encontradas...");
             resolve([]);
           }
-        } 
+        }
         ).catch(
           (error) => {
             console.log("error status=" + error.status + ", msg=" + error.message);
@@ -933,19 +933,19 @@ export class SolicitudService {
     let listadoAnexos: AnexoMaterial[] = [];
 
     let item = {
-      "id_material_solicitud":parseInt(id_material_solicitud)
+      "id_material_solicitud": parseInt(id_material_solicitud)
     }
     return new Promise(
       (resolve, reject) => {
-         this.resourceService.postResource("/solicitud/obtenerAllUrlAnexoMaterial",item).toPromise().then((data) => {
+        this.resourceService.postResource("/solicitud/obtenerAllUrlAnexoMaterial", item).toPromise().then((data) => {
           if (data.resultado !== 0) {
-            listadoAnexos = data.lista; 
+            listadoAnexos = data.lista;
             resolve(listadoAnexos);
-           } else {
+          } else {
             console.log("no listado encontradas...");
             resolve([]);
           }
-        } 
+        }
         ).catch(
           (error) => {
             console.log("error status=" + error.status + ", msg=" + error.message);
@@ -960,7 +960,7 @@ export class SolicitudService {
     let solicitud: SolicitudResponse;
 
     let item = {
-      "id_solicitud" : id_solicitud
+      "id_solicitud": id_solicitud
     }
     return new Promise(
       (resolve, reject) => {
@@ -985,15 +985,15 @@ export class SolicitudService {
 
   }
 
-  subirAnexoMaterial(archivo: File, id_material_solicitud: any, id_rol: any, filename:string): Promise<any> {
+  subirAnexoMaterial(archivo: File, id_material_solicitud: any, id_rol: any, filename: string): Promise<any> {
     let response: SolicitudResponse;
     //console.log("mi anexo material id es :"+id_material);
-    let item = new FormData();    
-   // item.append("document",new Blob([JSON.stringify({"id_solicitud":id_sol})],{type:'text/xml'}));
-    item.append("archivo",archivo);
-    item.append("id_material_solicitud",id_material_solicitud.toString());
-    item.append("id_rol",id_rol.toString());
-    item.append("etiqueta",filename);
+    let item = new FormData();
+    // item.append("document",new Blob([JSON.stringify({"id_solicitud":id_sol})],{type:'text/xml'}));
+    item.append("archivo", archivo);
+    item.append("id_material_solicitud", id_material_solicitud.toString());
+    item.append("id_rol", id_rol.toString());
+    item.append("etiqueta", filename);
 
     return new Promise(
       (resolve, reject) => {
@@ -1017,16 +1017,16 @@ export class SolicitudService {
     );
 
   }
-  subirAnexoSolicitud(archivo: File,id_solicitud :any,id_rol:any, filename: string): Promise<any> {
+  subirAnexoSolicitud(archivo: File, id_solicitud: any, id_rol: any, filename: string): Promise<any> {
     let response: SolicitudResponse;
-    
-    let item = new FormData();    
-   // item.append("document",new Blob([JSON.stringify({"id_solicitud":id_sol})],{type:'text/xml'}));
-   item.append("archivo",archivo);
-    item.append("id_solicitud",id_solicitud.toString());
-    item.append("id_rol",id_rol.toString());
-    item.append("etiqueta",filename);
-    console.log("vamos a enviar el archivo con el nombre "+filename);
+
+    let item = new FormData();
+    // item.append("document",new Blob([JSON.stringify({"id_solicitud":id_sol})],{type:'text/xml'}));
+    item.append("archivo", archivo);
+    item.append("id_solicitud", id_solicitud.toString());
+    item.append("id_rol", id_rol.toString());
+    item.append("etiqueta", filename);
+    console.log("vamos a enviar el archivo con el nombre " + filename);
     return new Promise(
       (resolve, reject) => {
         this.resourceService.postMultipartResource("/solicitud/subirAnexoSolicitudxRol", item).toPromise().then((data) => {
@@ -1052,13 +1052,13 @@ export class SolicitudService {
 
   borrarAnexoSolicitud(id_anexo_solicitud: any): Promise<any> {
     let solicitud: SolicitudResponse;
-    console.log(" boorrar esta solicitud anexo :"+id_anexo_solicitud);
-   
-     let item = {
+    console.log(" boorrar esta solicitud anexo :" + id_anexo_solicitud);
+
+    let item = {
       "id_anexo_solicitud": parseInt(id_anexo_solicitud),
-    } 
+    }
     //let item= parseInt(id_anexo_solicitud);
-    console.log(" json a borrar :"+JSON.stringify(item));
+    console.log(" json a borrar :" + JSON.stringify(item));
     return new Promise(
       (resolve, reject) => {
         this.resourceService.postResource("/solicitud/borrarAnexoxIdAnexoSolicitud", item).toPromise().then((data) => {
@@ -1076,23 +1076,23 @@ export class SolicitudService {
             reject(error);
           }
         );
-  
+
       }
     );
-  
+
   }
   borrarAnexoMaterial(id_anexo_material: any): Promise<any> {
     let response: SolicitudResponse;
-    console.log(" boorrar esta material anexo :"+id_anexo_material);
-     
+    console.log(" boorrar esta material anexo :" + id_anexo_material);
+
     let item = {
       "id_anexo_material": parseInt(id_anexo_material),
     }
-    console.log(" json a borrar :"+JSON.stringify(item));
+    console.log(" json a borrar :" + JSON.stringify(item));
     return new Promise(
       (resolve, reject) => {
         this.resourceService.postResource("/solicitud/borrarxIdMaterialAnexo", item).toPromise().then((data) => {
-          if (data.resultado==1) {
+          if (data.resultado == 1) {
             response = data;
             resolve(data);
           } else {
@@ -1106,10 +1106,10 @@ export class SolicitudService {
             reject(error);
           }
         );
-  
+
       }
     );
-  
+
   }
 
   finalizarSolicitud(id_solicitud: any, id_rol: number): Promise<any> {
@@ -1122,8 +1122,8 @@ export class SolicitudService {
     return new Promise(
       (resolve, reject) => {
         this.resourceService.postResource("/solicitud/finalizarSolicitud", dataSend).toPromise().then((data) => {
-            solicitud = data;
-            resolve(data);
+          solicitud = data;
+          resolve(data);
         }
         ).catch(
           (error) => {
@@ -1137,12 +1137,33 @@ export class SolicitudService {
 
   }
 
-  getMaterialCodigoModelo(body:any): Promise<any> {
+  agregarMaterialAmpliacion(idSolicitud:number,body: any): Promise<any> {
+    let material: any;
+    console.log("sending agregarMaterialAmpliacion..." + JSON.stringify(body));
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.postResource("/solicitud/"+idSolicitud+"/materialSolicitud/crearAmpliacion", body).toPromise().then((data) => {
+          material = data;
+          resolve(material);
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+
+      }
+    );
+
+  }
+
+  getMaterialCodigoModelo(body: any): Promise<any> {
     let material: any;
     return new Promise(
       (resolve, reject) => {
         this.resourceService.postResource("/materialSolicitud/consultaCodigoMaterialSAP", body).toPromise().then((data) => {
-          if (data.resultado==1) {
+          if (data.resultado == 1) {
             material = data['lista'];
             resolve(material);
           } else {
@@ -1171,6 +1192,6 @@ export class SolicitudService {
 export interface SolicitudResponse {
   resultado: number;
   mensaje: string;
-  url?:string;
-  id?:number;
+  url?: string;
+  id?: number;
 }

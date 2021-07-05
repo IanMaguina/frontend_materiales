@@ -27,7 +27,7 @@ export class BandejaSolicitudPendientePtcComponent implements OnInit {
   pageEvent!: PageEvent;
   page = GlobalSettings.PAGINA_INICIO;
   //fin paginator
-  TIPO_SOLICITUD_CREACION: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
 
   //escenarios
   ESCENARIO_NIVEL1: string ='';//GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
@@ -60,7 +60,7 @@ export class BandejaSolicitudPendientePtcComponent implements OnInit {
   listadoLineaNegocio: LineaNegocio[] = [];
   submitted = false;
 
-
+  
   constructor(
     private router: Router,
     private formBuilder: FormBuilder,
@@ -71,6 +71,7 @@ export class BandejaSolicitudPendientePtcComponent implements OnInit {
     private rutaActiva: ActivatedRoute
   ) {
     this.ESCENARIO_NIVEL1= this.rutaActiva.snapshot.params.nivelEscenario;
+    this.TIPO_SOLICITUD = this.rutaActiva.snapshot.params.tipoSolicitud;
     this.initForm();
   }
 
@@ -102,7 +103,7 @@ export class BandejaSolicitudPendientePtcComponent implements OnInit {
     console.log('nivel1-->'+this.ESCENARIO_NIVEL1)
     let params: any = {
       "id_rol": GlobalSettings.ROL_SOLICITANTE,
-      "id_tipo_solicitud": this.TIPO_SOLICITUD_CREACION,
+      "id_tipo_solicitud": this.TIPO_SOLICITUD,
       "codigo_escenario_nivel1":this.ESCENARIO_NIVEL1
     }
 
@@ -147,7 +148,7 @@ export class BandejaSolicitudPendientePtcComponent implements OnInit {
       "id_escenario_nivel1": this.ESCENARIO_NIVEL1 == "" ? null : this.ESCENARIO_NIVEL1,
       "id_estado_solicitud": estado == "" ? null : estado.id,
       "id_escenario_nivel3": lineaNegocio == "" ? null : lineaNegocio.id,
-      "id_tipo_solicitud": this.TIPO_SOLICITUD_CREACION,
+      "id_tipo_solicitud": this.TIPO_SOLICITUD,
       "fecha_inicio": fechaInicio == "" ? null : fechaInicio,
       "fecha_fin": fecha_fin == "" ? null : fecha_fin,
       "cantidad_filas": this.itemPerPage,
@@ -169,13 +170,13 @@ export class BandejaSolicitudPendientePtcComponent implements OnInit {
     })
   }
 
-  verDetalleSolicitud(item: SolicitudCabecera) {
+  verDetalleSolicitud(item: SolicitudCabecera) { 
     console.log(JSON.stringify(item));
     if (item['estadoSolicitud'] && this.ESTADO_SOLICITUD_EN_SOLICITANTE == item['estadoSolicitud'].id)
-    this.router.navigate(['/productosTerminados/editarSolicitud',this.ESCENARIO_NIVEL1,item.id]);
+    this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'editarSolicitud',this.ESCENARIO_NIVEL1,item.id]);
 
     if (item['estadoSolicitud'] && this.ESTADO_SOLICITUD_EN_SUPERVISION == item['estadoSolicitud'].id)
-      this.router.navigate(['/productosTerminados/verSolicitud',this.ESCENARIO_NIVEL1, item.id]);
+      this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'verSolicitud',this.ESCENARIO_NIVEL1, item.id]);
       
     if (item['estadoSolicitud'] 
     && (item['estadoSolicitud'].id == this.ESTADO_SOLICITUD_EN_CALIDAD
@@ -186,7 +187,7 @@ export class BandejaSolicitudPendientePtcComponent implements OnInit {
     || item['estadoSolicitud'].id == this.ESTADO_SOLICITUD_EN_SAP
     
     ))
-      this.router.navigate(['/productosTerminados/editarSolicitudGestor',this.ESCENARIO_NIVEL1, item.id]);
+      this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'editarSolicitudGestor',this.ESCENARIO_NIVEL1, item.id]);
 
   }
 
@@ -203,7 +204,7 @@ export class BandejaSolicitudPendientePtcComponent implements OnInit {
     let xxy: any = {
       "id_estado_solicitud": estado == "" ? null : estado.id,
       "id_escenario_nivel3": lineaNegocio == "" ? null : lineaNegocio.id,
-      "id_tipo_solicitud": this.TIPO_SOLICITUD_CREACION,
+      "id_tipo_solicitud": this.TIPO_SOLICITUD,
       "fecha_inicio": fechaInicio == "" ? null : fechaInicio,
       "fecha_fin": fecha_fin == "" ? null : fecha_fin,
       "cantidad_filas": this.itemPerPage,
