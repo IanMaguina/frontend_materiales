@@ -7,21 +7,24 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
   styleUrls: ['./error-sap-dialog.component.css']
 })
 export class ErrorSapDialogComponent implements OnInit {
-  error:any;
+  error: any;
   constructor(public dialogRef: MatDialogRef<ErrorSapDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
 
-    ) { 
-      this.error = data;
+  ) {
+    this.error = this.prepararDatos(data);
 
-    }
+  }
 
   ngOnInit(): void {
   }
-  confirmar(res:any): void {
-    
-    this.dialogRef.close();
-  
-}
+  confirmar(res: any): void {
 
+    this.dialogRef.close();
+
+  }
+
+  prepararDatos(mensaje: any) {
+    return mensaje.split("\n").join("<br />");
+  }
 }

@@ -9,6 +9,13 @@ import { CodigoMaterialSap } from '../modelos/codigoMaterialSap.interface';
 import { Anexo } from '../modelos/anexo.interface';
 import { AnexoMaterial } from '../modelos/anexo-material.interface';
 
+export interface SolicitudResponse {
+  resultado: number;
+  mensaje: string;
+  url?: string;
+  id?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -305,6 +312,7 @@ export class SolicitudService {
 
   }
 
+
   devolverRolUsuario() {
 
   }
@@ -557,6 +565,7 @@ export class SolicitudService {
 
   estadoActual(id_solicitud: number): Promise<any> {
     //let flujo: AprobadorSolicitud[] = [];
+    console.log("url estadoactual-->" + "/solicitud/listarFlujo?id_solicitud=" + id_solicitud)
     return new Promise(
       (resolve, reject) => {
         this.resourceService.getResource("/solicitud/listarFlujo?id_solicitud=" + id_solicitud).toPromise().then((data) => {
@@ -848,11 +857,11 @@ export class SolicitudService {
     );
   }
 
-  enviarSAP(id_solicitud: number): Promise<any> {
+  enviarSAP(id_solicitud: number, tip_pm: string): Promise<any> {
     let envio: any;
     return new Promise(
       (resolve, reject) => {
-        this.resourceService.getResource("/solicitud/enviarSAP/" + id_solicitud).toPromise().then((data) => {
+        this.resourceService.getResource("/solicitud/enviarSAP/" + id_solicitud + "/?tip_pm=" + tip_pm).toPromise().then((data) => {
           if (data && Object.keys(data).length !== 0) {
             envio = data;
             resolve(envio);
@@ -1137,14 +1146,20 @@ export class SolicitudService {
 
   }
 
-  agregarMaterialAmpliacion(idSolicitud:number,body: any): Promise<any> {
+  getMaterialCodigoModelo(body: any): Promise<any> {
     let material: any;
-    console.log("sending agregarMaterialAmpliacion..." + JSON.stringify(body));
+    console.log("sending body consultar SAP..." + JSON.stringify(body));
     return new Promise(
       (resolve, reject) => {
-        this.resourceService.postResource("/solicitud/"+idSolicitud+"/materialSolicitud/crearAmpliacion", body).toPromise().then((data) => {
-          material = data;
-          resolve(material);
+        this.resourceService.postResource("/materialSolicitud/consultaCodigoMaterialSAP", body).toPromise().then((data) => {
+          //this.resourceService.postResource("/materialSolicitud/consultarMaterialSAP", body).toPromise().then((data) => {
+          if (data.resultado == 1) {
+            material = data['lista'];
+            resolve(material);
+          } else {
+            console.log("anexo no encontrado...");
+            resolve([]);
+          }
         }
         ).catch(
           (error) => {
@@ -1158,11 +1173,40 @@ export class SolicitudService {
 
   }
 
-  getMaterialCodigoModelo(body: any): Promise<any> {
+  getMaterialCodigoMaterialSapAmpliacion(body: any): Promise<any> {
     let material: any;
+    console.log("sending body consultar SAP..." + JSON.stringify(body));
     return new Promise(
       (resolve, reject) => {
-        this.resourceService.postResource("/materialSolicitud/consultaCodigoMaterialSAP", body).toPromise().then((data) => {
+        this.resourceService.postResource("/materialSolicitud/consultaCodigoMaterialSAPAmpliacion", body).toPromise().then((data) => {
+          //this.resourceService.postResource("/materialSolicitud/consultarMaterialSAP", body).toPromise().then((data) => {
+          if (data.resultado == 1) {
+            material = data['lista'];
+            resolve(material);
+          } else {
+            console.log("anexo no encontrado...");
+            resolve([]);
+          }
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+
+      }
+    );
+
+  }
+
+  getMaterialSAP(body: any): Promise<any> {
+    let material: any;
+    console.log("sending body consultar SAP..." + JSON.stringify(body));
+    return new Promise(
+      (resolve, reject) => {
+        //this.resourceService.postResource("/materialSolicitud/consultaCodigoMaterialSAP", body).toPromise().then((data) => {
+        this.resourceService.postResource("/materialSolicitud/consultarMaterialSAP", body).toPromise().then((data) => {
           if (data.resultado == 1) {
             material = data['lista'];
             resolve(material);
@@ -1184,14 +1228,371 @@ export class SolicitudService {
   }
 
 
+  agregarMaterialAmpliacion(idSolicitud: number, body: any): Promise<any> {
+    let material: any;
+    console.log("sending agregarMaterialAmpliacion..." + JSON.stringify(body));
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.postResource("/solicitud/" + idSolicitud + "/materialSolicitud/crearAmpliacion", body).toPromise().then((data) => {
+          material = data;
+          resolve(material);
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+
+      }
+    );
+
+  }
+
+  actualizarMaterialAmpliacion(idSolicitud: number, idmaterial: number, body: any): Promise<any> {
+    let material: any;
+    console.log("sending actualizarMaterialAmpliacion..." + JSON.stringify(body));
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.putResource("/solicitud/" + idSolicitud + "/materialSolicitud/" + idmaterial + "/actualizarAmpliacion", body).toPromise().then((data) => {
+          material = data;
+          resolve(material);
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+      }
+    );
+  }
+
+  /*   agregarMaterialAmpliaciónMasivo(idSolicitud:number,idmaterial:number,body: any): Promise<any> {
+      let material: any;
+      console.log("sending agregarMaterialAmpliaciónMasivo..." + JSON.stringify(body));
+      return new Promise(
+        (resolve, reject) => {
+          this.resourceService.postResource("/solicitud/"+idSolicitud+"/materialSolicitud/agregarAmpliaciones", body).toPromise().then((data) => {
+            material = data;
+            resolve(material);
+          }
+          ).catch(
+            (error) => {
+              console.log("error status=" + error.status + ", msg=" + error.message);
+              reject(error);
+            }
+          );
+        }
+      );
+    }
+   */
+  eliminarMaterialAmpliación(idSolicitud: number, idmaterial: number): Promise<any> {
+    let material: any;
+    console.log(idSolicitud + "------" + idmaterial + " sending eliminarMaterialAmpliación...");
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.postResource("/solicitud/" + idSolicitud + "/materialSolicitud/" + idmaterial + "/eliminarMaterial", {}).toPromise().then((data) => {
+          material = data;
+          resolve(material);
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+      }
+    );
+  }
+
+  cargaMasivaAmpliacion(params: any): Promise<any> {
+    let id_solicitud = params.id_solicitud;
+    let id_rol = params.id_rol;
+    let data = params.materiales;
+    let id_usuario = this.userInfo.id
+    //data = { "materiales": [{ "campos": [{ "codigo_interno": "denominacion", "valor": "nuevo 6" }, { "codigo_interno": "unidad_medida_base", "valor": "KG" }, { "codigo_interno": "peso_bruto", "valor": 111 }, { "codigo_interno": "unidad_medida_peso", "valor": "KG" }, { "codigo_interno": "centro", "valor": "2010" }, { "codigo_interno": "organizacion_ventas", "valor": "3000" }, { "codigo_interno": "canal_distribucion", "valor": "01" }, { "codigo_interno": "almacen", "valor": "2061" }, { "codigo_interno": "clase", "valores": [{ "valor": "00302" }] }] }] }
+    console.log("sending data actualizar material..." + JSON.stringify(data));
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.postResource("/solicitud/" + id_solicitud + "/materialSolicitud/agregarAmpliaciones?id_usuario=" + id_usuario, data).toPromise().then((data) => {
+
+          console.log("response data=" + JSON.stringify(data));
+          resolve(data);
+
+        }).catch((error) => {
+          console.log("error status=" + error.status + ", msg=" + error.message);
+          reject(error);
+        });
+
+      });
+
+  }
+
+  // Modificacion
+
+  agregarMaterialModificacion(idSolicitud: number, body: any): Promise<any> {
+    let material: any;
+    console.log("sending agregarMaterialModificación..." + JSON.stringify(body));
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.postResource("/solicitud/" + idSolicitud + "/materialSolicitud/crearModificacion", body).toPromise().then((data) => {
+          material = data;
+          resolve(material);
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+
+      }
+    );
+
+  }
+
+  actualizarMaterialModificacion(idSolicitud: number, idmaterial: number, body: any): Promise<any> {
+    let material: any;
+    console.log("sending actualizarMaterialModificacion..." + JSON.stringify(body));
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.putResource("/solicitud/" + idSolicitud + "/materialSolicitud/" + idmaterial + "/actualizarModificacion", body).toPromise().then((data) => {
+          material = data;
+          resolve(material);
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+      }
+    );
+  }
+
+  /*   agregarMaterialModificacionMasivo(idSolicitud:number,idmaterial:number,body: any): Promise<any> {
+      let material: any;
+      console.log("sending agregarMaterialModificacionMasivo..." + JSON.stringify(body));
+      return new Promise(
+        (resolve, reject) => {
+          this.resourceService.postResource("/solicitud/"+idSolicitud+"/materialSolicitud/agregarModificaciones", body).toPromise().then((data) => {
+            material = data;
+            resolve(material);
+          }
+          ).catch(
+            (error) => {
+              console.log("error status=" + error.status + ", msg=" + error.message);
+              reject(error);
+            }
+          );
+        }
+      );
+    }
+   */
+  eliminarMaterialModificacion(idSolicitud: number, idmaterial: number): Promise<any> {
+    let material: any;
+    console.log(idSolicitud + "------" + idmaterial + " sending eliminarMaterialModificacion...");
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.postResource("/solicitud/" + idSolicitud + "/materialSolicitud/" + idmaterial + "/eliminarModificacion", {}).toPromise().then((data) => {
+          material = data;
+          resolve(material);
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+      }
+    );
+  }
+
+  cargaMasivaModificacion(params: any): Promise<any> {
+    let id_solicitud = params.id_solicitud;
+    let id_rol = params.id_rol;
+    let data = params.materiales;
+    let id_usuario = this.userInfo.id
+    //data = { "materiales": [{ "campos": [{ "codigo_interno": "denominacion", "valor": "nuevo 6" }, { "codigo_interno": "unidad_medida_base", "valor": "KG" }, { "codigo_interno": "peso_bruto", "valor": 111 }, { "codigo_interno": "unidad_medida_peso", "valor": "KG" }, { "codigo_interno": "centro", "valor": "2010" }, { "codigo_interno": "organizacion_ventas", "valor": "3000" }, { "codigo_interno": "canal_distribucion", "valor": "01" }, { "codigo_interno": "almacen", "valor": "2061" }, { "codigo_interno": "clase", "valores": [{ "valor": "00302" }] }] }] }
+    console.log("sending data actualizar Carga Masiva Modificacion material..." + JSON.stringify(data));
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.postResource("/solicitud/" + id_solicitud + "/materialSolicitud/agregarModificaciones?id_usuario=" + id_usuario, data).toPromise().then((data) => {
+          console.log("response data=" + JSON.stringify(data));
+          resolve(data);
+
+        }).catch((error) => {
+          console.log("error status=" + error.status + ", msg=" + error.message);
+          reject(error);
+        });
+
+      });
+
+  }
+
+  getCodigoMaterialSAP(denominacion: any): Promise<any> {
+
+    console.log("imm retrieving denominacion" + JSON.stringify(denominacion));
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.getResource("/materialSolicitud/consultaNombreMaterialSAP?denominacion=" + denominacion).toPromise().then((data) => {
+
+          if (data.resultado == 1) {
+            // console.log("imm material encontrado : "+JSON.stringify(data));
+            resolve(data.lista);
+          } else {
+            console.log("codigo material no encontrado...");
+            resolve([]);
+          }
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+
+
+  listarCamposReglasxEscenario3(id_escenario_nivel3: number, id_tipo_solicitud: number): Promise<any> {
+    let listadoCamposReglas: any[] = [];
+    let url = "/campo/listarCamposReglasxEscenario3?id_escenario_nivel3=" + id_escenario_nivel3 + "&id_tipo_solicitud=" + id_tipo_solicitud;
+    console.log(url);
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.getResource("/campo/listarCamposReglasxEscenario3?id_escenario_nivel3=" + id_escenario_nivel3 + "&id_tipo_solicitud=" + id_tipo_solicitud).toPromise().then((data) => {
+          if (data && Object.keys(data).length !== 0) {
+            listadoCamposReglas = data;
+            resolve(listadoCamposReglas);
+          } else {
+            console.log("no sociedaes encontradas...");
+            resolve([]);
+          }
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+
+      }
+    );
+  }
+
+
+  // Bloqueo
+
+  agregarMaterialBloqueo(idSolicitud: number, body: any): Promise<any> {
+    let material: any;
+    console.log("sending agregarMaterialBloqueo..." + JSON.stringify(body));
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.postResource("/solicitud/" + idSolicitud + "/materialSolicitud/crearBloqueo", body).toPromise().then((data) => {
+          material = data;
+          resolve(material);
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+
+      }
+    );
+
+  }
+
+  actualizarMaterialBloqueo(idSolicitud: number, idmaterial: number, body: any): Promise<any> {
+    let material: any;
+    console.log("sending actualizarMaterialBloqueo..." + JSON.stringify(body));
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.putResource("/solicitud/" + idSolicitud + "/materialSolicitud/" + idmaterial + "/actualizarBloqueo", body).toPromise().then((data) => {
+          material = data;
+          resolve(material);
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+      }
+    );
+  }
+
+/*   agregarMaterialBloqueoMasivo(idSolicitud: number, idmaterial: number, body: any): Promise<any> {
+    let material: any;
+    console.log("sending agregarMaterialBloqueoMasivo..." + JSON.stringify(body));
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.postResource("/solicitud/" + idSolicitud + "/materialSolicitud/agregarBloqueos", body).toPromise().then((data) => {
+          material = data;
+          resolve(material);
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+      }
+    );
+  }
+ */
+  eliminarMaterialBloqueo(idSolicitud: number, idmaterial: number): Promise<any> {
+    let material: any;
+    console.log(idSolicitud + "------" + idmaterial + " sending eliminarMaterialBloqueo...");
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.postResource("/solicitud/" + idSolicitud + "/materialSolicitud/" + idmaterial + "/eliminarModificacion", {}).toPromise().then((data) => {
+          material = data;
+          resolve(material);
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+      }
+    );
+  }
+
+  cargaMasivaBloqueo(params: any): Promise<any> {
+    let id_solicitud = params.id_solicitud;
+    let id_rol = params.id_rol;
+    let data = params.materiales;
+    let id_usuario = this.userInfo.id
+    //data = { "materiales": [{ "campos": [{ "codigo_interno": "denominacion", "valor": "nuevo 6" }, { "codigo_interno": "unidad_medida_base", "valor": "KG" }, { "codigo_interno": "peso_bruto", "valor": 111 }, { "codigo_interno": "unidad_medida_peso", "valor": "KG" }, { "codigo_interno": "centro", "valor": "2010" }, { "codigo_interno": "organizacion_ventas", "valor": "3000" }, { "codigo_interno": "canal_distribucion", "valor": "01" }, { "codigo_interno": "almacen", "valor": "2061" }, { "codigo_interno": "clase", "valores": [{ "valor": "00302" }] }] }] }
+    console.log("sending data actualizar Carga Masiva bloqueo material..." + JSON.stringify(data));
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.postResource("/solicitud/" + id_solicitud + "/materialSolicitud/agregarBloqueos?id_usuario=" + id_usuario, data).toPromise().then((data) => {
+          console.log("response data=" + JSON.stringify(data));
+          resolve(data);
+
+        }).catch((error) => {
+          console.log("error status=" + error.status + ", msg=" + error.message);
+          reject(error);
+        });
+
+      });
+
+  }
+
 }
 
 
 
 
-export interface SolicitudResponse {
-  resultado: number;
-  mensaje: string;
-  url?: string;
-  id?: number;
-}
+

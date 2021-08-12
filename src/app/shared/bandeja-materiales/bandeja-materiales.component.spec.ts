@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ListarSolicitudPtcComponent } from './listar-solicitud-ptc.component';
+import { BandejaMaterialesComponent } from './bandeja-materiales.component';
 
-describe('ListarSolicitudPtcComponent', () => {
-  let component: ListarSolicitudPtcComponent;
-  let fixture: ComponentFixture<ListarSolicitudPtcComponent>;
+describe('BandejaMaterialesComponent', () => {
+  let component: BandejaMaterialesComponent;
+  let fixture: ComponentFixture<BandejaMaterialesComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ListarSolicitudPtcComponent ]
+      declarations: [ BandejaMaterialesComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ListarSolicitudPtcComponent);
+    fixture = TestBed.createComponent(BandejaMaterialesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

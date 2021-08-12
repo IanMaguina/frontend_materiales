@@ -35,9 +35,11 @@ import {MatDialogModule} from '@angular/material/dialog';
 import { ListaAnexosDialogComponent } from './lista-anexos-dialog/lista-anexos-dialog.component';
 import { ListaAnexosMaterialDialogComponent } from './lista-anexos-material-dialog/lista-anexos-material-dialog.component';
 import { TablaEquivalenciasDialogComponent } from './tabla-equivalencias-dialog/tabla-equivalencias-dialog.component';
-import { ErrorSapDialogComponent } from './error-sap-dialog/error-sap-dialog.component'
+import { ErrorSapDialogComponent } from './error-sap-dialog/error-sap-dialog.component';
+import { BandejaMaterialSapComponent } from './bandeja-material-sap/bandeja-material-sap.component';
+import { BandejaMaterialesComponent } from './bandeja-materiales/bandeja-materiales.component'
 @NgModule({
-  declarations: [FooterComponent, HeaderComponent, ConfirmDialogComponent, SeguimientoSolicitudComponent, FlujoSolicitudComponent, MotivoSolicitudComponent, DenominacionSolicitudComponent, AdvertenciaDialogComponent, VerSolicitudComponent, ListaAnexosDialogComponent, ListaAnexosMaterialDialogComponent, TablaEquivalenciasDialogComponent, ErrorSapDialogComponent],
+  declarations: [FooterComponent, HeaderComponent, ConfirmDialogComponent, SeguimientoSolicitudComponent, FlujoSolicitudComponent, MotivoSolicitudComponent, DenominacionSolicitudComponent, AdvertenciaDialogComponent, VerSolicitudComponent, ListaAnexosDialogComponent, ListaAnexosMaterialDialogComponent, TablaEquivalenciasDialogComponent, ErrorSapDialogComponent, BandejaMaterialSapComponent, BandejaMaterialesComponent],
   imports: [
     CommonModule,
     SharedRoutingModule,

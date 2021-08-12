@@ -15,6 +15,21 @@ const routes: Routes = [
   {path:':tipoSolicitud/crearSolicitudMP/:nivelEscenario', component:NuevaSolicitudPtcComponent},
   {path:':tipoSolicitud/crearSolicitudAF/:nivelEscenario', component:NuevaSolicitudPtcComponent},
 
+  {path:':tipoSolicitud/ampliarSolicitudPT/:nivelEscenario', component:NuevaSolicitudPtcComponent},
+  {path:':tipoSolicitud/ampliarSolicitudRS/:nivelEscenario', component:NuevaSolicitudPtcComponent},
+  {path:':tipoSolicitud/ampliarSolicitudMP/:nivelEscenario', component:NuevaSolicitudPtcComponent},
+  {path:':tipoSolicitud/ampliarSolicitudAF/:nivelEscenario', component:NuevaSolicitudPtcComponent},
+
+  {path:':tipoSolicitud/modificarSolicitudPT/:nivelEscenario', component:NuevaSolicitudPtcComponent},
+  {path:':tipoSolicitud/modificarSolicitudRS/:nivelEscenario', component:NuevaSolicitudPtcComponent},
+  {path:':tipoSolicitud/modificarSolicitudMP/:nivelEscenario', component:NuevaSolicitudPtcComponent},
+  {path:':tipoSolicitud/modificarSolicitudAF/:nivelEscenario', component:NuevaSolicitudPtcComponent},
+
+  {path:':tipoSolicitud/bloquearSolicitudPT/:nivelEscenario', component:NuevaSolicitudPtcComponent},
+  {path:':tipoSolicitud/bloquearSolicitudRS/:nivelEscenario', component:NuevaSolicitudPtcComponent},
+  {path:':tipoSolicitud/bloquearSolicitudMP/:nivelEscenario', component:NuevaSolicitudPtcComponent},
+  {path:':tipoSolicitud/bloquearSolicitudAF/:nivelEscenario', component:NuevaSolicitudPtcComponent},
+
   //Editar Solicitantes
   {path:':tipoSolicitud/editarSolicitud/:nivelEscenario/:id', component:EditarSolicitudPtcComponent},
   
@@ -31,7 +46,7 @@ const routes: Routes = [
   //Bandeja de pendientes
   {path:':tipoSolicitud/pendientesProductosTerminados/:nivelEscenario', component:BandejaSolicitudPendientePtcComponent},
   {path:':tipoSolicitud/pendientesRepuestosSuministros/:nivelEscenario', component:BandejaSolicitudPendientePtcComponent},
-  {path:':tipoSolicitud/pendientesMateriaPrimas/:nivelEscenario', component:BandejaSolicitudPendientePtcComponent},
+  {path:':tipoSolicitud/pendientesMateriasPrimas/:nivelEscenario', component:BandejaSolicitudPendientePtcComponent},
   {path:':tipoSolicitud/pendientesActivos/:nivelEscenario', component:BandejaSolicitudPendientePtcComponent},
 
   //Gestor

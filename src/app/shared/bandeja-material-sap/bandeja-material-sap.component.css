@@ -1,0 +1,13 @@
+.filtros mat-grid-tile{
+    padding-right:3% !important;
+
+}
+.filtros mat-form-field{
+    width:80% !important;
+
+}
+
+.camposSolicitud mat-form-field{
+    height: 50% !important;
+    width: 80% !important;
+}

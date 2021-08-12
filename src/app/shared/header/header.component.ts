@@ -40,7 +40,7 @@ const TREE_DATA: MenuNode[] = [
         "id": 2,
         "name": "Ampliación",
         "children": [
-          { "name": "Nueva Solicitud", "link": "/productosTerminados/2/crearSolicitudPT/1000" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/2/ampliarSolicitudPT/1000" },
           { "name": "Consulta Solicitud", "link": "/productosTerminados/2/consultarProductosTerminados/1000" },
           { "name": "Bandeja Pendientes", "link": "/productosTerminados/2/pendientesProductosTerminados/1000" },
         ]
@@ -49,18 +49,18 @@ const TREE_DATA: MenuNode[] = [
         "id": 3,
         "name": "Modificación",
         "children": [
-          { "name": "Nueva Solicitud", "link": "#" },
-          { "name": "Consulta Solicitud", "link": "#" },
-          { "name": "Bandeja Borradores", "link": "#" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/3/modificarSolicitudPT/1000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/3/consultarProductosTerminados/1000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/3/pendientesProductosTerminados/1000" },
         ]
       },
       {
         "id": 4,
         "name": "Bloqueo",
         "children": [
-          { "name": "Nueva Solicitud", "link": "#" },
-          { "name": "Consulta Solicitud", "link": "#" },
-          { "name": "Bandeja Borradores", "link": "#" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/4/bloquearSolicitudPT/1000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/4/consultarProductosTerminados/1000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/4/pendientesProductosTerminados/1000" },
         ]
       }
     ]
@@ -82,33 +82,33 @@ const TREE_DATA: MenuNode[] = [
         "id": 2,
         "name": "Ampliación",
         "children": [
-          { "name": "Nueva Solicitud", "link": "#" },
-          { "name": "Consulta Solicitud", "link": "#" },
-          { "name": "Bandeja Borradores", "link": "#" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/2/ampliarSolicitudRS/2000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/2/consultarProductosTerminados/2000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/2/pendientesRepuestosSuministros/2000" },
         ]
       },
       {
         "id": 3,
         "name": "Modificación",
         "children": [
-          { "name": "Nueva Solicitud", "link": "#" },
-          { "name": "Consulta Solicitud", "link": "#" },
-          { "name": "Bandeja Borradores", "link": "#" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/3/modificarSolicitudRS/2000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/3/consultarProductosTerminados/2000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/3/pendientesRepuestosSuministros/2000" },
         ]
       },
       {
         "id": 4,
         "name": "Bloqueo",
         "children": [
-          { "name": "Nueva Solicitud", "link": "#" },
-          { "name": "Consulta Solicitud", "link": "#" },
-          { "name": "Bandeja Borradores", "link": "#" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/4/bloquearSolicitudRS/2000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/4/consultarProductosTerminados/2000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/4/pendientesRepuestosSuministros/2000" },
         ]
       }
     ]
   }, {
     "codigo": "3000",
-    "name": "Materias Primas",
+    "name": "Materias Primas y Prod. en Proceso",
     "children": [
       {
         "id": 1,
@@ -116,35 +116,34 @@ const TREE_DATA: MenuNode[] = [
         "children": [
           { "name": "Nueva Solicitud", "link": "/productosTerminados/1/crearSolicitudMP/3000" },
           { "name": "Consulta Solicitud", "link": "/productosTerminados/1/consultarMateriasPrimas/3000" },
-          { "name": "Bandeja Pendientes", "link": "/productosTerminados/1/pendientesMateriaPrimas/3000" },
-          /*{ "name": "Bandeja Pendientes Supervisor", "link": "/productosTerminados/consultarSolicitudesPendientesSupervisor" }, */
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/1/pendientesMateriasPrimas/3000" },
         ]
       },
       {
         "id": 2,
         "name": "Ampliación",
         "children": [
-          { "name": "Nueva Solicitud", "link": "#" },
-          { "name": "Consulta Solicitud", "link": "#" },
-          { "name": "Bandeja Borradores", "link": "#" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/2/ampliarSolicitudMP/3000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/2/consultarMateriasPrimas/3000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/2/pendientesMateriasPrimas/3000" },
         ]
       },
       {
         "id": 3,
         "name": "Modificación",
         "children": [
-          { "name": "Nueva Solicitud", "link": "#" },
-          { "name": "Consulta Solicitud", "link": "#" },
-          { "name": "Bandeja Borradores", "link": "#" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/3/modificarSolicitudMP/3000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/3/consultarMateriasPrimas/3000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/3/pendientesMateriasPrimas/3000" },
         ]
       },
       {
         "id": 4,
         "name": "Bloqueo",
         "children": [
-          { "name": "Nueva Solicitud", "link": "#" },
-          { "name": "Consulta Solicitud", "link": "#" },
-          { "name": "Bandeja Borradores", "link": "#" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/4/bloquearSolicitudMP/3000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/4/consultarMateriasPrimas/3000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/4/pendientesMateriasPrimas/3000" },
         ]
       }
     ]
@@ -166,29 +165,36 @@ const TREE_DATA: MenuNode[] = [
         "id": 2,
         "name": "Ampliación",
         "children": [
-          { "name": "Nueva Solicitud", "link": "#" },
-          { "name": "Consulta Solicitud", "link": "#" },
-          { "name": "Bandeja Borradores", "link": "#" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/2/ampliarSolicitudAF/4000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/2/consultarActivos/4000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/2/pendientesActivos/4000" },
         ]
       },
       {
         "id": 3,
         "name": "Modificación",
         "children": [
-          { "name": "Nueva Solicitud", "link": "#" },
-          { "name": "Consulta Solicitud", "link": "#" },
-          { "name": "Bandeja Borradores", "link": "#" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/3/modificarSolicitudAF/4000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/3/consultarActivos/4000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/3/pendientesActivos/4000" },
         ]
       },
       {
         "id": 4,
         "name": "Bloqueo",
         "children": [
-          { "name": "Nueva Solicitud", "link": "#" },
-          { "name": "Consulta Solicitud", "link": "#" },
-          { "name": "Bandeja Borradores", "link": "#" },
+          { "name": "Nueva Solicitud", "link": "/productosTerminados/4/bloquearSolicitudAF/4000" },
+          { "name": "Consulta Solicitud", "link": "/productosTerminados/4/consultarActivos/4000" },
+          { "name": "Bandeja Pendientes", "link": "/productosTerminados/4/pendientesActivos/4000" },
         ]
       }
+    ]
+  },
+
+  {
+    "name": "Consulta Materiales",
+    "children": [
+      { "name": "Por Codigo/Denominacion", "link": "/shared/bandejaMaterialesSap" },
     ]
   },
   {

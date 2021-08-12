@@ -3,8 +3,14 @@
         <a routerLink="/dashboard/principal">
             <mat-icon>home</mat-icon>
         </a>
-        <a routerLink="#"><span class="bread-item"> / Productos terminados </span></a>
-        <a routerLink="#"><span class="bread-item"> / Creación </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="ESCENARIO_NIVEL1==ESCENARIO_NIVEL1_PT"> / Productos terminados </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="ESCENARIO_NIVEL1==ESCENARIO_NIVEL1_RS"> / Repuestos y Suministros </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="ESCENARIO_NIVEL1==ESCENARIO_NIVEL1_MP"> / Materias Primas </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="ESCENARIO_NIVEL1==ESCENARIO_NIVEL1_AO"> / Activos y Otros </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_CREACION"> / Creación </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_AMPLIACION"> / Ampliación </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_MODIFICACION"> / Modificación </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_BLOQUEO"> / Bloqueo </span></a>
         <a routerLink="#"><span class="bread-item"> / Consulta de Solicitudes. </span></a>
     </div>
     <br>

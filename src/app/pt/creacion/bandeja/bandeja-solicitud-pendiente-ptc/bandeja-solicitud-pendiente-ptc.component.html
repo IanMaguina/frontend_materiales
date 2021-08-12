@@ -3,8 +3,15 @@
         <a routerLink="/dashboard/principal">
             <mat-icon>home</mat-icon>
         </a>
-        <a routerLink="#"><span class="bread-item"> / Productos terminados </span></a>
-        <a routerLink="#"><span class="bread-item"> / Creación </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="ESCENARIO_NIVEL1==ESCENARIO_NIVEL1_PT"> / Productos terminados </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="ESCENARIO_NIVEL1==ESCENARIO_NIVEL1_RS"> / Repuestos y Suministros </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="ESCENARIO_NIVEL1==ESCENARIO_NIVEL1_MP"> / Materias Primas </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="ESCENARIO_NIVEL1==ESCENARIO_NIVEL1_AO"> / Activos y Otros </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_CREACION"> / Creación </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_AMPLIACION"> / Ampliación </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_MODIFICACION"> / Modificación </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_BLOQUEO"> / Bloqueo </span></a>
+
         <a routerLink="#"><span class="bread-item"> / Mis Pendientes</span></a>
     </div>
     <br>
@@ -75,7 +82,8 @@
 
                 <mat-grid-tile>
                     <div class="izquierda">
-                        <button mat-raised-button color="accent" type="submit" [disabled]="filtroForm.invalid">Buscar</button>
+                        <button mat-raised-button color="accent" type="submit" [disabled]="filtroForm.invalid">Buscar</button>&nbsp;&nbsp;
+                        <button mat-raised-button color="accent" type="submit" [disabled]="filtroForm.invalid">Refrescar</button>
                     </div>
                 </mat-grid-tile>
             </mat-grid-list>
@@ -134,7 +142,8 @@ The actual rendered columns are set as a property on the row definition" -->
                 <th mat-header-cell *matHeaderCellDef> Acciones </th>
                 <td mat-cell *matCellDef="let element">
                     <button #asignar_rol mat-flat-button color="accent" (click)="verDetalleSolicitud(element)">
-                    Editar
+                    <span *ngIf="this.ESTADO_SOLICITUD_FINALIZADO == element.estadoSolicitud.id">Ver</span>
+                    <span *ngIf="this.ESTADO_SOLICITUD_FINALIZADO != element.estadoSolicitud.id">Editar</span>
                 </button>
 
                 </td>

@@ -16,7 +16,7 @@ export class AreaPlanificacionService {
     return new Promise(
       (resolve, reject) => {
         this.resourceService.getResource("/areaPlanificacion/listar?centro_codigo_sap=" + centro_codigo_sap + "&almacen_codigo_sap=" + almacen_codigo_sap).toPromise().then((data) => {
-          //console.log("sociedad data=" + JSON.stringify(data));
+          console.log("area planificacion data=" + JSON.stringify(data));
           if (data && Object.keys(data).length !== 0) {
             listarAreaPlanificacion = data;
             resolve(listarAreaPlanificacion);

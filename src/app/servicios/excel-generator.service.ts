@@ -1,3 +1,4 @@
+import { GlobalSettings } from 'src/app/shared/settings';
 import { Injectable } from '@angular/core';
 import { Workbook } from 'exceljs';
 import * as FileSaver from 'file-saver';
@@ -113,6 +114,7 @@ export class ExcelGeneratorService {
       d.forEach(v=>{
         if (isString(v)){
           v=v.split(/@@@/i).join('\n');
+          v=v.split(/###/i).join('"');
           aux.push(v);
         }else{
           aux.push(v);
@@ -166,8 +168,13 @@ export class ExcelGeneratorService {
 
   }
 
-  onFileSeleted(event: any, tabs:any[]): Promise<any> {
-
+  onFileSeleted(tipo_solicitud:number,event: any, tabs:any[]): Promise<any> {
+    let codigo_material="";
+    if (tipo_solicitud==GlobalSettings.TIPO_SOLICITUD_CREACION){
+      codigo_material=GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO;
+    }else{
+      codigo_material=GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_SAP;
+    }
     return new Promise((resolve, reject) => {
       const workbook = new Excel.Workbook();
       const target: DataTransfer = <DataTransfer>(event.target);
@@ -223,9 +230,13 @@ export class ExcelGeneratorService {
                 }
                 //console.log('arsa-->' + JSON.stringify(campos));
                 if (row.getCell(1).value != null) {
-                  filaCompleta.push({ "id_material_solicitud": row.getCell(1).value, "campos": campos })
+                  filaCompleta.push({ "id_material_solicitud": row.getCell(1).value, 
+                  [codigo_material]:row.getCell(2).value,"campos": campos })
                 } else {
-                  filaCompleta.push({ "campos": campos })
+                  //filaCompleta.push({ "campos": campos })
+                  filaCompleta.push({ "id_material_solicitud": row.getCell(1).value, 
+                  [codigo_material]:row.getCell(2).value,"campos": campos })
+
                 }
               }
             });

@@ -3,11 +3,25 @@
         <a routerLink="/dashboard/principal">
             <mat-icon>home</mat-icon>
         </a>
-        <a routerLink="#"><span class="bread-item"> / Productos terminados </span></a>
-        <a routerLink="#"><span class="bread-item"> / Creación </span></a>
-        <a routerLink="/productosTerminados/consultarSolicitudes"><span class="bread-item"> / Consulta de Solicitudes
+        <a routerLink="#"><span class="bread-item" *ngIf="ESCENARIO_NIVEL1==ESCENARIO_NIVEL1_PT"> / Productos terminados
             </span></a>
-        <a routerLink="#"><span class="bread-item"> / Editar Solicitud </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="ESCENARIO_NIVEL1==ESCENARIO_NIVEL1_RS"> / Repuestos y
+                Suministros </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="ESCENARIO_NIVEL1==ESCENARIO_NIVEL1_MP"> / Materias Primas
+            </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="ESCENARIO_NIVEL1==ESCENARIO_NIVEL1_AO"> / Activos y Otros
+            </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_CREACION"> / Creación
+            </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_AMPLIACION"> / Ampliación
+            </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_MODIFICACION"> / Modificación
+            </span></a>
+        <a routerLink="#"><span class="bread-item" *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_BLOQUEO"> / Bloqueo </span></a>
+
+        <!--         <a routerLink="/productosTerminados/consultarSolicitudes"><span class="bread-item"> / Consulta de Solicitudes
+            </span></a>
+ --> <a routerLink="#"><span class="bread-item"> / Editar Solicitud </span></a>
 
         <div class="derecha" colspan="6">
             <button mat-raised-button color="accent" type="button" (click)="seguimientoSolicitud()">Seguimiento</button>
@@ -32,7 +46,7 @@
 
             <mat-grid-list cols="10" rowHeight="75px">
 
-                <mat-grid-tile colspan="4">
+                <mat-grid-tile colspan="3">
                     <div class="izquierda">
                         <mat-form-field appearance="outline">
                             <mat-label>Línea de negocio</mat-label>
@@ -48,7 +62,12 @@
                                 </mat-error>
                             </mat-hint>
                         </mat-form-field>
-                        &nbsp;
+                        
+                    </div>
+                </mat-grid-tile>
+
+                <mat-grid-tile colspan="3">
+                    <div class="izquierda">
                         <mat-form-field appearance="outline">
                             <mat-label>Descripción corta</mat-label>
                             <input matInput placeholder="Descripción corta" formControlName="descripcion_corta">
@@ -58,13 +77,7 @@
                                 </mat-error>
                             </mat-hint>
                         </mat-form-field>
-                    </div>
-                </mat-grid-tile>
-
-                <mat-grid-tile colspan="2">
-                    <!-- <div class="izquierda">
-                        <div class="numeroSolicitud">{{cabeceraSolicitud.correlativo}}</div>
-                    </div> -->
+                    </div> 
                 </mat-grid-tile>
 
                 <mat-grid-tile colspan="4">
@@ -114,8 +127,14 @@
                             <!--  {{fileName || ""}} -->
                             <span class="fontLabel"> Anexo Solicitud:</span>
                             &nbsp;&nbsp;
+                            <button mat-mini-fab color="primary" type="button" class="upload-btn"
+                                (click)="openDialogAnexosSolicitud()" matTooltip="Cargar Anexo"
+                                *ngIf="existeAnexoSolicitud">
+                                <mat-icon>attach_file</mat-icon>
+                            </button>
                             <button mat-mini-fab color="accent" type="button" class="upload-btn"
-                                (click)="openDialogAnexosSolicitud()" matTooltip="Cargar Anexo">
+                                (click)="openDialogAnexosSolicitud()" matTooltip="Cargar Anexo"
+                                *ngIf="!existeAnexoSolicitud">
                                 <mat-icon>attach_file</mat-icon>
                             </button>
                         </div>
@@ -154,13 +173,16 @@
             </mat-grid-list>
         </div>
         <div class="generador">
-            <form [formGroup]="filtroForm" >
+            <form [formGroup]="filtroForm">
                 <mat-grid-list cols="10" rowHeight="85px">
 
-                    <mat-grid-tile colspan="5">
+                    <mat-grid-tile colspan="2">
                         <div class="izquierda">
                             <mat-form-field appearance="outline">
-                                <mat-label>ingrese código material modelo</mat-label>
+                                <mat-label *ngIf="TIPO_SOLICITUD==TIPO_SOLICITUD_CREACION">Ingrese código material
+                                    Modelo</mat-label>
+                                <mat-label *ngIf="TIPO_SOLICITUD!=TIPO_SOLICITUD_CREACION">Ingrese código material
+                                </mat-label>
                                 <input matInput placeholder="Codigo Material" formControlName="codigoModelo">
                                 <mat-hint>
                                     <mat-error [hidden]="!(formErrors.codigoModelo)">
@@ -170,24 +192,61 @@
                             </mat-form-field>
                         </div>
                     </mat-grid-tile>
-                    <mat-grid-tile colspan="1" *ngIf="TIPO_SOLICITUD!=TIPO_SOLICITUD_CREACION">
-                        <div class="izquierda">
-                            <button mat-raised-button color="accent" class="boton-secundario"
-                            (click)="filtroLlenar()"    [disabled]="filtroForm.invalid">Llenar datos</button>
+                    <mat-grid-tile colspan="2" >
+                        <div class="izquierda" *ngIf="TIPO_SOLICITUD!=TIPO_SOLICITUD_CREACION && TIPO_SOLICITUD!=TIPO_SOLICITUD_AMPLIACION">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Centro</mat-label>
+                                <mat-select formControlName="selectedCentro" [compareWith]="compareCentro"
+                                    (selectionChange)="filtrarListasPorCentro()">
+                                    <mat-option *ngFor="let listaCampo of listadoCentroItem" [value]="listaCampo">
+                                        {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                        </div>
+                    </mat-grid-tile>
+                    <mat-grid-tile colspan="2" >
+                        <div class="izquierda" *ngIf="TIPO_SOLICITUD!=TIPO_SOLICITUD_CREACION && TIPO_SOLICITUD!=TIPO_SOLICITUD_AMPLIACION">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Almacen</mat-label>
+                                <mat-select formControlName="selectedAlmacen" [compareWith]="compareAlmacen">
+                                    <mat-option *ngFor="let listaCampo of listadoAlmacenItem" [value]="listaCampo">
+                                        {{listaCampo.codigo_sap}} &nbsp;/&nbsp; {{listaCampo.nombre}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
                         </div>
                     </mat-grid-tile>
 
-                    <mat-grid-tile colspan="4">
+                    <mat-grid-tile colspan="1" >
+                        <div class="izquierda" *ngIf="TIPO_SOLICITUD!=TIPO_SOLICITUD_CREACION">
+                            <button mat-raised-button color="accent" name="btnLLenardatos" (click)="filtroLlenar()"
+                                [disabled]="filtroForm.invalid">Llenar datos</button>
+                        </div>
+                    </mat-grid-tile>
+
+                    <mat-grid-tile colspan="3">
                         <div class="derecha">
 
                             <div class="file-upload" *ngIf="activarEditarMaterial">
-                                <button mat-mini-fab color="accent" type="button" class="boton-secundario"
-                                    (click)="onSelectEquivalencias()" matTooltip="Ver Tabla de Equivalencias">
+                                <button mat-mini-fab type="button" color="primary" (click)="onSelectEquivalencias()"
+                                    matTooltip="Ver Tabla de Equivalencias" *ngIf="existeEquivalencias">
+                                    <mat-icon>table</mat-icon>
+                                </button>
+                                <button mat-mini-fab type="button" class="boton-secundario"
+                                    (click)="onSelectEquivalencias()" matTooltip="Ver Tabla de Equivalencias"
+                                    *ngIf="!existeEquivalencias">
                                     <mat-icon>table</mat-icon>
                                 </button>
                                 &nbsp;
+                                <button mat-mini-fab type="button" color="primary" (click)="selectOpenAnexosMaterial()"
+                                    matTooltip="Ver Lista Anexos Material" *ngIf="existeAnexoMaterial">
+                                    <mat-icon>attach_file</mat-icon>
+                                </button>
                                 <button mat-mini-fab type="button" class="boton-secundario"
-                                    (click)="selectOpenAnexosMaterial()" matTooltip="Ver Lista Anexos Material">
+                                    (click)="selectOpenAnexosMaterial()" matTooltip="Ver Lista Anexos Material"
+                                    *ngIf="!existeAnexoMaterial">
                                     <mat-icon>attach_file</mat-icon>
                                 </button>
                             </div>
@@ -547,6 +606,70 @@
                             class="example-form-field" appearance="outline">
                             <mat-checkbox formControlName={{campo.codigo_interno}}>{{campo.etiqueta}}</mat-checkbox>
                         </section>
+                        <section
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_CHECKBOX && campo.codigo_interno==CODIGO_INTERNO_VISTA_PLANIFICACION"
+                            class="example-form-field" appearance="outline">
+                            <mat-checkbox formControlName={{campo.codigo_interno}}>{{campo.etiqueta}}</mat-checkbox>
+                        </section>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_PRECIO_COTIZACION"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
+                            <input matInput type="number" formControlName={{campo.codigo_interno}}>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_PERIODO_VIDA"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span></mat-label>
+                            <input matInput type="number" formControlName={{campo.codigo_interno}}>
+                        </mat-form-field>
+
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_GRUPO_TRANSPORTE"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span>
+                            </mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareGrupoTransporte">
+                                <mat-option [value]="" *ngIf="campo.regla_campo!='M'">&nbsp;&nbsp;----- SELECCIONAR
+                                    -----&nbsp;&nbsp;</mat-option>
+                                <mat-option *ngFor="let listaCampo of listadoGrupoTransporte" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} - {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_GRUPO_CARGA"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span>
+                            </mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareGrupoCarga">
+                                <mat-option [value]="" *ngIf="campo.regla_campo!='M'">&nbsp;&nbsp;----- SELECCIONAR
+                                    -----&nbsp;&nbsp;</mat-option>
+                                <mat-option *ngFor="let listaCampo of listadoGrupoCarga" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} - {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field
+                            *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_GRUPO_COMPRA"
+                            class="example-form-field" appearance="outline">
+                            <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'"
+                                    class="label-error">*</span>
+                            </mat-label>
+                            <mat-select formControlName={{campo.codigo_interno}} [compareWith]="compareGrupoCompra">
+                                <mat-option [value]="" *ngIf="campo.regla_campo!='M'">&nbsp;&nbsp;----- SELECCIONAR
+                                    -----&nbsp;&nbsp;</mat-option>
+                                <mat-option *ngFor="let listaCampo of listadoGrupoCompra" [value]="listaCampo">
+                                    {{listaCampo.codigo_sap}} - {{listaCampo.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+
                         <mat-form-field
                             *ngIf="campo.tipo_objeto==TIPO_OBJETO_COMBO && campo.codigo_interno==CODIGO_INTERNO_CENTRO_BENEFICIO"
                             class="example-form-field" appearance="outline">
@@ -594,6 +717,12 @@
 
     <div class="content-table">
         <table mat-table [dataSource]="listadoMateriales" class="mat-elevation-z8">
+            <ng-container matColumnDef={{CODIGO_INTERNO_MATERIAL_CODIGO_SAP}} *ngIf="TIPO_SOLICITUD!=TIPO_SOLICITUD_CREACION">
+                <th mat-header-cell *matHeaderCellDef> Código Material SAP</th>
+                <td mat-cell *matCellDef="let element">{{element[CODIGO_INTERNO_MATERIAL_CODIGO_SAP]}}
+                </td>
+            </ng-container>
+            
             <ng-container *ngFor="let campo of listadoCampoReglas" matColumnDef={{campo.codigo_interno}}>
                 <div *ngIf="campo.tipo_objeto==TIPO_OBJETO_CHECKBOX">
                     <th mat-header-cell *matHeaderCellDef> {{campo.etiqueta}} </th>
@@ -609,10 +738,10 @@
                 <div *ngIf="campo.tipo_objeto!=TIPO_OBJETO_CHECKBOX">
                     <th mat-header-cell *matHeaderCellDef> {{campo.etiqueta}} </th>
                     <td mat-cell *matCellDef="let element; ">
-                        <span class="label-error" *ngIf="isErrorCampo(element,campo.codigo_interno)==true">
+                        <span class="label-error" *ngIf="element[campo.codigo_interno+'_error']">
                             {{element[campo.codigo_interno+"_valor"]}}
                         </span>
-                        <span *ngIf="isErrorCampo(element,campo.codigo_interno)==false">
+                        <span *ngIf="!element[campo.codigo_interno+'_error']">
                             {{element[campo.codigo_interno+'_valor']}}
                         </span>
                     </td>
@@ -621,7 +750,13 @@
             <ng-container matColumnDef="anexos">
                 <th mat-header-cell *matHeaderCellDef> Anexos </th>
                 <td mat-cell *matCellDef="let element">
-                    <button mat-icon-button color="accent" type="button" (click)="openDialogAnexosMaterial(element)">
+
+                    <button mat-icon-button color="primary" type="button" (click)="openDialogAnexosMaterial(element)"
+                        *ngIf="element.anexo_material_contador > 0">
+                        <mat-icon>attach_file</mat-icon>
+                    </button>
+                    <button mat-icon-button color="accent" type="button" (click)="openDialogAnexosMaterial(element)"
+                        *ngIf="element.anexo_material_contador == 0">
                         <mat-icon>attach_file</mat-icon>
                     </button>
 
@@ -630,7 +765,13 @@
             <ng-container matColumnDef="equivalencias">
                 <th mat-header-cell *matHeaderCellDef> Equivalencias </th>
                 <td mat-cell *matCellDef="let element">
-                    <button mat-icon-button color="accent" type="button" (click)="openDialogEquivalencias(element)">
+
+                    <button mat-icon-button color="primary" type="button" (click)="openDialogEquivalencias(element)"
+                        *ngIf="element.equivalencia_material_contador > 0">
+                        <mat-icon>table</mat-icon>
+                    </button>
+                    <button mat-icon-button color="accent" type="button" (click)="openDialogEquivalencias(element)"
+                        *ngIf="element.equivalencia_material_contador == 0">
                         <mat-icon>table</mat-icon>
                     </button>
 

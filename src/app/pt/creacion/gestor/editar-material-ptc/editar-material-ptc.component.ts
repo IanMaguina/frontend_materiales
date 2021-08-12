@@ -62,6 +62,7 @@ import { ClaseInspeccionService } from 'src/app/servicios/clase-inspeccion.servi
 import { ClaseInspeccion } from 'src/app/modelos/clase-Inspeccion.interface';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -77,6 +78,21 @@ export class EditarMaterialPtcComponent implements OnInit {
   itemForm!: FormGroup;
   filtroForm!: FormGroup;
   itemMaterialOld: any;
+  TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_CREACION: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_AMPLIACION: number = GlobalSettings.TIPO_SOLICITUD_AMPLIACION;
+  TIPO_SOLICITUD_MODIFICACION: number = GlobalSettings.TIPO_SOLICITUD_MODIFICACION;
+  TIPO_SOLICITUD_BLOQUEO: number = GlobalSettings.TIPO_SOLICITUD_BLOQUEO;
+  //escenarios
+  ESCENARIO_NIVEL1: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+
+  ESCENARIO_NIVEL1_PT: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+  ESCENARIO_NIVEL1_RS: string = GlobalSettings.ESCENARIO_NIVEL1_REPUESTOS_SUMINISTROS;
+  ESCENARIO_NIVEL1_MP: string = GlobalSettings.ESCENARIO_NIVEL1_MATERIAS_PRIMAS;
+  ESCENARIO_NIVEL1_AO: string = GlobalSettings.ESCENARIO_NIVEL1_ACTIVOS_OTROS;
+  CODIGO_INTERNO_MATERIAL_CODIGO_MODELO: string = GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO;
+  CODIGO_INTERNO_MATERIAL_CODIGO_SAP: string = GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_SAP;
+
 
   displayedColumns: any[] = [];
   listadoCampoReglas: ReglasCampo[] = [];
@@ -203,6 +219,9 @@ export class EditarMaterialPtcComponent implements OnInit {
   CODIGO_INTERNO_CRITICOS: string = GlobalSettings.CODIGO_INTERNO_CRITICOS;
   CODIGO_INTERNO_ESTRATEGICOS: string = GlobalSettings.CODIGO_INTERNO_ESTRATEGICOS;
   CODIGO_INTERNO_AREA_PLANIFICACION_TAB: string = GlobalSettings.CODIGO_INTERNO_AREA_PLANIFICACION_TAB;
+  CODIGO_INTERNO_VISTA_PLANIFICACION: string = GlobalSettings.CODIGO_INTERNO_VISTA_PLANIFICACION;
+  CODIGO_INTERNO_PRECIO_COTIZACION: string = GlobalSettings.CODIGO_INTERNO_PRECIO_COTIZACION;
+  CODIGO_INTERNO_PERIODO_VIDA: string = GlobalSettings.CODIGO_INTERNO_PERIODO_VIDA;
   MENSAJE_ACTUALIZAR_MATERIAL: string = GlobalSettings.MENSAJE_ACTUALIZAR_MATERIAL;
 
   vistaDisabled = false;
@@ -258,12 +277,17 @@ export class EditarMaterialPtcComponent implements OnInit {
     private centroBeneficioService: CentroBeneficioService,
     private claseInspeccionService: ClaseInspeccionService,
     private areaPlanificacionService: AreaPlanificacionService,
+    private rutaActiva: ActivatedRoute
   ) {
+
     this.initForm()
   }
 
   async ngOnInit() {
-    console.log("MATERIAL-->" + JSON.stringify(this.data.material));
+    ///console.log("ARSA MATERIAL-->" + JSON.stringify(this.data));
+    this.ESCENARIO_NIVEL1 = this.data["id_escenario_nivel1"];
+    this.TIPO_SOLICITUD = this.data["id_tipo_solicitud"];
+
     this.itemMaterialOld = this.data.material;
     this.id_solicitud = this.data.id_solicitud;
     this.id_material_solicitud = this.data.id_material_solicitud;
@@ -302,7 +326,7 @@ export class EditarMaterialPtcComponent implements OnInit {
     this.getListarCentroBeneficioPorSociedad(this.sociedad.codigo_sap);
 
     this.filtrarPartidaArancelaria();
-    this.getListarAreaPlanificacion(this.data.material["centro_codigo_sap_valor"], this.data.material["almacen_codigo_sap_valor"]);
+    this.getListarAreaPlanificacion(this.itemMaterialOld["centro_codigo_sap_valor"], this.itemMaterialOld["almacen_codigo_sap_valor"]);
 
 
   }
@@ -381,6 +405,9 @@ export class EditarMaterialPtcComponent implements OnInit {
       [this.CODIGO_INTERNO_CLASE_INSPECCION_TAB]: [""],
       [this.CODIGO_INTERNO_GRUPO_COMPRA]: [""],
       [this.CODIGO_INTERNO_AREA_PLANIFICACION_TAB]: [""],
+      [this.CODIGO_INTERNO_VISTA_PLANIFICACION]: [""],
+      [this.CODIGO_INTERNO_PRECIO_COTIZACION]: [""],
+      [this.CODIGO_INTERNO_PERIODO_VIDA]: [""]
 
     })
     this.itemForm.valueChanges.subscribe(() => {
@@ -715,7 +742,7 @@ export class EditarMaterialPtcComponent implements OnInit {
     this.listadoReglasVista.forEach((vista: any) => {
       vista["campos"].forEach((campo: any) => {
         this.itemForm.get(campo["codigo_interno"])?.setValue("");
-        let error = this.isErrorCampo(item, campo["codigo_interno"]);
+        let error = item[campo["codigo_interno"] + "_error"];//this.isErrorCampo(item, campo["codigo_interno"]);
         if (!error) {//!error
           let valor = (item[campo["codigo_interno"] + '_valor'] == null ? '' : item[campo["codigo_interno"] + '_valor'])
 
@@ -1199,6 +1226,28 @@ export class EditarMaterialPtcComponent implements OnInit {
   }
 
   async existeDenominacionSapYBdUpdate(form: any) {
+    switch (this.TIPO_SOLICITUD) {
+      case this.TIPO_SOLICITUD_CREACION:
+        console.log("creacion");
+        this.actualizarCreacion(form);
+        break;
+      case this.TIPO_SOLICITUD_AMPLIACION:
+        console.log("ampliacion");
+        this.actualizarAmpliacion(form);
+        break;
+      case this.TIPO_SOLICITUD_MODIFICACION:
+        console.log("modificacion");
+        this.actualizarModificacion(form);
+        break;
+      case this.TIPO_SOLICITUD_BLOQUEO:
+        console.log("bloqueo");
+        this.actualizarBloqueo(form);
+        break;
+    }
+
+  }
+
+  async actualizarCreacion(form: any) {
     if (this.itemForm.invalid) {
       this.submitted = true;
       this.formErrorsItem = this.formValidatorService.handleFormChanges(this.itemForm, this.formErrorsItem, this.validationMessages, this.submitted);
@@ -1227,6 +1276,100 @@ export class EditarMaterialPtcComponent implements OnInit {
       })
     } else {
       this.actualizarMaterial(form)
+    }
+
+  }
+
+  async actualizarAmpliacion(form: any) {
+
+    this.actualizarMaterialAmpliacion(form)
+  }
+
+  async actualizarMaterialAmpliacion(form: any) {
+    let codigoModelo = (this.filtroForm.get("codigoModelo")?.value ? this.filtroForm.get("codigoModelo")?.value : "");
+    if (true) {//!this.existeDenominacion
+      let campos: any[] = this.mapearCamposMaterialActualizar(form, this.itemMaterialOld);
+      let params = {
+        'material': { "campos": campos, [this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP]: codigoModelo }
+      }
+      //console.log('material Ampliacion--->' + JSON.stringify(params));
+      this.solicitudService.actualizarMaterialAmpliacion(this.id_solicitud, this.itemMaterialOld["id_material_solicitud"], params).then((data) => {
+        console.log('resppuesta al agregar material amplicacion-->' + JSON.stringify(data));
+        let mensaje = this.MENSAJE_ACTUALIZAR_MATERIAL;
+        if (data["resultado"] == 0) {
+          mensaje = data["mensaje"];
+          this.openSnackBarError(mensaje, "", "mat-primary")
+        } else {
+          this._snack.open(mensaje, 'cerrar', {
+            duration: 1800,
+            horizontalPosition: "end",
+            verticalPosition: "top"
+          });
+          this.dialogRef.close();
+        }
+      })
+    }
+  }
+
+  async actualizarModificacion(form: any) {
+
+    this.actualizarMaterialModificacion(form)
+  }
+
+  async actualizarMaterialModificacion(form: any) {
+    let codigoModelo = (this.filtroForm.get("codigoModelo")?.value ? this.filtroForm.get("codigoModelo")?.value : "");
+    if (true) {//!this.existeDenominacion
+      let campos: any[] = this.mapearCamposMaterialActualizar(form, this.itemMaterialOld);
+      let params = {
+        'material': { "campos": campos, [this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP]: codigoModelo }
+      }
+      //console.log('material Ampliacion--->' + JSON.stringify(params));
+      this.solicitudService.actualizarMaterialModificacion(this.id_solicitud, this.itemMaterialOld["id_material_solicitud"], params).then((data) => {
+        console.log('resppuesta al agregar material Modificacion-->' + JSON.stringify(data));
+        let mensaje = this.MENSAJE_ACTUALIZAR_MATERIAL;
+        if (data["resultado"] == 0) {
+          mensaje = data["mensaje"];
+          this.openSnackBarError(mensaje, "", "mat-primary")
+        } else {
+          this._snack.open(mensaje, 'cerrar', {
+            duration: 1800,
+            horizontalPosition: "end",
+            verticalPosition: "top"
+          });
+          this.dialogRef.close();
+        }
+      })
+    }
+  }
+
+  async actualizarBloqueo(form: any) {
+
+    this.actualizarMaterialBloqueo(form)
+  }
+
+  async actualizarMaterialBloqueo(form: any) {
+    let codigoModelo = (this.filtroForm.get("codigoModelo")?.value ? this.filtroForm.get("codigoModelo")?.value : "");
+    if (true) {//!this.existeDenominacion
+      let campos: any[] = this.mapearCamposMaterialActualizar(form, this.itemMaterialOld);
+      let params = {
+        'material': { "campos": campos, [this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP]: codigoModelo }
+      }
+      //console.log('material Ampliacion--->' + JSON.stringify(params));
+      this.solicitudService.actualizarMaterialBloqueo(this.id_solicitud, this.itemMaterialOld["id_material_solicitud"], params).then((data) => {
+        console.log('resppuesta al agregar material Bloqueo-->' + JSON.stringify(data));
+        let mensaje = this.MENSAJE_ACTUALIZAR_MATERIAL;
+        if (data["resultado"] == 0) {
+          mensaje = data["mensaje"];
+          this.openSnackBarError(mensaje, "", "mat-primary")
+        } else {
+          this._snack.open(mensaje, 'cerrar', {
+            duration: 1800,
+            horizontalPosition: "end",
+            verticalPosition: "top"
+          });
+          this.dialogRef.close();
+        }
+      })
     }
   }
 
@@ -1328,7 +1471,7 @@ export class EditarMaterialPtcComponent implements OnInit {
     }
     let material = [{ codigo_interno: "", valor: "" }];
     this.solicitudService.getMaterialCodigoModelo(body).then(mat => {
-      //console.log("material modelo-->" + JSON.stringify(mat));
+      console.log(JSON.stringify(codigoModelo) + " material modelo-->" + JSON.stringify(mat));
       material = mat;
       material.forEach(campo => {
         if (campo.codigo_interno == this.CODIGO_INTERNO_GRUPO_ARTICULO) {
@@ -1337,24 +1480,34 @@ export class EditarMaterialPtcComponent implements OnInit {
         }
         if (campo.codigo_interno == this.CODIGO_INTERNO_TIPO_MATERIAL) {
           this.itemForm.get(this.CODIGO_INTERNO_TIPO_MATERIAL)?.setValue({ codigo_sap: campo.valor })
+          this.getListarCategoriaValoracionPorTipoMaterial(campo.valor);
         }
+
+        if (campo.codigo_interno == this.CODIGO_INTERNO_SECTOR) {
+          this.itemForm.get(this.CODIGO_INTERNO_SECTOR)?.setValue(campo.valor)
+        }
+        if (campo.codigo_interno == this.CODIGO_INTERNO_RAMO) {
+          this.itemForm.get(this.CODIGO_INTERNO_RAMO)?.setValue(campo.valor);
+
+        }
+
       })
     })
 
   }
 
-  isErrorCampo(element: any, codigo_interno: string) {
-    if (codigo_interno.substr(-4) == '_tab' && element[codigo_interno + '_error']) {
-      if (element[codigo_interno + '_error'].split("true").length > 0) {
-        return false;
+  /*   isErrorCampo(element: any, codigo_interno: string) {
+      if (codigo_interno.substr(-4) == '_tab' && element[codigo_interno + '_error']) {
+        if (element[codigo_interno + '_error'].split("true").length > 0) {
+          return false;
+        } else {
+          return true;
+        }
       } else {
-        return true;
+        return element[codigo_interno + '_error'];
       }
-    } else {
-      return element[codigo_interno + '_error'];
     }
-  }
-
+   */
   async habilitarControles() {
     console.log('entro a habilitarControles')
     this.listadoReglasVista.forEach((vista: any) => {

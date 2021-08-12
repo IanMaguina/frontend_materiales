@@ -87,6 +87,21 @@ export class VerMaterialPtcComponent implements OnInit {
   id_tipo_solicitud!: number;
   sociedad!: Sociedad;
 
+  TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_CREACION: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_AMPLIACION: number = GlobalSettings.TIPO_SOLICITUD_AMPLIACION;
+  TIPO_SOLICITUD_MODIFICACION: number = GlobalSettings.TIPO_SOLICITUD_MODIFICACION;
+  TIPO_SOLICITUD_BLOQUEO: number = GlobalSettings.TIPO_SOLICITUD_BLOQUEO;
+  //escenarios
+  ESCENARIO_NIVEL1: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+
+  ESCENARIO_NIVEL1_PT: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+  ESCENARIO_NIVEL1_RS: string = GlobalSettings.ESCENARIO_NIVEL1_REPUESTOS_SUMINISTROS;
+  ESCENARIO_NIVEL1_MP: string = GlobalSettings.ESCENARIO_NIVEL1_MATERIAS_PRIMAS;
+  ESCENARIO_NIVEL1_AO: string = GlobalSettings.ESCENARIO_NIVEL1_ACTIVOS_OTROS;
+  CODIGO_INTERNO_MATERIAL_CODIGO_MODELO: string = GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO;
+  CODIGO_INTERNO_MATERIAL_CODIGO_SAP: string = GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_SAP;
+
   listadoAlmacenItem: Almacen[] = [];
   listadoAlmacenProduccion: Almacen[] = [];
   listadoCentroItem: any[] = [];
@@ -188,6 +203,9 @@ export class VerMaterialPtcComponent implements OnInit {
   CODIGO_INTERNO_CRITICOS: string = GlobalSettings.CODIGO_INTERNO_CRITICOS;
   CODIGO_INTERNO_ESTRATEGICOS: string = GlobalSettings.CODIGO_INTERNO_ESTRATEGICOS;
   CODIGO_INTERNO_AREA_PLANIFICACION_TAB: string = GlobalSettings.CODIGO_INTERNO_AREA_PLANIFICACION_TAB;
+  CODIGO_INTERNO_VISTA_PLANIFICACION: string = GlobalSettings.CODIGO_INTERNO_VISTA_PLANIFICACION;
+  CODIGO_INTERNO_PRECIO_COTIZACION: string = GlobalSettings.CODIGO_INTERNO_PRECIO_COTIZACION;
+  CODIGO_INTERNO_PERIODO_VIDA: string = GlobalSettings.CODIGO_INTERNO_PERIODO_VIDA;  
 
   MENSAJE_ACTUALIZAR_MATERIAL: string = GlobalSettings.MENSAJE_ACTUALIZAR_MATERIAL;
 
@@ -249,6 +267,10 @@ export class VerMaterialPtcComponent implements OnInit {
 
   async ngOnInit() {
     console.log("MATERIAL-->" + JSON.stringify(this.data.material));
+    ///console.log("ARSA MATERIAL-->" + JSON.stringify(this.data));
+    this.ESCENARIO_NIVEL1 = this.data["id_escenario_nivel1"];
+    this.TIPO_SOLICITUD = this.data["id_tipo_solicitud"];
+
     this.itemMaterialOld = this.data.material;
     this.id_solicitud = this.data.id_solicitud;
     this.id_material_solicitud = this.data.id_material_solicitud;
@@ -349,6 +371,10 @@ export class VerMaterialPtcComponent implements OnInit {
       [this.CODIGO_INTERNO_CRITICOS]: [false],
       [this.CODIGO_INTERNO_ESTRATEGICOS]: [false],
       [this.CODIGO_INTERNO_AREA_PLANIFICACION_TAB]: [""],
+      [this.CODIGO_INTERNO_VISTA_PLANIFICACION]: [""],
+      [this.CODIGO_INTERNO_PRECIO_COTIZACION]: [""],
+      [this.CODIGO_INTERNO_PERIODO_VIDA]: [""]
+
     })
     this.itemForm.valueChanges.subscribe(() => {
       this.formErrorsItem = this.formValidatorService.handleFormChanges(this.itemForm, this.formErrorsItem, this.validationMessages, true);
@@ -679,7 +705,7 @@ export class VerMaterialPtcComponent implements OnInit {
     this.listadoReglasVista.forEach((vista: any) => {
       vista["campos"].forEach((campo: any) => {
         //this.itemForm.get(campo["codigo_interno"])?.setValue("");
-        let error = this.isErrorCampo(item, campo["codigo_interno"]);
+        let error = item[campo["codigo_interno"] + "_error"];//this.isErrorCampo(item, campo["codigo_interno"]);
         if (true) {//!error
           let valor = (item[campo["codigo_interno"] + '_valor'] == null ? '' : item[campo["codigo_interno"] + '_valor'])
           if (campo["tipo_objeto"] == GlobalSettings.TIPO_OBJETO_INPUT_TEXT) {
@@ -1221,7 +1247,7 @@ export class VerMaterialPtcComponent implements OnInit {
     })
   }
 
-  isErrorCampo(element: any, codigo_interno: string) {
+/*   isErrorCampo(element: any, codigo_interno: string) {
     if (codigo_interno.substr(-4) == '_tab' && element[codigo_interno + '_error']) {
       if (element[codigo_interno + '_error'].split("true").length > 0) {
         return false;
@@ -1232,7 +1258,7 @@ export class VerMaterialPtcComponent implements OnInit {
       return element[codigo_interno + '_error'];
     }
   }
-
+ */
   async habilitarControles() {
     console.log('entro a habilitarControles')
     this.listadoReglasVista.forEach((vista: any) => {

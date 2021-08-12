@@ -33,6 +33,10 @@ export class ListarSolicitudPtcComponent implements OnInit {
   
   //escenarios
   ESCENARIO_NIVEL1: string = '';//GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+  ESCENARIO_NIVEL1_PT: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+  ESCENARIO_NIVEL1_RS: string = GlobalSettings.ESCENARIO_NIVEL1_REPUESTOS_SUMINISTROS;
+  ESCENARIO_NIVEL1_MP: string = GlobalSettings.ESCENARIO_NIVEL1_MATERIAS_PRIMAS;
+  ESCENARIO_NIVEL1_AO: string = GlobalSettings.ESCENARIO_NIVEL1_ACTIVOS_OTROS;
 
   ESTADO_SOLICITUD_EN_SOLICITANTE = GlobalSettings.ESTADO_SOLICITUD_EN_SOLICITANTE;
   ESTADO_SOLICITUD_EN_SUPERVISION = GlobalSettings.ESTADO_SOLICITUD_EN_SUPERVISION;
@@ -42,6 +46,7 @@ export class ListarSolicitudPtcComponent implements OnInit {
   ESTADO_SOLICITUD_EN_COMERCIAL = GlobalSettings.ESTADO_SOLICITUD_EN_COMERCIAL;
   ESTADO_SOLICITUD_EN_ADMINISTRACION = GlobalSettings.ESTADO_SOLICITUD_EN_ADMINISTRACION;
   ESTADO_SOLICITUD_EN_SAP = GlobalSettings.ESTADO_SOLICITUD_EN_SAP;
+  ESTADO_SOLICITUD_FINALIZADO = GlobalSettings.ESTADO_SOLICITUD_FINALIZADO;
 
 
 
@@ -64,6 +69,11 @@ export class ListarSolicitudPtcComponent implements OnInit {
   submitted = false;
   listadoSociedades: Sociedad[] = [];
   TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_CREACION: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_AMPLIACION: number = GlobalSettings.TIPO_SOLICITUD_AMPLIACION;
+  TIPO_SOLICITUD_MODIFICACION: number = GlobalSettings.TIPO_SOLICITUD_MODIFICACION;
+  TIPO_SOLICITUD_BLOQUEO: number = GlobalSettings.TIPO_SOLICITUD_BLOQUEO;
+
   constructor(
     private router: Router,
     private formBuilder: FormBuilder,
@@ -76,7 +86,7 @@ export class ListarSolicitudPtcComponent implements OnInit {
   ) {
 
     this.ESCENARIO_NIVEL1= this.rutaActiva.snapshot.params.nivelEscenario;
-    this.TIPO_SOLICITUD = this.rutaActiva.snapshot.params.tipoSolicitud;
+    this.TIPO_SOLICITUD = parseInt(this.rutaActiva.snapshot.params.tipoSolicitud);
 
   }
 
@@ -205,6 +215,9 @@ export class ListarSolicitudPtcComponent implements OnInit {
 
       ))
       this.router.navigate(['/shared',this.TIPO_SOLICITUD,'verSolicitud', item.id]);
+
+      if (item['estadoSolicitud'] && this.ESTADO_SOLICITUD_FINALIZADO == item['estadoSolicitud'].id)
+      this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'verSolicitud', item.id]);
 
   }
 

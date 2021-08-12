@@ -55,6 +55,11 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
   itemForm!: FormGroup;
 
   TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_CREACION: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_AMPLIACION: number = GlobalSettings.TIPO_SOLICITUD_AMPLIACION;
+  TIPO_SOLICITUD_MODIFICACION: number = GlobalSettings.TIPO_SOLICITUD_MODIFICACION;
+  TIPO_SOLICITUD_BLOQUEO: number = GlobalSettings.TIPO_SOLICITUD_BLOQUEO;
+
   ROL_SOLICITANTE: number = GlobalSettings.ROL_SOLICITANTE;
   ROL_SUPERVISOR: number = GlobalSettings.ROL_SUPERVISOR;
   ROL_ADMINISTRADOR_MATERIAL: number = GlobalSettings.ROL_ADMINISTRADOR_MATERIAL;
@@ -65,6 +70,12 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
   ESTADO_SOLICITUD_EN_SAP: number = GlobalSettings.ESTADO_SOLICITUD_EN_SAP;
   //escenarios
   ESCENARIO_NIVEL1: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+
+  ESCENARIO_NIVEL1_PT: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+  ESCENARIO_NIVEL1_RS: string = GlobalSettings.ESCENARIO_NIVEL1_REPUESTOS_SUMINISTROS;
+  ESCENARIO_NIVEL1_MP: string = GlobalSettings.ESCENARIO_NIVEL1_MATERIAS_PRIMAS;
+  ESCENARIO_NIVEL1_AO: string = GlobalSettings.ESCENARIO_NIVEL1_ACTIVOS_OTROS;
+
 
   TIPO_OBJETO_INPUT_TEXT: string = GlobalSettings.TIPO_OBJETO_INPUT_TEXT;
   TIPO_OBJETO_COMBO: string = GlobalSettings.TIPO_OBJETO_COMBO;
@@ -142,15 +153,17 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
 
   //datos de cabecera Solicitud
   id_solicitud!: number;
-  existe_error_sap:any;
+  existe_error_sap: any;
   correlativo!: string;
+
+  tip_pm = '';
 
   //Validation
   formErrors = {
     'selectecLineaNegocio': '',
     'descripcion_corta': '',
     'selectedCentro': '',
-    'selectedOrganizacionVenta': '',
+    'selectedAlmacen': '',
     'codigoModelo': ''
   }
 
@@ -208,7 +221,7 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
   MENSAJE_ELIMINAR_ANEXO_SOLICITUD: string = GlobalSettings.MENSAJE_ELIMINAR_ANEXO_SOLICITUD;
   MENSAJE_ELIMINAR_ANEXO_MATERIAL: string = GlobalSettings.MENSAJE_ELIMINAR_ANEXO_MATERIAL;
   cantidadErrores = 0;
-  camposErrores='';
+  camposErrores = '';
 
   btnAnular = true;
   btnAprobar = true;
@@ -222,6 +235,7 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
 
   btnEliminarMaterial = true;
 
+  existeAnexoSolicitud:boolean=false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -241,8 +255,24 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
     private _snack: MatSnackBar,
     private rutaActiva: ActivatedRoute
   ) {
-    this.ESCENARIO_NIVEL1= this.rutaActiva.snapshot.params.nivelEscenario;
-    this.TIPO_SOLICITUD = parseInt(this.rutaActiva.snapshot.params.tipoSolicitud);    
+    console.log("ENTRANDO EDITAR GESTOR-->"+this.rutaActiva.snapshot.params.tipoSolicitud);
+    this.ESCENARIO_NIVEL1 = this.rutaActiva.snapshot.params.nivelEscenario;
+    this.TIPO_SOLICITUD = parseInt(this.rutaActiva.snapshot.params.tipoSolicitud);
+    switch (this.TIPO_SOLICITUD) {
+      case this.TIPO_SOLICITUD_CREACION:
+        this.tip_pm = GlobalSettings.TIPO_SOLICITUD_CREACION_CHAR;
+        break;
+      case this.TIPO_SOLICITUD_AMPLIACION:
+        this.tip_pm = GlobalSettings.TIPO_SOLICITUD_AMPLIACION_CHAR;
+        break;
+      case this.TIPO_SOLICITUD_MODIFICACION:
+        this.tip_pm = GlobalSettings.TIPO_SOLICITUD_MODIFICACION_CHAR;
+        break;
+      case this.TIPO_SOLICITUD_BLOQUEO:
+        this.tip_pm = GlobalSettings.TIPO_SOLICITUD_BLOQUEO_CHAR;
+        break;
+    }
+
     this.initForm();
     this.id_solicitud = this.activatedRoute.snapshot.params.id;
     this.estadoActualSolicitud(this.id_solicitud);  // llama al this.obtenerSolicitud();
@@ -252,26 +282,27 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
   ngOnInit() {
     //this.getListarNivel3Solicitud();
     this.habilitarControles();
+    this.obtenerUrlSolicitud();
     //this.initBotones();
   }
 
   async initBotones() {
     //console.log(this.ROL_GESTOR+" primera--> "+(this.ROL_GESTOR==this.ROL_ADMINISTRADOR_MATERIAL));
     //console.log(this.ESTADO_ACTUAL_SOLICITUD+" segunda-->"+(this.ESTADO_ACTUAL_SOLICITUD!=this.ESTADO_SOLICITUD_EN_SAP));
-    this.btnEliminarMaterial=(this.existe_error_sap != false)
-    console.log("errorSAP-->"+this.existe_error_sap);
-    this.btnAnular = (this.ROL_GESTOR == this.ROL_ADMINISTRADOR_MATERIAL && this.ESTADO_ACTUAL_SOLICITUD != this.ESTADO_SOLICITUD_EN_SAP && this.existe_error_sap != false)  
+    this.btnEliminarMaterial = (this.existe_error_sap != false)
+    console.log("errorSAP-->" + this.existe_error_sap);
+    this.btnAnular = (this.ROL_GESTOR == this.ROL_ADMINISTRADOR_MATERIAL && this.ESTADO_ACTUAL_SOLICITUD != this.ESTADO_SOLICITUD_EN_SAP && this.existe_error_sap != false)
     this.btnAprobar = (this.ROL_GESTOR != this.ROL_ADMINISTRADOR_MATERIAL && this.ESTADO_ACTUAL_SOLICITUD != this.ESTADO_SOLICITUD_EN_SAP)
     this.btnEnviarSAP = (this.ROL_GESTOR == this.ROL_ADMINISTRADOR_MATERIAL && this.ESTADO_ACTUAL_SOLICITUD != this.ESTADO_SOLICITUD_EN_SAP && this.existe_error_sap != false);
-        
+
     this.btnFinalizar = (this.ROL_GESTOR == this.ROL_ADMINISTRADOR_MATERIAL && this.ESTADO_ACTUAL_SOLICITUD != this.ESTADO_SOLICITUD_EN_SAP && this.existe_error_sap == false)
-    this.btnRechazar = (this.btnFinalizar?false: (this.ESTADO_ACTUAL_SOLICITUD != this.ESTADO_SOLICITUD_EN_SAP || (this.ROL_GESTOR != this.ROL_ADMINISTRADOR_MATERIAL && this.existe_error_sap != false) ))
-    
+    this.btnRechazar = (this.btnFinalizar ? false : (this.ESTADO_ACTUAL_SOLICITUD != this.ESTADO_SOLICITUD_EN_SAP || (this.ROL_GESTOR != this.ROL_ADMINISTRADOR_MATERIAL && this.existe_error_sap != false)))
+
 
     this.btnDescargarFormato = (this.listadoMateriales.length == 0)
-    this.btnDescargarListado = (this.btnFinalizar?false:(this.ESTADO_ACTUAL_SOLICITUD != this.ESTADO_SOLICITUD_EN_SAP));
-    this.btnCargaMasiva = (this.btnFinalizar?false:(this.ESTADO_ACTUAL_SOLICITUD != this.ESTADO_SOLICITUD_EN_SAP));
-    
+    this.btnDescargarListado = (this.btnFinalizar ? false : (this.ESTADO_ACTUAL_SOLICITUD != this.ESTADO_SOLICITUD_EN_SAP));
+    this.btnCargaMasiva = (this.btnFinalizar ? false : (this.ESTADO_ACTUAL_SOLICITUD != this.ESTADO_SOLICITUD_EN_SAP));
+
   }
 
 
@@ -288,7 +319,7 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
 
     this.filtroForm = this.formBuilder.group({
       selectedCentro: [{ disabled: true }],
-      selectedOrganizacionVenta: [{ value: '', disabled: true }],
+      selectedAlmacen: [{ value: '', disabled: true }],
       codigoModelo: [{ value: '', disabled: true }],
     })
 
@@ -332,14 +363,14 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
 
   async filtrarReglas() {
     let selectecLineaNegocio: LineaNegocio = this.solicitudForm.get('selectecLineaNegocio').value;
-    console.log('linea de negocio arsa-->'+JSON.stringify(selectecLineaNegocio))
+    console.log('linea de negocio arsa-->' + JSON.stringify(selectecLineaNegocio))
     this.sociedad = selectecLineaNegocio.sociedad;
     this.getListadoCampoReglas(selectecLineaNegocio.id, this.ROL_GESTOR, this.TIPO_SOLICITUD); // cambio 29 marzo
   }
 
   async habilitarControles() {
     this.filtroForm.get('selectedCentro')?.enable();
-    this.filtroForm.get('selectedOrganizacionVenta')?.enable();
+    this.filtroForm.get('selectedAlmacen')?.enable();
     this.filtroForm.get('codigoModelo')?.enable();
     this.itemForm.get('denominacion')?.enable();
     this.itemForm.get('unidad_medida_base')?.enable();
@@ -362,6 +393,10 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
     this.displayedColumns.push("check");
     this.displayedColumns.push(this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP);
     this.displayedColumns.push(this.CODIGO_INTERNO_DENOMINACION);
+    if (this.TIPO_SOLICITUD != this.TIPO_SOLICITUD_CREACION) {
+      this.displayedColumns.push(this.CODIGO_INTERNO_CENTRO);
+      this.displayedColumns.push(this.CODIGO_INTERNO_ALMACEN);
+    }
     this.solicitudService.getListadoCampoReglas(id_escenario_nivel3, id_rol, id_tipo_solicitud).then((data) => { // cambio 29 marzo
       console.log("Listado de campos reglas -->" + JSON.stringify(data['lista']))
       let listadoCampoReglas: ReglasCampo[] = data['lista'];
@@ -466,7 +501,7 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
         }
       })
       this.initBotones();
-      console.log('listadoMateriales-->' + this.listadoMateriales);
+      console.log('listadoMateriales-->' + JSON.stringify(this.listadoMateriales));
 
     })
   }
@@ -521,23 +556,70 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
 
   onFileSelected(event: any) {
     let tabs = [this.CODIGO_INTERNO_CLASE_TAB, this.CODIGO_INTERNO_CLASE_INSPECCION_TAB, this.CODIGO_INTERNO_AREA_PLANIFICACION_TAB]
-    this.excelGeneratorService.onFileSeleted(event, tabs).then((data) => {
+    this.excelGeneratorService.onFileSeleted(this.TIPO_SOLICITUD, event, tabs).then((data) => {
       this.cargaMasiva(data);
       this.solicitudForm.get('files').reset();
     });
   }
 
   cargaMasiva(materiales: any) {
+    switch (this.TIPO_SOLICITUD) {
+      case this.TIPO_SOLICITUD_CREACION:
+        console.log("creacion");
+        this.cargaMasivaCreacion(materiales);
+        break;
+      case this.TIPO_SOLICITUD_AMPLIACION:
+        console.log("ampliacion");
+        this.cargaMasivaAmpliacion(materiales);
+        break;
+      case this.TIPO_SOLICITUD_MODIFICACION:
+        break;
+      case this.TIPO_SOLICITUD_BLOQUEO:
+        break;
+    }
+
+  }
+
+  cargaMasivaCreacion(materiales: any) {
     let params = {
       'id_solicitud': this.id_solicitud,
-      'id_rol': this.ROL_GESTOR,
+      'id_rol': this.ROL_SOLICITANTE,
       'materiales': materiales
     }
     //console.log('materiales front end--->' + JSON.stringify(params));
     this.solicitudService.cargaMasiva(params).then((data) => {
-      //console.log('resultado--->' + JSON.stringify(data));
+      console.log('resultado--->' + JSON.stringify(data));
+      this._snack.open(this.MENSAJE_CARGA_MASIVA, 'cerrar', {
+        duration: 1800,
+        horizontalPosition: "end",
+        verticalPosition: "top"
+      });
       this.getListadoMateriales();
     })
+
+  }
+
+  cargaMasivaAmpliacion(materiales: any) {
+    let params = {
+      'id_solicitud': this.id_solicitud,
+      'id_rol': this.ROL_SOLICITANTE,
+      'materiales': materiales
+    }
+    //console.log('materiales front end--->' + JSON.stringify(params));
+    this.solicitudService.cargaMasivaAmpliacion(params).then((data) => {
+      console.log('resultado--->' + JSON.stringify(data));
+      if (data.resultado == 1) {
+        this._snack.open(this.MENSAJE_CARGA_MASIVA, 'cerrar', {
+          duration: 1800,
+          horizontalPosition: "end",
+          verticalPosition: "top"
+        });
+      } else {
+        this.openDialogErrorSap(data.mensaje);
+      }
+      this.getListadoMateriales();
+    })
+
   }
 
 
@@ -551,6 +633,23 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
   }
 
   eliminarMaterial(item: any) {
+    switch (this.TIPO_SOLICITUD) {
+      case this.TIPO_SOLICITUD_CREACION:
+        console.log("creacion");
+        this.eliminarCreacion(item);
+        break;
+      case this.TIPO_SOLICITUD_AMPLIACION:
+        console.log("ampliacion");
+        this.eliminarAmpliacion(item);
+        break;
+      case this.TIPO_SOLICITUD_MODIFICACION:
+        break;
+      case this.TIPO_SOLICITUD_BLOQUEO:
+        break;
+    }
+  }
+
+  eliminarCreacion(item: any) {
     let mensaje;
     if (item.ampliacion) {
       mensaje = Messages.warnig.MENSAJE_DIALOGO_ELIMINAR_MATERIAL;
@@ -561,12 +660,10 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
       disableClose: true,
       data: mensaje
     });
-
     dialogRef.afterClosed().subscribe(result => {
       //vienen los datos del dialog
       //console.log('The dialog was closed'+JSON.stringify(result));
       if (result == "CONFIRM_DLG_YES") {
-
         this.solicitudService.eliminarMaterial(item).then((res) => {
           console.log(JSON.stringify(res));
           this._snack.open(this.MENSAJE_ELIMINAR_MATERIAL, 'cerrar', {
@@ -575,16 +672,44 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
             verticalPosition: "top"
           });
           this.getListadoMateriales();
-
         })
-
       } else {
         // this.solicitudForm.get('selectecLineaNegocio').setValue(this.EscenarioNivel3_Old ? this.EscenarioNivel3_Old : null);
         this.getListadoMateriales();
       }
-
     });
+  }
 
+  eliminarAmpliacion(item: any) {
+    this.itemMaterialOld = item;
+    let mensaje;
+    if (item.ampliacion) {
+      mensaje = Messages.warnig.MENSAJE_DIALOGO_ELIMINAR_MATERIAL;
+    } else {
+      mensaje = Messages.warnig.MENSAJE_DIALOGO_ELIMINAR_MATERIAL_AMPLIADOS;
+    }
+    const dialogRef = this.matDialog.open(ConfirmDialogComponent, {
+      disableClose: true,
+      data: mensaje
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      //vienen los datos del dialog
+      //console.log('The dialog was closed'+JSON.stringify(result));
+      if (result == "CONFIRM_DLG_YES") {
+        this.solicitudService.eliminarMaterialAmpliación(this.id_solicitud, this.itemMaterialOld["id_material_solicitud"]).then((res) => {
+          console.log(JSON.stringify(res));
+          this._snack.open(this.MENSAJE_ELIMINAR_MATERIAL, 'cerrar', {
+            duration: 1800,
+            horizontalPosition: "end",
+            verticalPosition: "top"
+          });
+          this.getListadoMateriales();
+        })
+      } else {
+        // this.solicitudForm.get('selectecLineaNegocio').setValue(this.EscenarioNivel3_Old ? this.EscenarioNivel3_Old : null);
+        this.getListadoMateriales();
+      }
+    });
   }
 
 
@@ -652,7 +777,7 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
           verticalPosition: "top"
         });
 
-        this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+        this.router.navigate(['/productosTerminados', this.TIPO_SOLICITUD, 'consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
       }
     })
   }
@@ -662,7 +787,7 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
     await this.existeErrores();
     let mensaje = "";
     if (this.cantidadErrores > 0) {
-      mensaje = Messages.warnig.MENSAJE_EXISTE_ERRORES_AL_GRABAR_SOLICITUD+this.camposErrores;
+      mensaje = Messages.warnig.MENSAJE_EXISTE_ERRORES_AL_GRABAR_SOLICITUD + this.camposErrores;
       const dialogRef = this.matDialog.open(AdvertenciaDialogComponent, {
         disableClose: true,
         data: mensaje
@@ -723,7 +848,7 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
                 verticalPosition: "top"
               });
 
-              this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+              this.router.navigate(['/productosTerminados', this.TIPO_SOLICITUD, 'consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
             } else {
               console.log("Error encontrado: " + JSON.stringify(data.mensaje))
             }
@@ -744,7 +869,7 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
                 verticalPosition: "top"
               });
 
-              this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+              this.router.navigate(['/productosTerminados', this.TIPO_SOLICITUD, 'consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
             } else {
               console.log("Error encontrado: " + JSON.stringify(data.mensaje))
             }
@@ -842,7 +967,7 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
             //this.ROL_GESTOR = this.estadoSeguimientoActualSolicitud.id_rol_real;
             //this.NOMBRE_ROL=this.estadoSeguimientoActualSolicitud.nombre_rol_real;
             this.ESTADO_ACTUAL_SOLICITUD = this.estadoSeguimientoActualSolicitud.id_estado_real;
-            
+
             this.obtenerSolicitud();
 
           }
@@ -854,7 +979,7 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
 
 
   async existeErrores() {
-    //console.log("arsa2-->" + JSON.stringify(this.listadoCampoReglas))
+    console.log("arsa2-->" + JSON.stringify(this.listadoCampoReglas))
     let error = 0;
     let vacio = 0;
     let campoError = " ";
@@ -882,7 +1007,7 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
       })
       //filaError.push({ "fila": c, "error": error, "vacio": vacio });
       this.cantidadErrores = error + vacio;
-      this.camposErrores=campoError;
+      this.camposErrores = campoError;
       console.log({ "error": error, "vacio": vacio });
     })
   }
@@ -930,13 +1055,13 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
     }
     this.solicitudService.aprobarSolicitud(body).then(result => {
       if (result.resultado == 1) {
-        this.solicitudService.enviarSAP(this.id_solicitud).then(data => {
+        this.solicitudService.enviarSAP(this.id_solicitud, this.tip_pm).then(data => {
           this._snack.open(this.MENSAJE_ENVIAR_SOLICITUD_A_SAP, 'cerrar', {
             duration: 1800,
             horizontalPosition: "end",
             verticalPosition: "top"
           });
-          this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+          this.router.navigate(['/productosTerminados', this.TIPO_SOLICITUD, 'consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
         })
       }
     })
@@ -978,7 +1103,8 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
   finalizarSolicitud(result: any) {
     if (this.ROL_GESTOR == this.ROL_ADMINISTRADOR_MATERIAL) {
       this.solicitudService.finalizarSolicitud(this.id_solicitud, this.ROL_GESTOR).then(res => {
-        console.log("mensaje-->" + JSON.stringify(res))
+        this.router.navigate(['/productosTerminados', this.TIPO_SOLICITUD, 'consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
+        /* console.log("mensaje-->" + JSON.stringify(res))
         let mensaje = Messages.error.MSG_ERROR_FINALIZAR_SOLICITUD;
         const dialogRef = this.matDialog.open(AdvertenciaDialogComponent, {
           disableClose: true,
@@ -986,10 +1112,10 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
         });
 
         dialogRef.afterClosed().subscribe(result => {
-          if (result == "CONFIRM_DLG_YES" ) {
-            this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+          if (result == "CONFIRM_DLG_YES") {
+            this.router.navigate(['/productosTerminados', this.TIPO_SOLICITUD, 'consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
           }
-        });
+        }); */
       })
     }
   }
@@ -1007,11 +1133,10 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
       data: datos
     });
     dialogRef3.afterClosed().subscribe(result => {
-      if (result.respuesta == "CONFIRM_DLG_YES") {
-        //mostrar que se cargó algo?
-      } else {
+      if (result.respuesta != "CONFIRM_DLG_YES") {
         console.log("no se rechazó la solicitud");
       }
+      this.getListadoMateriales();
 
     });
   }
@@ -1027,11 +1152,10 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
       width: '50%'
     });
     dialogRef2.afterClosed().subscribe(result => {
-      if (result.respuesta == "CONFIRM_DLG_YES") {
-        //mostrar que se cargó algo?
-      } else {
+      if (result.respuesta != "CONFIRM_DLG_YES") {
         console.log("no se rechazó la solicitud");
       }
+      this.obtenerUrlSolicitud();
 
     });
   }
@@ -1049,11 +1173,10 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
       width: '80%'
     });
     dialogRef4.afterClosed().subscribe(result => {
-      if (result.respuesta == "CONFIRM_DLG_YES") {
-        //mostrar que se cargó algo?
-      } else {
+      if (result.respuesta != "CONFIRM_DLG_YES") {
         console.log("se cerró el dialog de equivalencias");
       }
+      this.getListadoMateriales();
 
     });
   }
@@ -1081,7 +1204,7 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
               horizontalPosition: "end",
               verticalPosition: "top"
             });
-            this.router.navigate(['/productosTerminados',this.TIPO_SOLICITUD,'consultarSolicitudesPendientesSupervisor',this.ESCENARIO_NIVEL1]);
+            this.router.navigate(['/productosTerminados', this.TIPO_SOLICITUD, 'consultarSolicitudesPendientesSupervisor', this.ESCENARIO_NIVEL1]);
           }
 
         })
@@ -1109,6 +1232,18 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
       }
 
     });
+  }
+
+  obtenerUrlSolicitud(){
+    this.solicitudService.obtenerUrlSolicitud(this.id_solicitud).then( data => {
+    //  console.log("imm tengo anexo ? : "+ JSON.stringify(data));
+    //  console.log("imm id_solicitud anexo ? : "+ JSON.stringify(this.id_solicitud));
+      if(data['resultado'] == 1){
+        this.existeAnexoSolicitud = true;
+      }else{
+        this.existeAnexoSolicitud = false;
+      }
+    }) 
   }
 
 

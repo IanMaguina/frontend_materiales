@@ -39,6 +39,9 @@ import { Messages } from 'src/app/shared/messages';
 import { AdvertenciaDialogComponent } from 'src/app/shared/advertencia-dialog/advertencia-dialog.component';
 import { ContenidoSolicitudPtcComponent } from 'src/app/pt/creacion/shared/contenido-solicitud-ptc/contenido-solicitud-ptc.component';
 import { ErrorSapDialogComponent } from '../error-sap-dialog/error-sap-dialog.component';
+import { TablaEquivalenciasDialogComponent } from '../tabla-equivalencias-dialog/tabla-equivalencias-dialog.component';
+import { ListaAnexosDialogComponent } from '../lista-anexos-dialog/lista-anexos-dialog.component';
+import { ListaAnexosMaterialDialogComponent } from '../lista-anexos-material-dialog/lista-anexos-material-dialog.component';
 
 @Component({
   selector: 'app-ver-solicitud',
@@ -52,15 +55,25 @@ export class VerSolicitudComponent implements OnInit {
   itemForm!: FormGroup;
 
   TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_CREACION: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_AMPLIACION: number = GlobalSettings.TIPO_SOLICITUD_AMPLIACION;
+  TIPO_SOLICITUD_MODIFICACION: number = GlobalSettings.TIPO_SOLICITUD_MODIFICACION;
+  TIPO_SOLICITUD_BLOQUEO: number = GlobalSettings.TIPO_SOLICITUD_BLOQUEO;
+
+  //escenarios
+  ESCENARIO_NIVEL1 = '';//GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+  ESCENARIO_NIVEL1_PT: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+  ESCENARIO_NIVEL1_RS: string = GlobalSettings.ESCENARIO_NIVEL1_REPUESTOS_SUMINISTROS;
+  ESCENARIO_NIVEL1_MP: string = GlobalSettings.ESCENARIO_NIVEL1_MATERIAS_PRIMAS;
+  ESCENARIO_NIVEL1_AO: string = GlobalSettings.ESCENARIO_NIVEL1_ACTIVOS_OTROS;
+
   ROL_SOLICITANTE: number = GlobalSettings.ROL_SOLICITANTE;
   ROL_SUPERVISOR: number = GlobalSettings.ROL_SUPERVISOR;
   ROL_ADMINISTRADOR_MATERIAL: number = GlobalSettings.ROL_ADMINISTRADOR_MATERIAL;
 
   ROL_GESTOR!: number;// = GlobalSettings.ROL_ADMINISTRADOR_MATERIAL; // el rol gestor debe de venir con el usuario 
 
-  //escenarios
-  ESCENARIO_NIVEL1: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
-
+  
   TIPO_OBJETO_INPUT_TEXT: string = GlobalSettings.TIPO_OBJETO_INPUT_TEXT;
   TIPO_OBJETO_COMBO: string = GlobalSettings.TIPO_OBJETO_COMBO;
 
@@ -136,7 +149,7 @@ export class VerSolicitudComponent implements OnInit {
     'selectecLineaNegocio': '',
     'descripcion_corta': '',
     'selectedCentro': '',
-    'selectedOrganizacionVenta': '',
+    'selectedAlmacen': '',
     'codigoModelo': ''
   }
 
@@ -175,7 +188,6 @@ export class VerSolicitudComponent implements OnInit {
 
   urlFileAnexoSolicitud: string = "";
   urlFileAnexoMaterial: string = "";
-  existeAnexoSolicitud: boolean = false;
   activarDescargaAnexoMaterial: boolean = false;
 
   EscenarioNivel3_Old!: any;
@@ -187,6 +199,9 @@ export class VerSolicitudComponent implements OnInit {
   MSG_ERROR_NO_ANEXO = Messages.error.MSG_ERROR_NO_ANEXO;
 
   cantidadErrores = 0;
+  tip_pm='';
+
+  existeAnexoSolicitud:boolean = false;
   constructor(
     private formBuilder: FormBuilder,
     private formValidatorService: FormValidatorService,
@@ -206,14 +221,30 @@ export class VerSolicitudComponent implements OnInit {
   ) {
     this.initForm();
     this.id_solicitud = this.activatedRoute.snapshot.params.id;
-    this.TIPO_SOLICITUD = this.activatedRoute.snapshot.params.tipoSolicitud;    
+    this.ESCENARIO_NIVEL1 = this.activatedRoute.snapshot.params.nivelEscenario;
+    this.TIPO_SOLICITUD = parseInt(this.activatedRoute.snapshot.params.tipoSolicitud);
+    switch (this.TIPO_SOLICITUD) {
+      case this.TIPO_SOLICITUD_CREACION:
+        this.tip_pm = GlobalSettings.TIPO_SOLICITUD_CREACION_CHAR;
+        break;
+      case this.TIPO_SOLICITUD_AMPLIACION:
+        this.tip_pm = GlobalSettings.TIPO_SOLICITUD_AMPLIACION_CHAR;
+        break;
+      case this.TIPO_SOLICITUD_MODIFICACION:
+        this.tip_pm = GlobalSettings.TIPO_SOLICITUD_MODIFICACION_CHAR;
+        break;
+      case this.TIPO_SOLICITUD_BLOQUEO:
+        this.tip_pm = GlobalSettings.TIPO_SOLICITUD_BLOQUEO_CHAR;
+        break;
+    }    
     this.estadoActualSolicitud(this.id_solicitud);  // llama al this.obtenerSolicitud();
   }
 
   ngOnInit() {
     //this.getListarNivel3Solicitud();
     this.habilitarControles();
-    this.cargarUrlSolicitud();
+    
+    this.obtenerUrlSolicitud();
   }
 
 
@@ -230,7 +261,7 @@ export class VerSolicitudComponent implements OnInit {
 
     this.filtroForm = this.formBuilder.group({
       selectedCentro: [{ disabled: true }],
-      selectedOrganizacionVenta: [{ value: '', disabled: true }],
+      selectedAlmacen: [{ value: '', disabled: true }],
       codigoModelo: [{ value: '', disabled: true }],
     })
 
@@ -279,7 +310,7 @@ export class VerSolicitudComponent implements OnInit {
 
   async habilitarControles() {
     this.filtroForm.get('selectedCentro')?.enable();
-    this.filtroForm.get('selectedOrganizacionVenta')?.enable();
+    this.filtroForm.get('selectedAlmacen')?.enable();
     this.filtroForm.get('codigoModelo')?.enable();
     this.itemForm.get('denominacion')?.enable();
     this.itemForm.get('unidad_medida_base')?.enable();
@@ -325,6 +356,7 @@ export class VerSolicitudComponent implements OnInit {
           }
         }
         this.displayedColumns.push('anexos');
+        this.displayedColumns.push('equivalencias');
         this.displayedColumns.push('acciones');
         columna = JSON.parse("[{" + columna + "}]");
         jsonDescargaFormato = columna;
@@ -450,7 +482,7 @@ export class VerSolicitudComponent implements OnInit {
 
   onFileSelected(event: any) {
     let tabs = [this.CODIGO_INTERNO_CLASE_TAB]
-    this.excelGeneratorService.onFileSeleted(event, tabs).then((data) => {
+    this.excelGeneratorService.onFileSeleted(this.TIPO_SOLICITUD, event, tabs).then((data) => {
       this.cargaMasiva(data);
       this.solicitudForm.get('files').reset();
     });
@@ -794,7 +826,7 @@ export class VerSolicitudComponent implements OnInit {
     }
     this.solicitudService.aprobarSolicitud(body).then(result => {
       if (result.resultado == 1) {
-        this.solicitudService.enviarSAP(this.id_solicitud).then(data => {
+        this.solicitudService.enviarSAP(this.id_solicitud,this.tip_pm).then(data => {
           this._snack.open(this.MENSAJE_ENVIAR_SOLICITUD_A_SAP, 'cerrar', {
             duration: 1800,
             horizontalPosition: "end",
@@ -847,7 +879,7 @@ export class VerSolicitudComponent implements OnInit {
   }
 
 
-  descargarAnexoMaterial(element: any) {
+  /* descargarAnexoMaterial(element: any) {
     //console.log("anexo de : " + JSON.stringify(element));
     let id_material_solicitud = element.id_material_solicitud;
     this.solicitudService.obtenerUrlMaterial(id_material_solicitud).then(res => {
@@ -865,34 +897,9 @@ export class VerSolicitudComponent implements OnInit {
       }
     });
 
-  }
-
+  } */
   
-
-  cargarUrlSolicitud() {
-    this.solicitudService.obtenerUrlSolicitud(this.id_solicitud).then(data => {
-
-      if (data.resultado == 1) {
-        this.urlFileAnexoSolicitud = data.url;
-        this.existeAnexoSolicitud = true;
-      } else {
-        this.urlFileAnexoSolicitud = '#';
-        this.existeAnexoSolicitud = false;
-      }
-
-      // console.log("cargando vista archivo : "+this.urlFileAnexoSolicitud);
-    })
-  }
-
-  descargarFileSolicitud() {
-    //console.log("archivo : "+this.urlFileAnexoSolicitud);
-    if (this.existeAnexoSolicitud) {
-      //console.log("archivo : "+this.urlFileAnexoSolicitud);
-      window.open(this.urlFileAnexoSolicitud, '_blank');
-    } else {
-      console.log("no se tiene un anexo cargado");
-    }
-  }
+  
   openDialogErrorSap(form: any): void {
     let errorSap = form['mensaje_error_sap'];
     //let errorSap = "Esta es una prueba de error Esta es una prueba de error Esta es una prueba de error Esta es una prueba de error Esta es una prueba de error Esta es una prueba de error Esta es una prueba de error Esta es una prueba de error Esta es una prueba de error Esta es una prueba de error Esta es una prueba de error Esta es una prueba de error Esta es una prueba de error ";
@@ -910,6 +917,78 @@ export class VerSolicitudComponent implements OnInit {
         //se debe agregar el id de usuario y id de rol segun req. del servicio
        console.log("se cerró el dialog del error")
       } 
+
+    });
+  }
+
+  obtenerUrlSolicitud(){
+    this.solicitudService.obtenerUrlSolicitud(this.id_solicitud).then( data => {
+    //  console.log("imm tengo anexo ? : "+ JSON.stringify(data));
+    //  console.log("imm id_solicitud anexo ? : "+ JSON.stringify(this.id_solicitud));
+      if(data['resultado'] == 1){
+        this.existeAnexoSolicitud = true;
+      }else{
+        this.existeAnexoSolicitud = false;
+      }
+    }) 
+  }
+  openDialogAnexosMaterial(material: any): void {
+
+    let datos = {
+      "id_material_solicitud": material.id_material_solicitud,
+      "id_rol": GlobalSettings.ROL_SUPERVISOR,
+    }
+    const dialogRef3 = this.matDialog.open(ListaAnexosMaterialDialogComponent, {
+      disableClose: true,
+      data: datos
+    });
+    dialogRef3.afterClosed().subscribe(result => {
+      if (result.respuesta != "CONFIRM_DLG_YES") {
+        console.log("no se rechazó la solicitud");
+      }
+      this.getListadoMateriales();
+      
+    });
+  }
+
+  openDialogAnexosSolicitud(): void {
+
+    let datos = {
+      "id_solicitud": this.id_solicitud,
+      "id_rol": GlobalSettings.ROL_SUPERVISOR,
+    }
+    const dialogRef2 = this.matDialog.open(ListaAnexosDialogComponent, {
+      disableClose: true,
+      data: datos,
+      width: '50%'
+    });
+    dialogRef2.afterClosed().subscribe(result => {
+      if (result.respuesta == "CONFIRM_DLG_YES") {
+        //mostrar que se cargó algo?
+      } else {
+        console.log("no se rechazó la solicitud");
+      }
+
+    });
+  }
+  openDialogEquivalencias(element: any): void {
+
+    let data = {
+      "id_material_solicitud": element.id_material_solicitud,
+      "id_rol": GlobalSettings.ROL_SUPERVISOR
+    }
+
+
+    const dialogRef4 = this.matDialog.open(TablaEquivalenciasDialogComponent, {
+      disableClose: true,
+      data: data,
+      width: '80%'
+    });
+    dialogRef4.afterClosed().subscribe(result => {
+      if (result.respuesta != "CONFIRM_DLG_YES") {
+        console.log("se cerró el dialog de equivalencias");
+      }
+      this.getListadoMateriales();
 
     });
   }

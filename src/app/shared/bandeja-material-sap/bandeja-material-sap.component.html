@@ -1,0 +1,256 @@
+<div class="contentmain">
+    <div class="breadcumb">
+        <a routerLink="/dashboard/principal">
+            <mat-icon>home</mat-icon>
+        </a>
+        <a routerLink="#"><span class="bread-item" > / Bandeja de Materiales SAP </span></a>
+    </div>
+    <br>
+    <div class="filtros">
+        <form [formGroup]="filtroForm" (ngSubmit)="filtrarSolicitud()">
+
+            <mat-grid-list cols="5" rowHeight="80px">
+               <mat-grid-tile>
+                    <div class="izquierda">
+                        <mat-form-field appearance="outline">
+                           <mat-label >Codigo Material</mat-label>
+                            <input matInput placeholder="Ingrese código material modelo" formControlName="codigoModelo">
+                            <mat-hint>
+                                <mat-error [hidden]="!(formErrors.codigoModelo)">
+                                    {{ formErrors.codigoModelo }}
+                                </mat-error>
+                            </mat-hint>
+                        </mat-form-field>
+                    </div>
+                
+                    
+                </mat-grid-tile>
+                <mat-grid-tile> 
+                  
+                    <mat-icon>
+                        multiple_stop
+                    </mat-icon>    
+                </mat-grid-tile>
+               <mat-grid-tile>
+                <div class="izquierda">
+                    <mat-form-field appearance="outline">
+                       <mat-label > Denominación </mat-label>
+                        <input matInput placeholder="ingrese una denominación" formControlName="denominacion">
+                        <mat-hint>
+                            <mat-error [hidden]="!(formErrors.denominacion)">
+                                {{ formErrors.denominacion }}
+                            </mat-error>
+                        </mat-hint>
+                    </mat-form-field>
+                </div>
+                    
+                </mat-grid-tile>
+
+
+                <mat-grid-tile>
+                    
+                        <button mat-raised-button color="accent" type="submit" [disabled]="filtroForm.invalid">Buscar</button>&nbsp;&nbsp;
+                        <!-- <button mat-raised-button color="accent" type="reset" [disabled]="filtroForm.invalid">Refrescar</button> -->
+                    
+                </mat-grid-tile>
+            </mat-grid-list>
+        </form>
+    </div>
+    <mat-divider></mat-divider>
+   
+    <div class="camposSolicitud">
+        <form [formGroup]="itemForm" #materialForm="ngForm" class="form-detail">
+            <mat-grid-list cols="8" rowheight="70px">
+                
+                <mat-grid-tile>
+                    <mat-form-field   
+                    class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_DENOMINACION}} </mat-label>
+                        <input matInput type="text" #input readonly formControlName={{CODIGO_INTERNO_DENOMINACION}} >                  
+                    </mat-form-field>
+                </mat-grid-tile>
+
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_CENTRO}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_CENTRO}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_ALMACEN}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_ALMACEN}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+
+                <mat-grid-tile >
+                    <mat-form-field  class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_CODIGO_EAN}} </mat-label>
+                        <input matInput #input type="text" readonly formControlName={{CODIGO_INTERNO_CODIGO_EAN}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+
+                <mat-grid-tile>
+                    <mat-form-field   class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_SECTOR}} </mat-label>
+                        <input matInput #input type="text" readonly formControlName={{CODIGO_INTERNO_SECTOR}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+             <!--    <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_RAMO}} </mat-label>
+                        <input matInput #input type="text" readonly formControlName={{CODIGO_INTERNO_RAMO}}>
+                    </mat-form-field>
+                </mat-grid-tile> -->
+             <!--    <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_PRECIO_BASE}} </mat-label>
+                        <input matInput type="number" readonly formControlName={{CODIGO_INTERNO_PRECIO_BASE}}>
+                    </mat-form-field>
+                </mat-grid-tile> -->
+                <!-- <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_PRECIO_VARIABLE}} </mat-label>
+                        <input matInput type="number" readonly formControlName={{CODIGO_INTERNO_PRECIO_VARIABLE}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_PESO_BRUTO}} </mat-label>
+                        <input matInput type="number" readonly formControlName={{CODIGO_INTERNO_PESO_BRUTO}}>
+                    </mat-form-field>
+                </mat-grid-tile> -->
+                <!-- <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_TEXTO_COMERCIAL}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_TEXTO_COMERCIAL}}>
+                    </mat-form-field>
+                </mat-grid-tile> -->
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_UNIDAD_MEDIDA_BASE}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_UNIDAD_MEDIDA_BASE}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <!-- <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_UNIDAD_MEDIDA_PESO}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_UNIDAD_MEDIDA_PESO}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO}}>
+                    </mat-form-field>
+                </mat-grid-tile> -->
+                
+                <!-- <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_ORGANIZACION_VENTAS}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_ORGANIZACION_VENTAS}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_CANAL_DISTRIBUCION}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_CANAL_DISTRIBUCION}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+                
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_CLASE_TAB}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_CLASE_TAB}}>
+                    </mat-form-field>
+                </mat-grid-tile> -->
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_TIPO_MATERIAL}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_TIPO_MATERIAL}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_GRUPO_ARTICULO}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_GRUPO_ARTICULO}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <!-- <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_IDIOMA}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_IDIOMA}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_JERARQUIA_PRODUCTO}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_JERARQUIA_PRODUCTO}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_GRUPOS_MATERIAL1}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_GRUPOS_MATERIAL1}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_GRUPOS_MATERIAL2}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_GRUPOS_MATERIAL2}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_CATEGORIA_VALORACION}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_CATEGORIA_VALORACION}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_MONEDA}} </mat-label>
+                        <input matInput type="text" readonly formControlName={{CODIGO_INTERNO_MONEDA}}>
+                    </mat-form-field>
+                </mat-grid-tile>
+
+                <mat-grid-tile>
+                 <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_TEXTO_COMPRA}}</mat-label>
+                        <textarea matInput type="text" readonly formControlName={{CODIGO_INTERNO_TEXTO_COMPRA}}></textarea>
+                    </mat-form-field>
+                </mat-grid-tile>
+
+                <mat-grid-tile>
+                    <mat-form-field class="example-form-field" appearance="outline">
+                        <mat-label>{{CODIGO_INTERNO_PARTIDA_ARANCELARIA}} </mat-label>
+                        <input type="text" matInput #input readonly formControlName={{CODIGO_INTERNO_PARTIDA_ARANCELARIA}}>
+                    </mat-form-field>
+                </mat-grid-tile> -->
+            </mat-grid-list>
+                    
+   
+                    
+                 
+
+        </form>
+
+    </div>
+
+   
+</div>

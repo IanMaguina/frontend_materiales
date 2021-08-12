@@ -50,15 +50,28 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
 
   solicitudForm: any;
 
+  CODIGO_INTERNO_MATERIAL_CODIGO_MODELO: string = GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO;
+  CODIGO_INTERNO_MATERIAL_CODIGO_SAP: string = GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_SAP;
 
   TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_CREACION: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
+  TIPO_SOLICITUD_AMPLIACION: number = GlobalSettings.TIPO_SOLICITUD_AMPLIACION;
+  TIPO_SOLICITUD_MODIFICACION: number = GlobalSettings.TIPO_SOLICITUD_MODIFICACION;
+  TIPO_SOLICITUD_BLOQUEO: number = GlobalSettings.TIPO_SOLICITUD_BLOQUEO;
+  //escenarios
+  ESCENARIO_NIVEL1: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+
+  ESCENARIO_NIVEL1_PT: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+  ESCENARIO_NIVEL1_RS: string = GlobalSettings.ESCENARIO_NIVEL1_REPUESTOS_SUMINISTROS;
+  ESCENARIO_NIVEL1_MP: string = GlobalSettings.ESCENARIO_NIVEL1_MATERIAS_PRIMAS;
+  ESCENARIO_NIVEL1_AO: string = GlobalSettings.ESCENARIO_NIVEL1_ACTIVOS_OTROS;  
   ROL_GESTOR!: number;
   ROL_SOLICITANTE: number = GlobalSettings.ROL_SOLICITANTE;
 
   TIPO_OBJETO_INPUT_TEXT: string = GlobalSettings.TIPO_OBJETO_INPUT_TEXT;
   TIPO_OBJETO_COMBO: string = GlobalSettings.TIPO_OBJETO_COMBO;
   TIPO_OBJETO_CHECKBOX: string = GlobalSettings.TIPO_OBJETO_CHECKBOX;
-  ESCENARIO_NIVEL1: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+
   CODIGO_INTERNO_UNIDAD_MEDIDA_BASE: string = GlobalSettings.CODIGO_INTERNO_UNIDAD_MEDIDA_BASE;
   CODIGO_INTERNO_UNIDAD_MEDIDA_PESO: string = GlobalSettings.CODIGO_INTERNO_UNIDAD_MEDIDAD_PESO;
   CODIGO_INTERNO_CENTRO: string = GlobalSettings.CODIGO_INTERNO_CENTRO;
@@ -112,6 +125,7 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
   CODIGO_INTERNO_MONEDA: string = GlobalSettings.CODIGO_INTERNO_MONEDA;
   CODIGO_INTERNO_IND_PED_AUTOMA: string = GlobalSettings.CODIGO_INTERNO_IND_PED_AUTOMA;
   CODIGO_INTERNO_EXCESO_SUM_ILIMITADO: string = GlobalSettings.CODIGO_INTERNO_EXCESO_SUM_ILIMITADO;
+  CODIGO_INTERNO_GRUPO_COMPRA: string = GlobalSettings.CODIGO_INTERNO_GRUPO_COMPRA;
   
   SOLICITUD_DETALLE_NUMERO_COLUMNAS: number = GlobalSettings.SOLICITUD_DETALLE_NUMERO_COLUMNAS;
 
@@ -145,7 +159,7 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
     'selectecLineaNegocio': '',
     'descripcion_corta': '',
     'selectedCentro': '',
-    'selectedOrganizacionVenta': '',
+    'selectedAlmacen': '',
     'codigoModelo': ''
   }
 
@@ -190,7 +204,8 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
 
 
   estadoFlujoActualSolicitud!: AprobadorSolicitud;
-
+  existeAnexoSolicitud:boolean = false;
+  existeAnexoMaterial:boolean = false;
   constructor(
     private formBuilder: FormBuilder,
     private formValidatorService: FormValidatorService,
@@ -223,6 +238,7 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
     //this.getListarOrganizacionVentas();
     this.getListarCanalDistribucion();
     this.getListarClasificacion();
+    this.obtenerUrlSolicitud();
    
   }
 
@@ -313,7 +329,13 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
     this.displayedColumns = [];
     this.solicitudService.getListadoCampoReglas(id_escenario_nivel3, id_rol, id_tipo_solicitud).then((data) => {
       let listadoCampoReglas: ReglasCampo[] = data['lista'];
-      let columna: any = '"id_material_solicitud": "",';;
+      let columna: any = '"id_material_solicitud": "", "';
+      if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_CREACION) {
+        columna = columna + this.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO + '":"",';
+      } else {
+        columna = columna + this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP + '":"",';
+      }
+
       if (data.resultado == 1) {
         for (let y = 0; y < listadoCampoReglas.length; y++) {
           if (listadoCampoReglas[y].tipo_objeto != null) {
@@ -593,8 +615,19 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
       //console.log('Flujo actual solicitud-->'+JSON.stringify(this.estadoFlujoActualSolicitud));
     })
   }
-
-  descargarAnexoMaterial(element: any) {
+  obtenerUrlSolicitud(){
+    this.solicitudService.obtenerUrlSolicitud(this.id_solicitud).then( data => {
+    //  console.log("imm tengo anexo ? : "+ JSON.stringify(data));
+    //  console.log("imm id_solicitud anexo ? : "+ JSON.stringify(this.id_solicitud));
+      if(data['resultado'] == 1){
+        this.existeAnexoSolicitud = true;
+      }else{
+        this.existeAnexoSolicitud = false;
+      }
+    }) 
+  }
+  
+  /* descargarAnexoMaterial(element: any) {
     //console.log("anexo de : " + JSON.stringify(element));
     let id_material_solicitud = element.id_material_solicitud;
     this.solicitudService.obtenerUrlMaterial(id_material_solicitud).then(res => {
@@ -612,9 +645,9 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
       }
     });
 
-  }
+  } */
 
-  isErrorCampo(element: any, codigo_interno: string) {
+/*   isErrorCampo(element: any, codigo_interno: string) {
     if (codigo_interno.substr(-4)=='_tab' && element[codigo_interno + '_error']) {
       if (element[codigo_interno + '_error'].split("true").length > 0) {
         return false;
@@ -625,7 +658,7 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
       return element[codigo_interno + '_error'];
     }
   }
-
+ */
   openDialogAnexosMaterial(material: any): void {
 
     let datos = {
@@ -637,12 +670,11 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
       data: datos
     });
     dialogRef3.afterClosed().subscribe(result => {
-      if (result.respuesta == "CONFIRM_DLG_YES") {
-        //mostrar que se cargó algo?
-      } else {
+      if (result.respuesta != "CONFIRM_DLG_YES") {
         console.log("no se rechazó la solicitud");
       }
-
+      this.getListadoMateriales();
+      
     });
   }
   openDialogAnexosSolicitud(): void {
@@ -679,11 +711,10 @@ export class VerSolicitudPendientePtcComponent implements OnInit {
       width: '80%'
     });
     dialogRef4.afterClosed().subscribe(result => {
-      if (result.respuesta == "CONFIRM_DLG_YES") {
-        //mostrar que se cargó algo?
-      } else {
+      if (result.respuesta != "CONFIRM_DLG_YES") {
         console.log("se cerró el dialog de equivalencias");
       }
+      this.getListadoMateriales();
 
     });
   }

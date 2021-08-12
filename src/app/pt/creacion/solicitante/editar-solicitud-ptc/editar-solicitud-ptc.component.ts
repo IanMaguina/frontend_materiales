@@ -71,6 +71,13 @@ import { CentroBeneficio } from 'src/app/modelos/centro-beneficio.interface';
 import { PartidaArancelaria } from 'src/app/modelos/partida-arancelaria.interface';
 import { Observable } from 'rxjs';
 import { PartidaArancelariaService } from 'src/app/servicios/partida-arancelaria.service';
+import { ErrorSapDialogComponent } from 'src/app/shared/error-sap-dialog/error-sap-dialog.component';
+import { EquivalenciaService } from 'src/app/servicios/equivalencia.service';
+import { Equivalencia } from 'src/app/modelos/equivalencia.interface';
+import { GrupoTransporteService } from 'src/app/servicios/grupo-transporte.service';
+import { GrupoCargaService } from 'src/app/servicios/grupo-carga.service';
+import { GrupoCompraService } from 'src/app/servicios/grupo-compra.service';
+import { GrupoCompra } from 'src/app/modelos/grupo-compra.interface';
 
 @Component({
   selector: 'app-editar-solicitud-ptc',
@@ -84,14 +91,19 @@ export class EditarSolicitudPtcComponent implements OnInit {
   filtroForm!: FormGroup;
   itemForm!: FormGroup;
 
-  TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
   ROL_SOLICITANTE: number = GlobalSettings.ROL_SOLICITANTE;
+  TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
   TIPO_SOLICITUD_CREACION: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
   TIPO_SOLICITUD_AMPLIACION: number = GlobalSettings.TIPO_SOLICITUD_AMPLIACION;
   TIPO_SOLICITUD_MODIFICACION: number = GlobalSettings.TIPO_SOLICITUD_MODIFICACION;
   TIPO_SOLICITUD_BLOQUEO: number = GlobalSettings.TIPO_SOLICITUD_BLOQUEO;
   //escenarios
   ESCENARIO_NIVEL1: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+
+  ESCENARIO_NIVEL1_PT: string = GlobalSettings.ESCENARIO_NIVEL1_PRODUCTOS_TERMINADOS;
+  ESCENARIO_NIVEL1_RS: string = GlobalSettings.ESCENARIO_NIVEL1_REPUESTOS_SUMINISTROS;
+  ESCENARIO_NIVEL1_MP: string = GlobalSettings.ESCENARIO_NIVEL1_MATERIAS_PRIMAS;
+  ESCENARIO_NIVEL1_AO: string = GlobalSettings.ESCENARIO_NIVEL1_ACTIVOS_OTROS;
 
   TIPO_OBJETO_INPUT_TEXT: string = GlobalSettings.TIPO_OBJETO_INPUT_TEXT;
   TIPO_OBJETO_INPUT_TEXTAREA: string = GlobalSettings.TIPO_OBJETO_INPUT_TEXTAREA;
@@ -101,6 +113,8 @@ export class EditarSolicitudPtcComponent implements OnInit {
   TIPO_DATO_CHAR: string = GlobalSettings.TIPO_DATO_CHAR;
   TIPO_DATO_NUM: string = GlobalSettings.TIPO_DATO_NUM;
 
+  CODIGO_INTERNO_CLASE_INSPECCION_TAB: string = GlobalSettings.CODIGO_INTERNO_CLASE_INSPECCION_TAB;
+  CODIGO_INTERNO_AREA_PLANIFICACION_TAB: string = GlobalSettings.CODIGO_INTERNO_AREA_PLANIFICACION_TAB;
   CODIGO_INTERNO_UNIDAD_MEDIDA_BASE: string = GlobalSettings.CODIGO_INTERNO_UNIDAD_MEDIDA_BASE;
   CODIGO_INTERNO_UNIDAD_MEDIDA_PESO: string = GlobalSettings.CODIGO_INTERNO_UNIDAD_MEDIDAD_PESO;
   CODIGO_INTERNO_CENTRO: string = GlobalSettings.CODIGO_INTERNO_CENTRO;
@@ -156,8 +170,14 @@ export class EditarSolicitudPtcComponent implements OnInit {
   CODIGO_INTERNO_EXCESO_SUM_ILIMITADO: string = GlobalSettings.CODIGO_INTERNO_EXCESO_SUM_ILIMITADO;
 
   CODIGO_INTERNO_MATERIAL_CODIGO_MODELO: string = GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO;
+  CODIGO_INTERNO_MATERIAL_CODIGO_SAP: string = GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_SAP;
   CODIGO_INTERNO_CRITICOS: string = GlobalSettings.CODIGO_INTERNO_CRITICOS;
   CODIGO_INTERNO_ESTRATEGICOS: string = GlobalSettings.CODIGO_INTERNO_ESTRATEGICOS;
+
+  CODIGO_INTERNO_VISTA_PLANIFICACION: string = GlobalSettings.CODIGO_INTERNO_VISTA_PLANIFICACION;
+  CODIGO_INTERNO_PRECIO_COTIZACION: string = GlobalSettings.CODIGO_INTERNO_PRECIO_COTIZACION;
+  CODIGO_INTERNO_PERIODO_VIDA: string = GlobalSettings.CODIGO_INTERNO_PERIODO_VIDA;
+  CODIGO_INTERNO_GRUPO_COMPRA: string = GlobalSettings.CODIGO_INTERNO_GRUPO_COMPRA;
 
   SOLICITUD_DETALLE_NUMERO_COLUMNAS: number = GlobalSettings.SOLICITUD_DETALLE_NUMERO_COLUMNAS;
   listadoMateriales: any[] = [];
@@ -196,6 +216,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
   listadoGrupoMaterial2: GrupoMaterial2[] = [];
   listadoGrupoTransporte: GrupoTransporte[] = [];
   listadoGrupoCarga: GrupoCarga[] = [];
+  listadoGrupoCompra: GrupoCompra[] = [];
   listadoCentroBeneficio: CentroBeneficio[] = [];
 
   listadoMoneda = GlobalSettings.LISTADO_MONEDA;
@@ -209,18 +230,25 @@ export class EditarSolicitudPtcComponent implements OnInit {
   //datos de cabecera Solicitud
   id_solicitud!: number;
   correlativo?: string;
+  id_escenario_nivel3: number = 0;
+  organizacionVentaCodigoSap:string="";
+  canalDistribucionCodigoSap:string="";
 
   //Validation
   formErrors = {
     'selectecLineaNegocio': '',
     'descripcion_corta': '',
     'selectedCentro': '',
-    'selectedOrganizacionVenta': '',
+    'selectedAlmacen': '',
     'codigoModelo': null,
     'denominacion': null
   }
 
   formErrorsItem = {
+    //[this.CODIGO_INTERNO_DENOMINACION]:"ERROR EN DENOMINACION"
+  }
+
+  formErrorsFiltro = {
     //[this.CODIGO_INTERNO_DENOMINACION]:"ERROR EN DENOMINACION"
   }
 
@@ -277,6 +305,9 @@ export class EditarSolicitudPtcComponent implements OnInit {
   listadoPartidaArancelaria: PartidaArancelaria[] = [];
 
   btnAdd = false;
+  existeAnexoSolicitud: boolean = false;
+  existeAnexoMaterial: boolean = false;
+  existeEquivalencias: boolean = false;
   constructor(
     private formBuilder: FormBuilder,
     private formValidatorService: FormValidatorService,
@@ -304,7 +335,11 @@ export class EditarSolicitudPtcComponent implements OnInit {
     private grupoMaterial2Service: GrupoMaterial2Service,
     private centroBeneficioService: CentroBeneficioService,
     private partidaArancelariaService: PartidaArancelariaService,
-    private rutaActiva: ActivatedRoute
+    private rutaActiva: ActivatedRoute,
+    private equivalenciaService: EquivalenciaService,
+    private grupoTransporteService: GrupoTransporteService,
+    private grupoCargaService: GrupoCargaService,
+    private grupoCompraService: GrupoCompraService,
 
   ) {
     this.ESCENARIO_NIVEL1 = this.rutaActiva.snapshot.params.nivelEscenario;
@@ -312,6 +347,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
     this.TIPO_SOLICITUD = parseInt(this.rutaActiva.snapshot.params.tipoSolicitud);
     this.initForm();
     this.obtenerSolicitud();
+    this.obtenerUrlSolicitud();
     this.estadoActualSolicitud(this.id_solicitud);
   }
 
@@ -332,9 +368,13 @@ export class EditarSolicitudPtcComponent implements OnInit {
     this.getListarGrupoMaterial1();
     this.getListarGrupoMaterial2();
 
-
-
     this.filtrarPartidaArnacelaria();
+
+    this.getListadoMateriales();
+    this.getListarGrupoTransporte();
+    this.getListarGrupoCarga();
+    this.getListarGrupoCompra()
+
   }
 
 
@@ -389,13 +429,13 @@ export class EditarSolicitudPtcComponent implements OnInit {
 
     this.filtroForm = this.formBuilder.group({
       selectedCentro: [{ value: '', disabled: true }],
-      selectedOrganizacionVenta: [{ value: '', disabled: true }],
+      selectedAlmacen: [{ value: '', disabled: true }],
       codigoModelo: [{ value: '', disabled: true }],
       fileAnexoMaterial: ['']
     })
     this.filtroForm.valueChanges
       .subscribe(() => {
-        this.formErrors = this.formValidatorService.handleFormChanges(this.filtroForm, this.formErrors, this.validationMessages, this.submitted);
+        this.formErrorsFiltro = this.formValidatorService.handleFormChanges(this.filtroForm, this.formErrorsFiltro, this.validationMessages, true);
       });
 
     this.itemForm = this.formBuilder.group({
@@ -404,7 +444,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
       peso_bruto: [{ value: '', disabled: true }],
       unidad_medida_peso: [{ value: '', disabled: true }],
       centro_codigo_sap: [{ value: '', disabled: true }],
-      [this.CODIGO_INTERNO_CENTRO_BENEFICIO]: [{ value: '', disabled: true }],
+      [this.CODIGO_INTERNO_CENTRO_BENEFICIO]: [''],
       organizacion_ventas: [{ value: '', disabled: true }],
       canal_distribucion: [{ value: '', disabled: true }],
       almacen_codigo_sap: [{ value: '', disabled: true }],
@@ -426,6 +466,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
       //administrador  materiales
       [this.CODIGO_INTERNO_GRUPO_TRANSPORTE]: [{ value: '', disabled: true }],
       [this.CODIGO_INTERNO_GRUPO_CARGA]: [{ value: '', disabled: true }],
+      [this.CODIGO_INTERNO_GRUPO_COMPRA]: [""],
       [this.CODIGO_INTERNO_IDIOMA]: [{ value: '', disabled: true }],
       [this.CODIGO_INTERNO_TEXTO_COMPRA]: [{ value: '', disabled: true }],
       [this.CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO]: [{ value: '', disabled: true }],
@@ -452,7 +493,11 @@ export class EditarSolicitudPtcComponent implements OnInit {
       [this.CODIGO_INTERNO_EXCESO_SUM_ILIMITADO]: [{ value: false, disabled: true }],
 
       [this.CODIGO_INTERNO_CRITICOS]: [""],
-      [this.CODIGO_INTERNO_ESTRATEGICOS]: [""]
+      [this.CODIGO_INTERNO_ESTRATEGICOS]: [""],
+
+      [this.CODIGO_INTERNO_VISTA_PLANIFICACION]: [""],
+      [this.CODIGO_INTERNO_PRECIO_COTIZACION]: [""],
+      [this.CODIGO_INTERNO_PERIODO_VIDA]: [""]
 
 
 
@@ -460,6 +505,11 @@ export class EditarSolicitudPtcComponent implements OnInit {
     this.itemForm.valueChanges.subscribe(() => {
       this.formErrorsItem = this.formValidatorService.handleFormChanges(this.itemForm, this.formErrorsItem, this.validationMessages, true);
     })
+
+
+
+
+
   }
 
   obtenerSolicitud() {
@@ -468,6 +518,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
       "id_rol": this.ROL_SOLICITANTE
     }
     this.solicitudService.obtenerSolicitud(params).then(data => {
+
       this.cabeceraSolicitud = data['objeto'];
       this.listadoMateriales = data['objeto'].materiales_solicitud;
       this.correlativo = this.cabeceraSolicitud.correlativo;
@@ -477,6 +528,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
       //console.log("datos de la solicitud-->" + JSON.stringify(this.cabeceraSolicitud.escenarioNivel3))
     })
   }
+
 
   cargarDataCabecera() {
     this.solicitudForm.get('selectecLineaNegocio').setValue(this.cabeceraSolicitud.escenarioNivel3 ? this.cabeceraSolicitud.escenarioNivel3 : null);
@@ -491,13 +543,15 @@ export class EditarSolicitudPtcComponent implements OnInit {
     this.getListarCentroBeneficioPorSociedad(this.sociedad.codigo_sap);
     this.getListarOrganizacionVentas();
     this.getListadoCampoReglas(selectecLineaNegocio.id, this.ROL_SOLICITANTE, this.TIPO_SOLICITUD);
-
+    this.id_escenario_nivel3 = selectecLineaNegocio.id;
+    this.getVistaPortalReglas();
+    this.listarCamposReglasxEscenario3();
   }
 
   habilitarControles() {
     console.log('entro a habilitarControles')
     this.filtroForm.get('selectedCentro')?.enable();
-    this.filtroForm.get('selectedOrganizacionVenta')?.enable();
+    this.filtroForm.get('selectedAlmacen')?.enable();
     this.filtroForm.get('codigoModelo')?.enable();
     this.listadoCampoReglas.forEach(campo => {
       if (campo["codigo_interno"] != this.CODIGO_INTERNO_AMPLIACION) {
@@ -598,9 +652,43 @@ export class EditarSolicitudPtcComponent implements OnInit {
     })
   }
 
+
+  getListarGrupoTransporte() {
+    this.grupoTransporteService.getListarGrupoTransporte().then((data) => {
+      this.listadoGrupoTransporte = data['lista'];
+    })
+  }
+
+  getListarGrupoCarga() {
+    this.grupoCargaService.getListarGrupoCarga().then((data) => {
+      this.listadoGrupoCarga = data['lista'];
+    })
+  }
+
+  getListarGrupoCompra() {
+    this.grupoCompraService.getListarGrupoCompra().then((data) => {
+      this.listadoGrupoCompra = data['lista'];
+    })
+  }
+
   filtrarListasPorCentro() {
     //console.log("formControlName---->" + val);
     let centro: Centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value;
+    switch (this.TIPO_SOLICITUD) {
+      case this.TIPO_SOLICITUD_CREACION:
+        centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value;
+        break;
+      case this.TIPO_SOLICITUD_AMPLIACION:
+        centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value;
+        break;
+      case this.TIPO_SOLICITUD_MODIFICACION:
+        centro = this.filtroForm.get("selectedCentro")?.value;
+        break;
+      case this.TIPO_SOLICITUD_BLOQUEO:
+        centro = this.filtroForm.get("selectedCentro")?.value;
+        break;
+    }
+
     this.getListarAlmacen(centro.codigo_sap);
     //console.log("centroItem---->" + JSON.stringify(this.centroItem));
   }
@@ -610,9 +698,17 @@ export class EditarSolicitudPtcComponent implements OnInit {
     let lista: any[] = [];
     let jsonDescargaFormato: any[] = [];
     this.displayedColumns = [];
+    let columnaExcel: any[] = [];
     this.solicitudService.getListadoCampoReglas(id_escenario_nivel3, id_rol, id_tipo_solicitud).then((data) => {
       let listadoCampoReglas: ReglasCampo[] = data['lista'];
-      let columna: any = '"id_material_solicitud": "", "' + this.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO + '":"",';
+      let columna: any = '"id_material_solicitud": "", "';
+      columnaExcel.push({})
+      if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_CREACION) {
+        columna = columna + this.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO + '":""';
+      } else {
+        columna = columna + this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP + '":""';
+        this.displayedColumns.push(this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP);
+      }
       if (data.resultado == 1) {
         for (let y = 0; y < listadoCampoReglas.length; y++) {
           if (listadoCampoReglas[y].tipo_objeto != null) {
@@ -621,14 +717,25 @@ export class EditarSolicitudPtcComponent implements OnInit {
             ///ian - agregando campos para la tabla
             this.displayedColumns.push(listadoCampoReglas[y].codigo_interno)
             //ian - fin 
-            if (numCampos == 1) {
-              columna = columna + '"' + campo + '": ""';
-            } else {
-              if (listadoCampoReglas[y].codigo_interno != this.CODIGO_INTERNO_AMPLIACION) {
-                console.log('peru-->' + listadoCampoReglas[y].codigo_interno)
+            if ((this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_CREACION) || (this.TIPO_SOLICITUD != this.TIPO_SOLICITUD_CREACION && campo!=this.CODIGO_INTERNO_DENOMINACION)) {
+              if (numCampos == 1) {
                 columna = columna + ',"' + campo + '": ""';
+              } else {
+                if (campo != this.CODIGO_INTERNO_AMPLIACION) {
+                  columna = columna + ',"' + campo + '": ""';
+                }
               }
-            }
+            }/* else{
+              if (campo!=this.CODIGO_INTERNO_DENOMINACION){
+                if (numCampos == 1) {
+                  columna = columna + ',"' + campo + '": ""';
+                } else {
+                  if (campo != this.CODIGO_INTERNO_AMPLIACION) {
+                    columna = columna + ',"' + campo + '": ""';
+                  }
+                }
+              }
+            } */
             lista.push(listadoCampoReglas[y]);
           }
         }
@@ -653,7 +760,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
 
   //----- Compartido con nuevo
 
-  async agregarMaterial(form: any) {
+  async agregarMaterialCreacion(form: any) {
     if (true) {//!this.existeDenominacion
       let campos: any[] = await this.mapearCamposMaterial(form);
       //console.log("11111111111111111111");
@@ -743,6 +850,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
       if (data.resultado == 1) {
         this.EscenarioNivel3_Old = form.selectecLineaNegocio; //nuevo
         this.estadoActualSolicitud(this.id_solicitud);
+        this.limpiarMaterial();
         this.habilitarControles();
         this.getListadoMateriales();
         JSON.stringify(data);
@@ -758,7 +866,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
   getListadoMateriales() {
     this.solicitudService.getListadoMateriales(this.id_solicitud, this.ROL_SOLICITANTE).then((data) => {
       this.listadoMateriales = data['lista'];
-      console.log('listadoMateriales-->' + JSON.stringify(this.listadoMateriales));
+      console.log('immARSA listadoMateriales-->' + JSON.stringify(this.listadoMateriales));
 
     })
   }
@@ -767,18 +875,30 @@ export class EditarSolicitudPtcComponent implements OnInit {
     let codigoModelo = (this.filtroForm.get("codigoModelo")?.value ? this.filtroForm.get("codigoModelo")?.value : "");
     let campos: any[] = [];
     if (codigoModelo != "") {
-      campos.push({ 'codigo_interno': GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO, 'valor': codigoModelo });
+      if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_CREACION) {
+        campos.push({ 'codigo_interno': GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO, 'valor': codigoModelo });
+      } else {
+/*         this.camposMaterialModelo.forEach((reg, x) => {
+          if (reg["valor_defecto"]!=""){
+            campos.push({ 'codigo_interno': reg['codigo_interno'], 'valor': reg["valor_defecto"] });
+          }
+        })
+ */        //campos.push({ 'codigo_interno': GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_SAP, 'valor': codigoModelo });
+      }
     }
     this.listadoCampoReglas.forEach((campoRegla, x) => {
       if (this.itemForm.get(campoRegla['codigo_interno'])?.enabled) {
         //console.log("campo Regla 0000->" + campoRegla['codigo_interno'] + " @@@  " + JSON.stringify(form[campoRegla['codigo_interno']]));
         if (campoRegla['tipo_objeto'] == this.TIPO_OBJETO_INPUT_TEXT) {
-          let valor = (form[campoRegla['codigo_interno']] ? form[campoRegla['codigo_interno']] : "");
+          let valor = (form[campoRegla['codigo_interno']] ? form[campoRegla['codigo_interno']] : "")
           valor = (valor == "null" ? "" : valor);
+          if (campoRegla['tipo_dato'] == this.TIPO_DATO_CHAR){
+            valor = (valor == "null" ? "" : valor.trim());
+          }
           campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valor': valor });
         }
         if (campoRegla['tipo_objeto'] == this.TIPO_OBJETO_INPUT_TEXTAREA) {
-          let valor = (form[campoRegla['codigo_interno']] ? form[campoRegla['codigo_interno']] : "");
+          let valor = (form[campoRegla['codigo_interno']] ? form[campoRegla['codigo_interno']] : "")
           valor = (valor == "null" ? "" : valor);
           campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valor': valor });
         }
@@ -836,20 +956,35 @@ export class EditarSolicitudPtcComponent implements OnInit {
       columnaError = []
       c++;
       //fila = '{"id_material_solicitud":' + element.id_material_solicitud;
-      fila = '{"id_material_solicitud":' + element.id_material_solicitud + ', "' + this.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO + '":"" ';
+      fila = '{"id_material_solicitud":' + element.id_material_solicitud + ', "';
+      if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_CREACION) {
+        fila = fila + this.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO + '":"' + element[this.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO] + '"';
+      } else {
+        fila = fila + this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP + '":"' + element[this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP] + '"';
+      }
+
       this.listadoCampoReglas.forEach(campoRegla => {
         if (campoRegla['codigo_interno'] != this.CODIGO_INTERNO_AMPLIACION) {
-          //console.log("valor 1-->"+element[campoRegla['codigo_interno'] + "_valor"]==null);
-          //console.log("valor 2-->"+element[campoRegla['codigo_interno'] + "_valor"]=="null");
           let valor = (element[campoRegla['codigo_interno'] + "_valor"] == "null"
             || element[campoRegla['codigo_interno'] + "_valor"] == null ? "" : element[campoRegla['codigo_interno'] + "_valor"]);
           //valor=valor.replace('\n',' ');
           valor = valor.split(/\n/i).join('@@@');
-          posicion++;
-          fila = fila + ', "' + [campoRegla['codigo_interno']] + '":"' + valor + '"';
-          if (element[campoRegla['codigo_interno'] + "_error"]) {
-            columnaError.push(posicion);
-          }
+          valor = valor.split(/"/i).join('###');
+          if ((this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_CREACION) || (this.TIPO_SOLICITUD != this.TIPO_SOLICITUD_CREACION && campoRegla['codigo_interno']!=this.CODIGO_INTERNO_DENOMINACION)) {
+            posicion++;
+            fila = fila + ', "' + [campoRegla['codigo_interno']] + '":"' + valor + '"';
+            if (element[campoRegla['codigo_interno'] + "_error"]) {
+              columnaError.push(posicion);
+            }
+          }/*  else {
+            if (campoRegla['codigo_interno'] != this.CODIGO_INTERNO_DENOMINACION) {
+              posicion++;
+              fila = fila + ', "' + [campoRegla['codigo_interno']] + '":"' + valor + '"';
+              if (element[campoRegla['codigo_interno'] + "_error"]) {
+                columnaError.push(posicion);
+              }
+            }
+          } */
         }
       })
       if (columnaError.length > 0) {
@@ -965,14 +1100,36 @@ export class EditarSolicitudPtcComponent implements OnInit {
   }
 
   onFileSelected(event: any) {
-    let tabs = [this.CODIGO_INTERNO_CLASE_TAB]
-    this.excelGeneratorService.onFileSeleted(event, tabs).then((data) => {
+    let tabs = [this.CODIGO_INTERNO_CLASE_TAB, this.CODIGO_INTERNO_CLASE_INSPECCION_TAB, this.CODIGO_INTERNO_AREA_PLANIFICACION_TAB]
+    this.excelGeneratorService.onFileSeleted(this.TIPO_SOLICITUD, event, tabs).then((data) => {
       this.cargaMasiva(data);
       this.solicitudForm.get('files').reset();
     });
   }
 
   cargaMasiva(materiales: any) {
+    switch (this.TIPO_SOLICITUD) {
+      case this.TIPO_SOLICITUD_CREACION:
+        console.log("creacion");
+        this.cargaMasivaCreacion(materiales);
+        break;
+      case this.TIPO_SOLICITUD_AMPLIACION:
+        console.log("ampliacion");
+        this.cargaMasivaAmpliacion(materiales);
+        break;
+      case this.TIPO_SOLICITUD_MODIFICACION:
+        console.log("modificacion");
+        this.cargaMasivaModificacion(materiales);
+        break;
+      case this.TIPO_SOLICITUD_BLOQUEO:
+        console.log("bloqueo");
+        this.cargaMasivaBloqueo(materiales);
+        break;
+    }
+
+  }
+
+  cargaMasivaCreacion(materiales: any) {
     let params = {
       'id_solicitud': this.id_solicitud,
       'id_rol': this.ROL_SOLICITANTE,
@@ -988,18 +1145,91 @@ export class EditarSolicitudPtcComponent implements OnInit {
       });
       this.getListadoMateriales();
     })
+
   }
+
+  cargaMasivaAmpliacion(materiales: any) {
+    let params = {
+      'id_solicitud': this.id_solicitud,
+      'id_rol': this.ROL_SOLICITANTE,
+      'materiales': materiales
+    }
+    console.log('materiales front end--->' + JSON.stringify(params));
+    this.solicitudService.cargaMasivaAmpliacion(params).then((data) => {
+      console.log('resultado--->' + JSON.stringify(data));
+      if (data.resultado == 1) {
+        this._snack.open(this.MENSAJE_CARGA_MASIVA, 'cerrar', {
+          duration: 1800,
+          horizontalPosition: "end",
+          verticalPosition: "top"
+        });
+      } else {
+        this.openDialogErrorSap(data.mensaje);
+      }
+      this.getListadoMateriales();
+    })
+  }
+
+  cargaMasivaModificacion(materiales: any) {
+    let params = {
+      'id_solicitud': this.id_solicitud,
+      'id_rol': this.ROL_SOLICITANTE,
+      'materiales': materiales
+    }
+    //console.log('materiales front end--->' + JSON.stringify(params));
+    this.solicitudService.cargaMasivaModificacion(params).then((data) => {
+      console.log('resultado--->' + JSON.stringify(data));
+      if (data.resultado == 1) {
+        this._snack.open(this.MENSAJE_CARGA_MASIVA, 'cerrar', {
+          duration: 1800,
+          horizontalPosition: "end",
+          verticalPosition: "top"
+        });
+      } else {
+        this.openDialogErrorSap(data.mensaje);
+      }
+      this.getListadoMateriales();
+    })
+  }  
+
+  cargaMasivaBloqueo(materiales: any) {
+    let params = {
+      'id_solicitud': this.id_solicitud,
+      'id_rol': this.ROL_SOLICITANTE,
+      'materiales': materiales
+    }
+    //console.log('materiales front end--->' + JSON.stringify(params));
+    this.solicitudService.cargaMasivaBloqueo(params).then((data) => {
+      console.log('resultado--->' + JSON.stringify(data));
+      if (data.resultado == 1) {
+        this._snack.open(this.MENSAJE_CARGA_MASIVA, 'cerrar', {
+          duration: 1800,
+          horizontalPosition: "end",
+          verticalPosition: "top"
+        });
+      } else {
+        this.openDialogErrorSap(data.mensaje);
+      }
+      this.getListadoMateriales();
+    })
+  }  
 
   async editarMaterial(item: any) {
     this.habilitarControles();
+    this.obtenerUrlMaterial(item.id_material_solicitud);
+    this.obtenerEquivalencias(item.id_material_solicitud);
     this.btnAdd = false;
-    console.log("editar material-->" + JSON.stringify(item));
-    //console.log(" listadoCampoReglas-->" + JSON.stringify(this.listadoCampoReglas));
+    //console.log("editar material-->" + JSON.stringify(item));
+    console.log(" listadoCampoReglas 1-->" + JSON.stringify(this.listadoCampoReglas));
+    console.log(" listadoCampoReglas 2-->" + JSON.stringify(this.listadoReglasVista));
+
     this.itemMaterialOld = item;
     this.activarEditarMaterial = true;
+    let codigoModelo = (item[this.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO] ? item[this.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO] : "");
+    this.filtroForm.get("codigoModelo")?.setValue(codigoModelo);
     this.listadoCampoReglas.forEach((campo: any) => {
       this.itemForm.get(campo["codigo_interno"])?.setValue("");
-      let error = this.isErrorCampo(item, campo["codigo_interno"]);
+      let error = item[campo["codigo_interno"] + "_error"];//this.isErrorCampo(item, campo["codigo_interno"]);
       if (!error) {//!error
         let valor = (item[campo["codigo_interno"] + "_valor"] == null ? '' : item[campo["codigo_interno"] + "_valor"])
 
@@ -1047,22 +1277,23 @@ export class EditarSolicitudPtcComponent implements OnInit {
 
       }
     })
-    if (item[this.CODIGO_INTERNO_AMPLIACION + '_valor'] == "X") {
-      this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.disable();
-      this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.disable();
-      this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.disable();
-      this.btnAdd = true;
-    } else {
-      await this.solicitudService.esPadre(this.id_solicitud, this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value).then(res => {
-        if (res.existe && item[this.CODIGO_INTERNO_DENOMINACION + '_error'] == false) {
+    this.deshabilitarControles(item);
+    /*     if (item[this.CODIGO_INTERNO_AMPLIACION + '_valor'] == "X") {
           this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.disable();
           this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.disable();
           this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.disable();
           this.btnAdd = true;
+        } else {
+          await this.solicitudService.esPadre(this.id_solicitud, this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value).then(res => {
+            if (res.existe && item[this.CODIGO_INTERNO_DENOMINACION + '_error'] == false) {
+              this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.disable();
+              this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.disable();
+              this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.disable();
+              this.btnAdd = true;
+            }
+          })
         }
-      })
-    }
-
+     */
   }
 
   editarMaterialOLD(item: any) {
@@ -1112,24 +1343,37 @@ export class EditarSolicitudPtcComponent implements OnInit {
   }
 
   eliminarMaterial(item: any) {
+    switch (this.TIPO_SOLICITUD) {
+      case this.TIPO_SOLICITUD_CREACION:
+        console.log("creacion");
+        this.eliminarCreacion(item);
+        break;
+      case this.TIPO_SOLICITUD_AMPLIACION:
+        console.log("ampliacion");
+        this.eliminarAmpliacion(item);
+        break;
+      case this.TIPO_SOLICITUD_MODIFICACION:
+        break;
+      case this.TIPO_SOLICITUD_BLOQUEO:
+        break;
+    }
+  }
 
+  eliminarCreacion(item: any) {
     let mensaje;
     if (item.ampliacion) {
       mensaje = Messages.warnig.MENSAJE_DIALOGO_ELIMINAR_MATERIAL;
     } else {
       mensaje = Messages.warnig.MENSAJE_DIALOGO_ELIMINAR_MATERIAL_AMPLIADOS;
     }
-
     const dialogRef = this.matDialog.open(ConfirmDialogComponent, {
       disableClose: true,
       data: mensaje
     });
-
     dialogRef.afterClosed().subscribe(result => {
       //vienen los datos del dialog
       //console.log('The dialog was closed'+JSON.stringify(result));
       if (result == "CONFIRM_DLG_YES") {
-
         this.solicitudService.eliminarMaterial(item).then((res) => {
           console.log(JSON.stringify(res));
           this._snack.open(this.MENSAJE_ELIMINAR_MATERIAL, 'cerrar', {
@@ -1138,16 +1382,44 @@ export class EditarSolicitudPtcComponent implements OnInit {
             verticalPosition: "top"
           });
           this.getListadoMateriales();
-
         })
-
       } else {
         // this.solicitudForm.get('selectecLineaNegocio').setValue(this.EscenarioNivel3_Old ? this.EscenarioNivel3_Old : null);
         this.getListadoMateriales();
       }
-
     });
+  }
 
+  eliminarAmpliacion(item: any) {
+    this.itemMaterialOld = item;
+    let mensaje;
+    if (item.ampliacion) {
+      mensaje = Messages.warnig.MENSAJE_DIALOGO_ELIMINAR_MATERIAL;
+    } else {
+      mensaje = Messages.warnig.MENSAJE_DIALOGO_ELIMINAR_MATERIAL_AMPLIADOS;
+    }
+    const dialogRef = this.matDialog.open(ConfirmDialogComponent, {
+      disableClose: true,
+      data: mensaje
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      //vienen los datos del dialog
+      //console.log('The dialog was closed'+JSON.stringify(result));
+      if (result == "CONFIRM_DLG_YES") {
+        this.solicitudService.eliminarMaterialAmpliación(this.id_solicitud, this.itemMaterialOld["id_material_solicitud"]).then((res) => {
+          console.log(JSON.stringify(res));
+          this._snack.open(this.MENSAJE_ELIMINAR_MATERIAL, 'cerrar', {
+            duration: 1800,
+            horizontalPosition: "end",
+            verticalPosition: "top"
+          });
+          this.getListadoMateriales();
+        })
+      } else {
+        // this.solicitudForm.get('selectecLineaNegocio').setValue(this.EscenarioNivel3_Old ? this.EscenarioNivel3_Old : null);
+        this.getListadoMateriales();
+      }
+    });
   }
 
   compareLineaNegocio(o1: any, o2: any) {
@@ -1251,6 +1523,11 @@ export class EditarSolicitudPtcComponent implements OnInit {
     //console.log('compareGrupoCarga-->'+JSON.stringify(o1)+'------'+JSON.stringify(o2))
     return o1.codigo_sap === o2.codigo_sap;
   }
+  compareGrupoCompra(o1: any, o2: any) {
+    //console.log('compareGrupoCarga-->'+JSON.stringify(o1)+'------'+JSON.stringify(o2))
+    return o1.codigo_sap === o2.codigo_sap;
+  }
+
   compareIdioma(o1: any, o2: any) {
     //console.log('compareIdioma-->'+JSON.stringify(o1)+'------'+JSON.stringify(o2))
     return o1.codigo_sap === o2.codigo_sap;
@@ -1286,13 +1563,23 @@ export class EditarSolicitudPtcComponent implements OnInit {
   }
 
   mapearCamposMaterialActualizar(form: any, itemMaterialOld: any) {
+    let codigoModelo = (this.filtroForm.get("codigoModelo")?.value ? this.filtroForm.get("codigoModelo")?.value : "");
     let campos: any[] = [];
-    let camposAux: any[] = [];
+    if (codigoModelo != "") {
+      if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_CREACION) {
+        campos.push({ 'codigo_interno': GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO, 'valor': codigoModelo });
+      } else {
+        //campos.push({ 'codigo_interno': GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_SAP, 'valor': codigoModelo });
+      }
+    }
     this.listadoCampoReglas.forEach((campoRegla, x) => {
       if (this.itemForm.get(campoRegla['codigo_interno'])?.enabled) {
         if (campoRegla['tipo_objeto'] == this.TIPO_OBJETO_INPUT_TEXT) {
           let valor = (form[campoRegla['codigo_interno']] ? form[campoRegla['codigo_interno']] : "")
           valor = (valor == "null" ? "" : valor);
+          if (campoRegla['tipo_dato'] == this.TIPO_DATO_CHAR){
+            valor = (valor == "null" ? "" : valor.trim());
+          }
           campos.push({ 'codigo_interno': campoRegla['codigo_interno'], 'valor': valor });
         }
         if (campoRegla['tipo_objeto'] == this.TIPO_OBJETO_INPUT_TEXTAREA) {
@@ -1442,7 +1729,8 @@ export class EditarSolicitudPtcComponent implements OnInit {
     })
   }
 
-  limpiarMaterial() {
+  async limpiarMaterial() {
+    this.btnAdd = false;
     this.listadoCampoReglas.forEach(campoRegla => {
       this.itemForm.get(campoRegla['codigo_interno'])?.setValue("");
       this.itemForm.get(campoRegla['codigo_interno'])?.enable();
@@ -1451,7 +1739,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
       }
     })
 
-    this.initCamposMateriales();
+    await this.initCamposMateriales();
     this.itemMaterialOld = null;
     this.camposMaterialModelo = [];
   }
@@ -1472,7 +1760,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
         //se debe agregar el id de usuario y id de rol segun req. del servicio
         let item = {
           "id_solicitud": this.id_solicitud,
-          "id_rol": 1
+          "id_rol": this.ROL_SOLICITANTE
         }
 
         this.solicitudService.anularSolicitud(item).then(data => {
@@ -1520,105 +1808,6 @@ export class EditarSolicitudPtcComponent implements OnInit {
     })
   }
 
-  initCamposMaterialesOLD() {
-    this.listadoCampoReglas.forEach(campoRegla => {
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_DENOMINACION) {
-        this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_UNIDAD_MEDIDA_BASE) {
-        this.itemForm.get(this.CODIGO_INTERNO_UNIDAD_MEDIDA_BASE)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_PESO_BRUTO) {
-        this.itemForm.get(this.CODIGO_INTERNO_PESO_BRUTO)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_UNIDAD_MEDIDA_PESO) {
-        this.itemForm.get(this.CODIGO_INTERNO_UNIDAD_MEDIDA_PESO)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_CENTRO) {
-        this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_CENTRO_BENEFICIO) {
-        this.itemForm.get(this.CODIGO_INTERNO_CENTRO_BENEFICIO)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_ORGANIZACION_VENTAS) {
-        this.itemForm.get(this.CODIGO_INTERNO_ORGANIZACION_VENTAS)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_CANAL_DISTRIBUCION) {
-        this.itemForm.get(this.CODIGO_INTERNO_CANAL_DISTRIBUCION)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_ALMACEN) {
-        this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_CLASE_TAB) {
-        this.itemForm.get(this.CODIGO_INTERNO_CLASE_TAB)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-
-      //Calidad
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_ALMACEN_PRODUCCION) {
-        this.itemForm.get(this.CODIGO_INTERNO_ALMACEN_PRODUCCION)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_RESPONSABLE_CONTROL_PRODUCCION) {
-        this.itemForm.get(this.CODIGO_INTERNO_RESPONSABLE_CONTROL_PRODUCCION)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_PERFIL_CONTROL_FABRICACION) {
-        this.itemForm.get(this.CODIGO_INTERNO_PERFIL_CONTROL_FABRICACION)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-
-      //Costos
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_CATEGORIA_VALORACION) {
-        this.itemForm.get(this.CODIGO_INTERNO_CATEGORIA_VALORACION)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      //Comercial
-
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA) {
-        this.itemForm.get(this.CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_GRUPO_ESTADISTICA_MAT) {
-        this.itemForm.get(this.CODIGO_INTERNO_GRUPO_ESTADISTICA_MAT)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL) {
-        this.itemForm.get(this.CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_JERARQUIA_PRODUCTO) {
-        this.itemForm.get(this.CODIGO_INTERNO_JERARQUIA_PRODUCTO)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_GRUPOS_MATERIAL1) {
-        this.itemForm.get(this.CODIGO_INTERNO_GRUPOS_MATERIAL1)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_GRUPOS_MATERIAL2) {
-        this.itemForm.get(this.CODIGO_INTERNO_GRUPOS_MATERIAL2)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_TEXTO_COMERCIAL) {
-        this.itemForm.get(this.CODIGO_INTERNO_TEXTO_COMERCIAL)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-
-      //administrador  materiales
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_GRUPO_TRANSPORTE) {
-        this.itemForm.get(this.CODIGO_INTERNO_GRUPO_TRANSPORTE)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_GRUPO_CARGA) {
-        this.itemForm.get(this.CODIGO_INTERNO_GRUPO_CARGA)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_IDIOMA) {
-        this.itemForm.get(this.CODIGO_INTERNO_IDIOMA)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO) {
-        this.itemForm.get(this.CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_UMP_VAR) {
-        this.itemForm.get(this.CODIGO_INTERNO_UMP_VAR)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_TEXTO_COMPRA) {
-        this.itemForm.get(this.CODIGO_INTERNO_TEXTO_COMPRA)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-
-      //Control de gestiòn
-      if (campoRegla.codigo_interno == this.CODIGO_INTERNO_PRECIO_ESTANDAR) {
-        this.itemForm.get(this.CODIGO_INTERNO_PRECIO_ESTANDAR)?.setValidators([Validators.required, Validators.maxLength(campoRegla.longitud)]);
-      }
-    })
-  }
 
   async existeErrores() {
     console.log("arsa2-->" + JSON.stringify(this.listadoMateriales))
@@ -1643,7 +1832,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
             campoVacio = campoVacio + campoRegla['codigo_interno'] + " ";
             columnaVacio.push(vacio);
           }
-          if (this.isErrorCampo(element, campoVista) == true) {//if (element[campoVista + "_error"] == true) {
+          if (element[campoVista + "_error"] == true) {//if (this.isErrorCampo(element, campoVista) == true) {
             error++;
             campoError = campoError + campoRegla['codigo_interno'] + ". ";
             columnaError.push(error);
@@ -1659,8 +1848,8 @@ export class EditarSolicitudPtcComponent implements OnInit {
 
 
   openSnackBarError(message: string, action: string, tema: string) {
-    this._snack.open(message, action, {
-      duration: 2000,
+    this._snack.open(message, "cerrar", {
+      duration: 8000,
       panelClass: ['mat-toolbar', tema], //'mat-primary' to 'mat-accent' or 'mat-warn'
       verticalPosition: 'bottom', // 'top' | 'bottom'
       horizontalPosition: 'right', //'start' | 'center' | 'end' | 'left' | 'right'      
@@ -1679,20 +1868,24 @@ export class EditarSolicitudPtcComponent implements OnInit {
     switch (this.TIPO_SOLICITUD) {
       case this.TIPO_SOLICITUD_CREACION:
         console.log("creacion");
-        this.creacion(form);
+        this.agregarCreacion(form);
         break;
       case this.TIPO_SOLICITUD_AMPLIACION:
         console.log("ampliacion");
-        this.ampliacion(form);
+        this.agregarAmpliacion(form);
         break;
       case this.TIPO_SOLICITUD_MODIFICACION:
+        console.log("modificacion");
+        this.agregarModificacion(form);
         break;
       case this.TIPO_SOLICITUD_BLOQUEO:
+        console.log("bloqueo");
+        this.agregarBloqueo(form);
         break;
     }
   }
 
-  async creacion(form: any) {
+  async agregarCreacion(form: any) {
     let centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value
     let almacen = this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value
     let denominacion = this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value;
@@ -1709,14 +1902,14 @@ export class EditarSolicitudPtcComponent implements OnInit {
       if (!res) {
         await this.solicitudService.existeDenominacionDb(denominacion).then(res => {
           this.existeDenominacion = res.existe;
-          this.agregarMaterial(form)
+          this.agregarMaterialCreacion(form)
         })
       }
     })
 
   }
 
-  async ampliacion(form: any) {
+  async agregarAmpliacion(form: any) {
     let centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value
     let almacen = this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value
     let denominacion = this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value;
@@ -1724,15 +1917,38 @@ export class EditarSolicitudPtcComponent implements OnInit {
     let centro_codigo_sap = (centro.codigo_sap ? centro.codigo_sap : "")
     let almacen_codigo_sap = (almacen.codigo_sap ? almacen.codigo_sap : "")
     denominacion = denominacion.toUpperCase().trim();
-    let res = await this.existeDenominacionCentroAlmacenSAP();
-    if (res) {
-      this.openSnackBarError(Messages.error.MENSAJE_ERROR_DENOMINACION_SAP, "", "mat-primary")
-    } else {
+    this.agregarMaterialAmpliacion(form);
+/*     let res = await this.existeDenominacionCentroAlmacenSAP();
+    if (!res) {
       this.agregarMaterialAmpliacion(form);
+    } else {
+      this.openSnackBarError(Messages.error.MENSAJE_ERROR_DENOMINACION_NO_EXISTE_SAP, "", "mat-primary")
     }
-  }
+ */  }
 
   async existeDenominacionSapYBdUpdate(form: any) {
+    switch (this.TIPO_SOLICITUD) {
+      case this.TIPO_SOLICITUD_CREACION:
+        console.log("creacion");
+        this.actualizarCreacion(form);
+        break;
+      case this.TIPO_SOLICITUD_AMPLIACION:
+        console.log("ampliacion");
+        this.actualizarAmpliacion(form);
+        break;
+      case this.TIPO_SOLICITUD_MODIFICACION:
+        console.log("modificacion");
+        this.actualizarModificacion(form);
+        break;
+      case this.TIPO_SOLICITUD_BLOQUEO:
+        console.log("bloqueo");
+        this.actualizarBloqueo(form);
+        break;
+    }
+
+  }
+
+  async actualizarCreacion(form: any) {
     let centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value
     let almacen = this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value
     let denominacion = this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value;
@@ -1755,21 +1971,28 @@ export class EditarSolicitudPtcComponent implements OnInit {
           await this.solicitudService.existeDenominacionDb(denominacion).then(async resDB => {
             this.existeDenominacion = resDB.existe;
             this.actualizarMaterial(form)
-            /*             if (resDB.existe) {
-                          this.openSnackBarError(Messages.error.MENSAJE_ERROR_DENOMINACION_BD, "", "mat-primary")
-                          return this.existeDenominacion;
-                        } else {
-                          this.actualizarMaterial(form)
-                        }
-             */
           })
         }
       })
     } else {
       this.actualizarMaterial(form)
     }
+
   }
 
+  async actualizarAmpliacion(form: any) {
+    let centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value
+    let almacen = this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value
+    let denominacion = this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value;
+    //let ampliacion = (this.itemForm.get(this.CODIGO_INTERNO_AMPLIACION)?.value ? true : false);
+    let ampliacion = (this.itemForm.get(this.CODIGO_INTERNO_AMPLIACION)?.value ? this.itemForm.get(this.CODIGO_INTERNO_AMPLIACION)?.value : false);
+    let centro_codigo_sap = (centro.codigo_sap ? centro.codigo_sap : "")
+    let almacen_codigo_sap = (almacen.codigo_sap ? almacen.codigo_sap : "")
+    let centroOld = this.itemMaterialOld[this.CODIGO_INTERNO_CENTRO + "_valor"];
+    let almacenOld = this.itemMaterialOld[this.CODIGO_INTERNO_ALMACEN + "_valor"];
+    denominacion = denominacion.toUpperCase().trim();
+    this.actualizarMaterialAmpliacion(form)
+  }
 
   actualizarMaterial(form: any) {
 
@@ -1823,7 +2046,11 @@ export class EditarSolicitudPtcComponent implements OnInit {
           if (campo["codigo_interno"] == this.CODIGO_INTERNO_CENTRO) {
             this.getListarAlmacen(campo['valor_defecto']);
           }
-          this.itemForm.get(campo["codigo_interno"])?.setValue({ codigo_sap: valor });
+          if (valor==''){
+            this.itemForm.get(campo["codigo_interno"])?.setValue("");
+          }else{
+            this.itemForm.get(campo["codigo_interno"])?.setValue({ codigo_sap: valor });
+          }
         }
         //this.itemForm.get(campo["codigo_interno"])?.setValue({ codigo_sap: valor });
       }
@@ -1921,19 +2148,101 @@ export class EditarSolicitudPtcComponent implements OnInit {
   }
 
   filtroLlenar() {
-    let codigoModelo = this.filtroForm.get("codigoModelo")?.value;
-    let body = {
-      "material": {
-        "codigo": codigoModelo,
-      }
-    }
-    this.solicitudService.getMaterialCodigoModelo(body).then(mat => {
-      this.camposMaterialModelo = mat;
-      console.log("material modelo-->" + codigoModelo + "......." + JSON.stringify(mat));
-      //this.llenarDatos(this.camposMaterialModelo, [])
-      this.llenarDatosCodigoModelo(this.camposMaterialModelo);
-    })
+    let codigoModelo = (this.filtroForm.get("codigoModelo")?.value ? this.filtroForm.get("codigoModelo")?.value : "");
+    let centro = (this.filtroForm.get("selectedCentro")?.value ? this.filtroForm.get("selectedCentro")?.value : "");
+    let almacen = (this.filtroForm.get("selectedAlmacen")?.value ? this.filtroForm.get("selectedAlmacen")?.value : "");
+    let body = {};
 
+    switch (this.TIPO_SOLICITUD) {
+      case this.TIPO_SOLICITUD_CREACION:
+        console.log("entrando 1");
+        body={
+          "material": {
+            "codigo": codigoModelo,
+            "centro": (centro ? centro.codigo_sap : ""),
+            "almacen": (almacen ? almacen.codigo_sap : ""),
+            "organizacionVentas":(this.organizacionVentaCodigoSap?this.organizacionVentaCodigoSap:""),
+            "canalDistribucion":(this.canalDistribucionCodigoSap?this.canalDistribucionCodigoSap:"")
+          }
+        }
+        this.solicitudService.getMaterialCodigoModelo(body).then(mat => {
+          this.camposMaterialModelo = mat;
+          if (this.camposMaterialModelo.length > 0) {
+            console.log("material modelo-->" + codigoModelo + "......." + JSON.stringify(mat));
+            this.llenarDatosCodigoModelo(this.camposMaterialModelo);
+          } else {
+            this.openSnackBarError(Messages.error.MENSAJE_ERROR_DENOMINACION_NO_EXISTE_SAP, "", "mat-primary")
+          }
+        })
+
+        break;
+      case this.TIPO_SOLICITUD_AMPLIACION:
+        console.log("entrando 2");
+        body={
+          "material": {
+            "material_codigo_sap": codigoModelo,
+            "centro_codigo_sap": (centro ? centro.codigo_sap : ""),
+            "almacen_codigo_sap": (almacen ? almacen.codigo_sap : ""),
+            "organizacion_ventas":(this.organizacionVentaCodigoSap?this.organizacionVentaCodigoSap:""),
+            "canal_distribucion":(this.canalDistribucionCodigoSap?this.canalDistribucionCodigoSap:"")
+          }
+        }
+        this.solicitudService.getMaterialCodigoMaterialSapAmpliacion(body).then(mat => {
+          this.camposMaterialModelo = mat;
+          if (this.camposMaterialModelo.length > 0) {
+            console.log("material modelo-->" + codigoModelo + "......." + JSON.stringify(mat));
+            this.llenarDatosCodigoModelo(this.camposMaterialModelo);
+          } else {
+            this.openSnackBarError(Messages.error.MENSAJE_ERROR_DENOMINACION_NO_EXISTE_SAP, "", "mat-primary")
+          }
+        })
+
+        break;
+      case this.TIPO_SOLICITUD_MODIFICACION:
+        console.log("entrando 3");
+        body={
+          "material": {
+            "codigo": codigoModelo,
+            "centro": (centro ? centro.codigo_sap : ""),
+            "almacen": (almacen ? almacen.codigo_sap : ""),
+            "organizacionVentas":(this.organizacionVentaCodigoSap?this.organizacionVentaCodigoSap:""),
+            "canalDistribucion":(this.canalDistribucionCodigoSap?this.canalDistribucionCodigoSap:"")
+          }
+        }
+        this.solicitudService.getMaterialSAP(body).then(mat => {
+          this.camposMaterialModelo = mat;
+          if (this.camposMaterialModelo.length > 0) {
+            console.log("material modelo-->" + codigoModelo + "......." + JSON.stringify(mat));
+            this.llenarDatosCodigoModelo(this.camposMaterialModelo);
+          } else {
+            this.openSnackBarError(Messages.error.MENSAJE_ERROR_DENOMINACION_NO_EXISTE_SAP, "", "mat-primary")
+          }
+        })
+
+        break;
+      case this.TIPO_SOLICITUD_BLOQUEO:
+        console.log("entrando 4");
+        body={
+          "material": {
+            "codigo": codigoModelo,
+            "centro": (centro ? centro.codigo_sap : ""),
+            "almacen": (almacen ? almacen.codigo_sap : ""),
+            "organizacionVentas":(this.organizacionVentaCodigoSap?this.organizacionVentaCodigoSap:""),
+            "canalDistribucion":(this.canalDistribucionCodigoSap?this.canalDistribucionCodigoSap:"")
+          }
+        }
+        this.solicitudService.getMaterialSAP(body).then(mat => {
+          this.camposMaterialModelo = mat;
+          if (this.camposMaterialModelo.length > 0) {
+            console.log("material modelo-->" + codigoModelo + "......." + JSON.stringify(mat));
+            this.llenarDatosCodigoModelo(this.camposMaterialModelo);
+          } else {
+            this.openSnackBarError(Messages.error.MENSAJE_ERROR_DENOMINACION_NO_EXISTE_SAP, "", "mat-primary")
+          }
+        })
+
+        break;
+    }
   }
 
 
@@ -1974,11 +2283,18 @@ export class EditarSolicitudPtcComponent implements OnInit {
   async llenarDatosCodigoModelo(datosCodigoModelo: any[]) {
     this.listadoCampoReglas.forEach((campoRegla: any) => {
       datosCodigoModelo.forEach((campo: any, i) => {
+        if (campo.codigo_interno == this.CODIGO_INTERNO_TIPO_MATERIAL) {
+          this.itemForm.get(this.CODIGO_INTERNO_TIPO_MATERIAL)?.setValue(campo.valor);
+          this.getListarCategoriaValoracion();
+        }
         if (campoRegla["codigo_interno"] == campo["codigo_interno"]) {
           this.itemForm.get(campoRegla["codigo_interno"])?.setValue("");
-          let valor = (campo["valor"] == null ? '' : campo["valor"]);
+          let valor = (campo["valor"] == null || campo["valor"] == "0" || campo["valor"] == "0.00" || campo["valor"] == "0.000" ? '' : campo["valor"]);
 
           if (campoRegla["tipo_objeto"] == GlobalSettings.TIPO_OBJETO_INPUT_TEXT) {
+            if (campoRegla["codigo_interno"] == this.CODIGO_INTERNO_DENOMINACION) {
+              this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.disable();
+            }
             this.itemForm.get(campo["codigo_interno"])?.setValue(valor);
           }
           if (campoRegla["tipo_objeto"] == GlobalSettings.TIPO_OBJETO_INPUT_TEXTAREA) {
@@ -2004,8 +2320,6 @@ export class EditarSolicitudPtcComponent implements OnInit {
         }
       })
     })
-
-
   }
 
 
@@ -2015,18 +2329,20 @@ export class EditarSolicitudPtcComponent implements OnInit {
     })
   }
 
-  isErrorCampo(element: any, codigo_interno: string) {
-    if (codigo_interno.substr(-4) == '_tab' && element[codigo_interno + '_error']) {
-      if (element[codigo_interno + '_error'].split("true").length > 0) {
-        return false;
+  /*   isErrorCampo(element: any, codigo_interno: string) {
+  
+      if (codigo_interno.substr(-4) == '_tab' && element[codigo_interno + '_error']) {
+  console.log("IMPRIMIR CAMPO ERROR-->"+codigo_interno)
+        if (element[codigo_interno + '_error'].split(true).length > 0) {
+          return false;
+        } else {
+          return true;
+        }
       } else {
-        return true;
+        return element[codigo_interno + '_error'];
       }
-    } else {
-      return element[codigo_interno + '_error'];
     }
-  }
-
+   */
   setValorPorDefecto() {
     this.listadoCampoReglas.forEach(campoRegla => {
 
@@ -2069,11 +2385,10 @@ export class EditarSolicitudPtcComponent implements OnInit {
       width: '50%'
     });
     dialogRef2.afterClosed().subscribe(result => {
-      if (result.respuesta == "CONFIRM_DLG_YES") {
-        //mostrar que se cargó algo?
-      } else {
+      if (result.respuesta != "CONFIRM_DLG_YES") {
         console.log("no se rechazó la solicitud");
       }
+      this.obtenerUrlSolicitud();
 
     });
   }
@@ -2088,12 +2403,11 @@ export class EditarSolicitudPtcComponent implements OnInit {
       data: datos
     });
     dialogRef3.afterClosed().subscribe(result => {
-      if (result.respuesta == "CONFIRM_DLG_YES") {
-        //mostrar que se cargó algo?
-      } else {
+      if (result.respuesta != "CONFIRM_DLG_YES") {
         console.log("no se rechazó la solicitud");
       }
-
+      this.getListadoMateriales();
+      this.obtenerUrlMaterial(this.itemMaterialOld.id_material_solicitud);
     });
   }
 
@@ -2125,12 +2439,11 @@ export class EditarSolicitudPtcComponent implements OnInit {
       width: '80%'
     });
     dialogRef4.afterClosed().subscribe(result => {
-      if (result.respuesta == "CONFIRM_DLG_YES") {
-        //mostrar que se cargó algo?
-      } else {
+      if (result.respuesta != "CONFIRM_DLG_YES") {
         console.log("se cerró el dialog de equivalencias");
       }
-
+      this.getListadoMateriales();
+      this.obtenerEquivalencias(this.itemMaterialOld.id_material_solicitud);
     });
   }
 
@@ -2168,8 +2481,7 @@ export class EditarSolicitudPtcComponent implements OnInit {
     if (true) {//!this.existeDenominacion
       let campos: any[] = await this.mapearCamposMaterial(form);
       let params = {
-        'material_codigo_sap': codigoModelo,
-        'material': { "campos": campos }
+        'material': { "campos": campos, [this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP]: codigoModelo }
       }
       //console.log('material Ampliacion--->' + JSON.stringify(params));
       this.solicitudService.agregarMaterialAmpliacion(this.id_solicitud, params).then((data) => {
@@ -2177,7 +2489,14 @@ export class EditarSolicitudPtcComponent implements OnInit {
         let mensaje = this.MENSAJE_AGREGAR_MATERIAL;
         if (data["resultado"] == 0) {
           mensaje = data["mensaje"];
-          this.openSnackBarError(mensaje, "", "mat-primary")
+          console.log("ffff--->"+data["lista"])
+          if (data["lista"]){
+            this.solicitudService.estadoActual(data["lista"]["id_solicitud"]).then(sol => {
+              this.openSnackBarError(mensaje+ ".\nSe encuentra en trámite por el usuario "+ sol["nombre_usuario_aprobador"], "", "mat-primary")
+            })
+          }else{
+            this.openSnackBarError(mensaje, "", "mat-primary")
+          }
         } else {
           this._snack.open(mensaje, 'cerrar', {
             duration: 1800,
@@ -2189,8 +2508,338 @@ export class EditarSolicitudPtcComponent implements OnInit {
         this.limpiarMaterial()
       })
     }
+  }
 
+  async actualizarMaterialAmpliacion(form: any) {
+    let codigoModelo = (this.filtroForm.get("codigoModelo")?.value ? this.filtroForm.get("codigoModelo")?.value : "");
+    if (true) {//!this.existeDenominacion
+      let campos: any[] = this.mapearCamposMaterialActualizar(form, this.itemMaterialOld);
+      let params = {
+        'material': { "campos": campos, [this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP]: codigoModelo }
+      }
+      //console.log('material Ampliacion--->' + JSON.stringify(params));
+      this.solicitudService.actualizarMaterialAmpliacion(this.id_solicitud, this.itemMaterialOld["id_material_solicitud"], params).then((data) => {
+        console.log('resppuesta al agregar material amplicacion-->' + JSON.stringify(data));
+        let mensaje = this.MENSAJE_ACTUALIZAR_MATERIAL;
+        if (data["resultado"] == 0) {
+          mensaje = data["mensaje"];
+          if (data["lista"]){
+            this.solicitudService.estadoActual(data["lista"]["id_solicitud"]).then(sol => {
+              this.openSnackBarError(mensaje+ ".\nSe encuentra en trámite por el usuario "+ sol["nombre_usuario_aprobador"], "", "mat-primary")
+            })
+          }else{
+            this.openSnackBarError(mensaje, "", "mat-primary")
+          }
+          
+        } else {
+          this._snack.open(mensaje, 'cerrar', {
+            duration: 1800,
+            horizontalPosition: "end",
+            verticalPosition: "top"
+          });
+        }
+        this.getListadoMateriales();
+        this.limpiarMaterial()
+      })
+    }
+  }
+
+  async agregarModificacion(form: any) {
+    let denominacion = this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value;
+    denominacion = denominacion.toUpperCase().trim();
+    this.agregarMaterialModificacion(form);
+  }
+
+  async agregarMaterialModificacion(form: any) {
+    let codigoModelo = (this.filtroForm.get("codigoModelo")?.value ? this.filtroForm.get("codigoModelo")?.value : "");
+    let campos: any[] = await this.mapearCamposMaterial(form);    
+    let centro = (this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value?this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value["codigo_sap"]:"");
+    let almacen = (this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value?this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value["codigo_sap"]:"");
+    let params = {
+      'material': { "campos": campos, 
+                  [this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP]: codigoModelo,
+                  [this.CODIGO_INTERNO_CENTRO]:centro,
+                  [this.CODIGO_INTERNO_ALMACEN]:almacen
+                }
+    }
+    //console.log('material Ampliacion--->' + JSON.stringify(params));
+    this.solicitudService.agregarMaterialModificacion(this.id_solicitud, params).then((data) => {
+      console.log('resppuesta al agregar material modificacion-->' + JSON.stringify(data));
+      let mensaje = this.MENSAJE_AGREGAR_MATERIAL;
+      if (data["resultado"] == 0) {
+        mensaje = data["mensaje"];
+        this.openSnackBarError(mensaje, "", "mat-primary")
+      } else {
+        this._snack.open(mensaje, 'cerrar', {
+          duration: 1800,
+          horizontalPosition: "end",
+          verticalPosition: "top"
+        });
+      }
+      this.getListadoMateriales();
+      this.limpiarMaterial()
+    })
+  }
+
+  async actualizarModificacion(form: any) {
+    let centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value
+    let almacen = this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value
+    let denominacion = this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value;
+    //let ampliacion = (this.itemForm.get(this.CODIGO_INTERNO_AMPLIACION)?.value ? true : false);
+    let ampliacion = (this.itemForm.get(this.CODIGO_INTERNO_AMPLIACION)?.value ? this.itemForm.get(this.CODIGO_INTERNO_AMPLIACION)?.value : false);
+    let centro_codigo_sap = (centro.codigo_sap ? centro.codigo_sap : "")
+    let almacen_codigo_sap = (almacen.codigo_sap ? almacen.codigo_sap : "")
+    let centroOld = this.itemMaterialOld[this.CODIGO_INTERNO_CENTRO + "_valor"];
+    let almacenOld = this.itemMaterialOld[this.CODIGO_INTERNO_ALMACEN + "_valor"];
+    denominacion = denominacion.toUpperCase().trim();
+    this.actualizarMaterialModificacion(form)
+  }
+
+  async actualizarMaterialModificacion(form: any) {
+    let codigoModelo = (this.filtroForm.get("codigoModelo")?.value ? this.filtroForm.get("codigoModelo")?.value : "");
+    let campos: any[] = this.mapearCamposMaterialActualizar(form, this.itemMaterialOld);
+    let centro = (this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value?this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value["codigo_sap"]:"");
+    let almacen = (this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value?this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value["codigo_sap"]:"");
+    let params = {
+      'material': { "campos": campos, 
+                  [this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP]: codigoModelo,
+                  [this.CODIGO_INTERNO_CENTRO]:centro,
+                  [this.CODIGO_INTERNO_ALMACEN]:almacen
+                }
+    }
+    //console.log('material Ampliacion--->' + JSON.stringify(params));
+    this.solicitudService.actualizarMaterialModificacion(this.id_solicitud, this.itemMaterialOld["id_material_solicitud"], params).then((data) => {
+      console.log('resppuesta al agregar material Modificacion-->' + JSON.stringify(data));
+      let mensaje = this.MENSAJE_ACTUALIZAR_MATERIAL;
+      if (data["resultado"] == 0) {
+        mensaje = data["mensaje"];
+        this.openSnackBarError(mensaje, "", "mat-primary")
+      } else {
+        this._snack.open(mensaje, 'cerrar', {
+          duration: 1800,
+          horizontalPosition: "end",
+          verticalPosition: "top"
+        });
+      }
+      this.getListadoMateriales();
+      this.limpiarMaterial()
+    })
+  }
+
+  // Inicio
+  async agregarBloqueo(form: any) {
+    let centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value
+    let almacen = this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value
+    let denominacion = this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value;
+    denominacion = denominacion.toUpperCase().trim();
+    this.agregarMaterialBloqueo(form);
+  }
+
+  async agregarMaterialBloqueo(form: any) {
+    let codigoModelo = (this.filtroForm.get("codigoModelo")?.value ? this.filtroForm.get("codigoModelo")?.value : "");
+    let campos: any[] = await this.mapearCamposMaterial(form);
+    let centro = (this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value?this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value["codigo_sap"]:"");
+    let almacen = (this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value?this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value["codigo_sap"]:"");
+    let params = {
+      'material': { "campos": campos, 
+                  [this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP]: codigoModelo,
+                  [this.CODIGO_INTERNO_CENTRO]:centro,
+                  [this.CODIGO_INTERNO_ALMACEN]:almacen
+                }
+    }
+    //console.log('material Ampliacion--->' + JSON.stringify(params));
+    this.solicitudService.agregarMaterialBloqueo(this.id_solicitud, params).then((data) => {
+      console.log('resppuesta al agregar material bloqueo-->' + JSON.stringify(data));
+      let mensaje = this.MENSAJE_AGREGAR_MATERIAL;
+      if (data["resultado"] == 0) {
+        mensaje = data["mensaje"];
+        this.openSnackBarError(mensaje, "", "mat-primary")
+      } else {
+        this._snack.open(mensaje, 'cerrar', {
+          duration: 1800,
+          horizontalPosition: "end",
+          verticalPosition: "top"
+        });
+      }
+      this.getListadoMateriales();
+      this.limpiarMaterial()
+    })
+  }
+
+  async actualizarBloqueo(form: any) {
+    let centro = this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value
+    let almacen = this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value
+    let denominacion = this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value;
+    //let ampliacion = (this.itemForm.get(this.CODIGO_INTERNO_AMPLIACION)?.value ? true : false);
+    let ampliacion = (this.itemForm.get(this.CODIGO_INTERNO_AMPLIACION)?.value ? this.itemForm.get(this.CODIGO_INTERNO_AMPLIACION)?.value : false);
+    let centro_codigo_sap = (centro.codigo_sap ? centro.codigo_sap : "")
+    let almacen_codigo_sap = (almacen.codigo_sap ? almacen.codigo_sap : "")
+    let centroOld = this.itemMaterialOld[this.CODIGO_INTERNO_CENTRO + "_valor"];
+    let almacenOld = this.itemMaterialOld[this.CODIGO_INTERNO_ALMACEN + "_valor"];
+    denominacion = denominacion.toUpperCase().trim();
+    this.actualizarMaterialBloqueo(form)
+  }
+
+  async actualizarMaterialBloqueo(form: any) {
+    let codigoModelo = (this.filtroForm.get("codigoModelo")?.value ? this.filtroForm.get("codigoModelo")?.value : "");
+    let campos: any[] = this.mapearCamposMaterialActualizar(form, this.itemMaterialOld);
+    let centro = (this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value?this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.value["codigo_sap"]:"");
+    let almacen = (this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value?this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.value["codigo_sap"]:"");
+    let params = {
+      'material': { "campos": campos, 
+                  [this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP]: codigoModelo,
+                  [this.CODIGO_INTERNO_CENTRO]:centro,
+                  [this.CODIGO_INTERNO_ALMACEN]:almacen
+                }
+    }
+    //console.log('material Ampliacion--->' + JSON.stringify(params));
+    this.solicitudService.actualizarMaterialBloqueo(this.id_solicitud, this.itemMaterialOld["id_material_solicitud"], params).then((data) => {
+      console.log('resppuesta al agregar material bloqueo-->' + JSON.stringify(data));
+      let mensaje = this.MENSAJE_ACTUALIZAR_MATERIAL;
+      if (data["resultado"] == 0) {
+        mensaje = data["mensaje"];
+        this.openSnackBarError(mensaje, "", "mat-primary")
+      } else {
+        this._snack.open(mensaje, 'cerrar', {
+          duration: 1800,
+          horizontalPosition: "end",
+          verticalPosition: "top"
+        });
+      }
+      this.getListadoMateriales();
+      this.limpiarMaterial()
+    })
+  }
+
+  //Fin de bloqueo
+
+  openDialogErrorSap(errorSap: any): void {
+    const dialogRef5 = this.matDialog.open(ErrorSapDialogComponent, {
+      disableClose: true,
+      data: errorSap
+    });
+
+    dialogRef5.afterClosed().subscribe(result => {
+
+      if (result == "CONFIRM_DLG_YES") {
+        //se debe agregar el id de usuario y id de rol segun req. del servicio
+        console.log("se cerró el dialog del error")
+      }
+
+    });
+  }
+
+  obtenerUrlSolicitud() {
+    this.solicitudService.obtenerUrlSolicitud(this.id_solicitud).then(data => {
+      //  console.log("imm tengo anexo ? : "+ JSON.stringify(data));
+      //  console.log("imm id_solicitud anexo ? : "+ JSON.stringify(this.id_solicitud));
+      if (data['resultado'] == 1) {
+        this.existeAnexoSolicitud = true;
+      } else {
+        this.existeAnexoSolicitud = false;
+      }
+    })
+  }
+  obtenerUrlMaterial(id_material: any) {
+    this.solicitudService.obtenerUrlMaterial(id_material).then(data => {
+      //  console.log("imm tengo anexo ? : "+ JSON.stringify(data));
+      if (data['resultado'] == 1) {
+        this.existeAnexoMaterial = true;
+      } else {
+        this.existeAnexoMaterial = false;
+      }
+    })
+  }
+  obtenerEquivalencias(id_material: any) {
+
+    let material: number = id_material;
+
+    //console.log("imm envio el material ? : "+ id_material);
+    this.equivalenciaService.getListaEquivalencias(material).then(data => {
+      //console.log("imm tengo anexo ? : "+ JSON.stringify(data));
+      let lista: Equivalencia[] = data;
+      if (lista.length > 0) {
+        this.existeEquivalencias = true;
+      } else {
+        this.existeEquivalencias = false;
+      }
+    })
+  }
+
+  async getVistaPortalReglas() {
+    this.solicitudService.getVistaPortalReglas(this.id_escenario_nivel3, this.ROL_SOLICITANTE, this.TIPO_SOLICITUD).then(async (data) => {
+      if (data.resultado == 1) {
+        this.listadoReglasVista = await data['lista'];
+      }
+    })
   }
 
 
+  async deshabilitarControles(item: any) {
+    //console.log("Deshabilitar campos del material-->" + JSON.stringify(item));
+    this.itemMaterialOld = item;
+    this.listadoReglasVista.forEach((vista: any) => {
+      if (vista["id_vista_portal"] == GlobalSettings.VISTA_PORTAL_BASICO) {
+        vista["campos"].forEach((campo: any) => {
+          let error = item[campo["codigo_interno"] + "_error"];//this.isErrorCampo(item, campo["codigo_interno"]);
+          if (!error) {//!error
+            switch (this.TIPO_SOLICITUD) {
+              case this.TIPO_SOLICITUD_CREACION:
+                if (item[this.CODIGO_INTERNO_AMPLIACION + '_valor'] == "X") {
+                  this.itemForm.get(campo["codigo_interno"])?.disable();
+                  this.btnAdd = true;
+                  /*                 this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.disable();
+                                  this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.disable();
+                                  this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.disable(); */
+                } else {
+                  this.solicitudService.esPadre(this.id_solicitud, this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.value).then(res => {
+                    if (res.existe && item[this.CODIGO_INTERNO_DENOMINACION + '_error'] == false) {
+                      this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.disable();
+                      this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.disable();
+                      this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.disable();
+                      this.btnAdd = true;
+                    }
+                  })
+                }
+                break;
+              case this.TIPO_SOLICITUD_AMPLIACION:
+                this.itemForm.get(campo["codigo_interno"])?.disable();
+                this.btnAdd = true;
+                //this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.disable();
+                this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.enable();
+                this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.enable();                 
+
+                break;
+              case this.TIPO_SOLICITUD_MODIFICACION:
+                break;
+              case this.TIPO_SOLICITUD_BLOQUEO:
+                break;
+            }
+          }
+        })
+      }
+    })
+  }
+
+  async listarCamposReglasxEscenario3() {
+    this.solicitudService.listarCamposReglasxEscenario3(this.id_escenario_nivel3, this.TIPO_SOLICITUD).then(async (data) => {
+      if (data.resultado == 1) {
+        let reglasPorescenario3:any[]=data['lista'];
+        reglasPorescenario3.forEach(reg=>{
+          if (reg["codigo_interno"]==this.CODIGO_INTERNO_ORGANIZACION_VENTAS){
+            this.organizacionVentaCodigoSap=reg["valor_defecto"];
+          }
+          if (reg["codigo_interno"]==this.CODIGO_INTERNO_CANAL_DISTRIBUCION){
+            this.canalDistribucionCodigoSap=reg["valor_defecto"];
+          }
+        })
+      }
+    })
+  }
+
+  async estadoSolicitudExistente(id_solicitud: number) {
+    this.solicitudService.estadoActual(id_solicitud).then(sol => {
+      return sol;
+    })
+  }  
 }
