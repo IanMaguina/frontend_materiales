@@ -234,7 +234,7 @@ export class ExcelGeneratorService {
                   [codigo_material]:row.getCell(2).value,"campos": campos })
                 } else {
                   //filaCompleta.push({ "campos": campos })
-                  filaCompleta.push({ "id_material_solicitud": row.getCell(1).value, 
+                  filaCompleta.push({ "id_material_solicitud": row.getCell(1).value,
                   [codigo_material]:row.getCell(2).value,"campos": campos })
 
                 }
@@ -250,6 +250,186 @@ export class ExcelGeneratorService {
   }
 
 
+  onFileSeletedModificacion(tipo_solicitud:number,event: any, tabs:any[],params:any): Promise<any> {
+    let codigo_material="";
+    let organizacion_ventas= params.organizacion_ventas;
+    let canal_distribucion= params.canal_distribucion;
+
+    if (tipo_solicitud==GlobalSettings.TIPO_SOLICITUD_CREACION){
+      codigo_material=GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO;
+    }else{
+      codigo_material=GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_SAP;
+    }
+    return new Promise((resolve, reject) => {
+      const workbook = new Excel.Workbook();
+      const target: DataTransfer = <DataTransfer>(event.target);
+      if (target.files.length !== 1) {
+        throw new Error('Cannot use multiple files');
+      }
+
+      /**
+       * Final Solution For Importing the Excel FILE
+       */
+
+      const arryBuffer = new Response(target.files[0]).arrayBuffer();
+      arryBuffer.then(function (data) {
+        workbook.xlsx.load(data)
+          .then(function () {
+
+            // play with workbook and worksheet now
+            //console.log(workbook);
+            const worksheet = workbook.getWorksheet(1);
+            //console.log('rowCount: ', worksheet.rowCount);
+            //console.log('ColumnCount: ', worksheet.columnCount);
+
+            let cabecera: any[] = [];
+            let detalle: any[] = [];
+            let filaCompleta: any[] = [];
+            let fila: any = "";
+
+            let campos: any[] = [];
+            let tabla_intermedia: any[] = tabs;
+            worksheet.eachRow(function (row, rowNumber) {
+              fila = "";
+
+              if (rowNumber == 1) {
+                for (let x = 1; x <= worksheet.columnCount; x++) {
+                  cabecera[x] = row.getCell(x).value;
+                }
+              } else {
+                campos = [];
+                let centro:any=""; 
+                let almacen:any="";
+                let materialCodigoSap:any="";
+                for (let x = 2; x <= worksheet.columnCount; x++) {
+                  tabla_intermedia.forEach(element => {
+
+                  })
+                  if (tabla_intermedia.indexOf(cabecera[x].toString()) >= 0) {
+                    let arrayC = row.getCell(x).toString().split(",");
+                    let valores: any[] = [];
+                    arrayC.forEach(item => {
+                      valores.push({ 'valor': (item==null?"":item) })
+                    })
+                    campos.push({ "codigo_interno": cabecera[x], "valores": valores });
+                  } else {
+                    campos.push({ "codigo_interno": cabecera[x], "valor": (row.getCell(x).value==null?"":row.getCell(x).value) });
+                  }
+                  if (cabecera[x]==GlobalSettings.CODIGO_INTERNO_CENTRO){
+                    centro=(row.getCell(x).value==null?"":row.getCell(x).value);
+                  }
+                  if (cabecera[x]==GlobalSettings.CODIGO_INTERNO_ALMACEN){
+                    almacen=(row.getCell(x).value==null?"":row.getCell(x).value);
+                  }
+                  if (cabecera[x]==GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_SAP){
+                    materialCodigoSap=(row.getCell(x).value==null?"":row.getCell(x).value);
+                  }
+
+                }
+                  filaCompleta.push({ "id_material_solicitud": row.getCell(1).value, 
+                  "centro_codigo_sap": centro,
+                  "almacen_codigo_sap": almacen,
+                  "organizacion_ventas":organizacion_ventas ,
+                  "canal_distribucion": canal_distribucion,
+                  [codigo_material]:materialCodigoSap,"campos": campos })
+        }
+            });
+            console.log("Materiales a cargar-->" + JSON.stringify({ "materiales": filaCompleta }));
+            resolve({ "materiales": filaCompleta });
+
+          });
+      });
+
+    });
+  }
+
+  onFileSeletedBloqueo(tipo_solicitud:number,event: any, tabs:any[]): Promise<any> {
+    let codigo_material="";
+    if (tipo_solicitud==GlobalSettings.TIPO_SOLICITUD_CREACION){
+      codigo_material=GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_MODELO;
+    }else{
+      codigo_material=GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_SAP;
+    }
+    return new Promise((resolve, reject) => {
+      const workbook = new Excel.Workbook();
+      const target: DataTransfer = <DataTransfer>(event.target);
+      if (target.files.length !== 1) {
+        throw new Error('Cannot use multiple files');
+      }
+
+      /**
+       * Final Solution For Importing the Excel FILE
+       */
+
+      const arryBuffer = new Response(target.files[0]).arrayBuffer();
+      arryBuffer.then(function (data) {
+        workbook.xlsx.load(data)
+          .then(function () {
+
+            // play with workbook and worksheet now
+            //console.log(workbook);
+            const worksheet = workbook.getWorksheet(1);
+            //console.log('rowCount: ', worksheet.rowCount);
+            //console.log('ColumnCount: ', worksheet.columnCount);
+
+            let cabecera: any[] = [];
+            let detalle: any[] = [];
+            let filaCompleta: any[] = [];
+            let fila: any = "";
+
+            let campos: any[] = [];
+            let tabla_intermedia: any[] = tabs;
+            worksheet.eachRow(function (row, rowNumber) {
+              fila = "";
+
+              if (rowNumber == 1) {
+                for (let x = 1; x <= worksheet.columnCount; x++) {
+                  cabecera[x] = row.getCell(x).value;
+                }
+              } else {
+                campos = [];
+                let centro:any=""; 
+                let almacen:any="";
+                let materialCodigoSap:any="";
+                for (let x = 2; x <= worksheet.columnCount; x++) {
+                  tabla_intermedia.forEach(element => {
+
+                  })
+                  if (tabla_intermedia.indexOf(cabecera[x].toString()) >= 0) {
+                    let arrayC = row.getCell(x).toString().split(",");
+                    let valores: any[] = [];
+                    arrayC.forEach(item => {
+                      valores.push({ 'valor': (item==null?"":item) })
+                    })
+                    campos.push({ "codigo_interno": cabecera[x], "valores": valores });
+                  } else {
+                    campos.push({ "codigo_interno": cabecera[x], "valor": (row.getCell(x).value==null?"":row.getCell(x).value) });
+                  }
+                  if (cabecera[x]==GlobalSettings.CODIGO_INTERNO_CENTRO){
+                    centro=(row.getCell(x).value==null?"":row.getCell(x).value);
+                  }
+                  if (cabecera[x]==GlobalSettings.CODIGO_INTERNO_ALMACEN){
+                    almacen=(row.getCell(x).value==null?"":row.getCell(x).value);
+                  }
+                  if (cabecera[x]==GlobalSettings.CODIGO_INTERNO_MATERIAL_CODIGO_SAP){
+                    materialCodigoSap=(row.getCell(x).value==null?"":row.getCell(x).value);
+                  }
+
+                }
+                  filaCompleta.push({ "id_material_solicitud": row.getCell(1).value, 
+                  "centro_codigo_sap": centro,
+                  "almacen_codigo_sap": almacen,
+                  [codigo_material]:materialCodigoSap,"campos": campos })
+          }
+            });
+            console.log("Materiales a cargar-->" + JSON.stringify({ "materiales": filaCompleta }));
+            resolve({ "materiales": filaCompleta });
+
+          });
+      });
+
+    });
+  }
   onFileSeletedOLD(event: any): Promise<any> {
     return new Promise((resolve, reject) => {
       const workbook = new Excel.Workbook();

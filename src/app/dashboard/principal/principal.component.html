@@ -1,5 +1,5 @@
-<span>Bienvenido {{userInfo.nombre}} !!!</span>
-<div >
+<!-- <span>Bienvenido {{userInfo.nombre}} !!!</span> -->
+<!-- <div *ngIf="false">
   <canvas class="pie" baseChart 
     [data]="pieChartData" 
     [labels]="pieChartLabels" 
@@ -11,4 +11,193 @@
     
     >
   </canvas>
+</div> -->
+
+<div class="contentmain" >
+  <div class="breadcumb">
+    <a routerLink="#">
+        <!-- <mat-icon>home</mat-icon>   -->
+        Dashboard :  {{userInfo.nombre}}  
+    </a>
+  </div>
+
+ 
+
+  <div class="filtros">
+    <form [formGroup]="filtroForm" >
+
+      <mat-grid-list cols="15" rowHeight="80px">
+
+        <mat-grid-tile colspan="3">
+            <div class="izquierda">
+                <mat-form-field appearance="outline">
+                    <mat-label>Gestor</mat-label>
+                    <mat-select formControlName="gestor" >
+                      <mat-option value="" selected>Seleccionar</mat-option>
+                      <mat-option *ngFor="let gestor of listadoGestor" [value]="gestor.id">
+                          {{ gestor.nombre }} 
+                      </mat-option>
+                    </mat-select>
+                </mat-form-field>
+              </div>
+          </mat-grid-tile> 
+        <mat-grid-tile colspan="3">
+            <div class="izquierda">
+                <mat-form-field appearance="outline">
+                    <mat-label>Proceso</mat-label>
+                    <mat-select formControlName="proceso" >
+                      <mat-option value="" selected>Seleccionar</mat-option>
+                      <mat-option *ngFor="let proceso of listadoProceso" [value]="proceso.id">
+                          {{ proceso.nombre }} 
+                      </mat-option>
+                    </mat-select>
+                </mat-form-field>
+              </div>
+          </mat-grid-tile>
+        <mat-grid-tile colspan="3">
+            <div class="izquierda">
+                <mat-form-field appearance="outline">
+                    <mat-label>Area</mat-label>
+                    <mat-select formControlName="area" >
+                      <mat-option value="" selected>Seleccionar</mat-option>
+                      <mat-option *ngFor="let area of listadoArea" [value]="area.id">
+                          {{ area.nombre }} 
+                      </mat-option>
+                    </mat-select>
+                </mat-form-field>
+              </div>
+          </mat-grid-tile>
+       
+          <mat-grid-tile colspan="3">
+            <div class="izquierda">
+            <mat-form-field appearance="outline">
+                <mat-label>Fecha Inicio</mat-label>
+                <input matInput [matDatepicker]="picker1" formControlName="fecha_inicio" >
+                <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+                <mat-datepicker #picker1 color="primary"></mat-datepicker>
+            </mat-form-field>
+            </div>
+        </mat-grid-tile>
+
+        <mat-grid-tile colspan="3">
+            <div class="izquierda">
+            <mat-form-field appearance="outline">
+                <mat-label>Fecha Fin</mat-label>
+                <input matInput [matDatepicker]="picker2" formControlName="fecha_fin" >
+                <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+                <mat-datepicker #picker2 color="primary"></mat-datepicker>
+            </mat-form-field>
+            </div>
+        </mat-grid-tile>
+        <mat-grid-tile colspan="6">
+          <div class="izquierda">
+            <button mat-raised-button color="accent" type="button" (click)="filtrarDatos()" >
+              Consultar
+          </button>
+          &nbsp;
+            <button mat-raised-button color="accent" type="button" (click)="limpiar()" >
+              Limpiar
+          </button>
+          </div>
+        </mat-grid-tile>
+        </mat-grid-list>
+    </form>
+  </div>
+  <mat-divider></mat-divider>
+  <br>
+  <div class="graficos">
+    <mat-grid-list cols="9" rowHeight="130px">
+      <mat-grid-tile [colspan]="5" [rowspan]="3">
+        <!-- canvas cantidad de solicitudes por area -->
+        <div class="grafic-content" *ngIf="doughnutChartData">
+        <canvas baseChart 
+          [options]="donutChartOptions" 
+          [data]="doughnutChartData"
+          [labels]="doughnutChartLabels"
+          [chartType]="doughnutChartType">
+        </canvas>
+      </div>
+      </mat-grid-tile> 
+
+      
+
+      <mat-grid-tile [colspan]="4" [rowspan]="3" >
+        
+        <!-- canvas tiempo de atención por gestor -->
+        <div class="grafic-content" *ngIf="doughnutChartData2">
+        <canvas baseChart 
+          [options]="donutChartOptions2" 
+          [data]="doughnutChartData2"
+          [labels]="doughnutChartLabels2"
+          [chartType]="doughnutChartType2">
+        </canvas>
+      </div>
+      </mat-grid-tile>
+
+      <mat-grid-tile [colspan]="3" [rowspan]="1" >
+        <div class="cardview">
+          <h2>solicitudes pendientes de atención</h2> 
+          <h1>  {{solicitudPendiente}}</h1>
+        </div>
+      </mat-grid-tile>
+
+      <mat-grid-tile [colspan]="3" [rowspan]="1"  >
+        <div class="cardview">
+          <h2> Tiempo Promedio de Atención</h2>
+          <h1> {{tiempoPromedio }} horas </h1>
+        </div>
+       
+      </mat-grid-tile>
+
+      <mat-grid-tile [colspan]="3" [rowspan]="1" >
+        <div class="cardview">
+          <h2> Porcentaje de avance de Atención	</h2>
+          <h1> {{porcentajeAvance}} %</h1>
+        </div>
+        
+      </mat-grid-tile>
+      
+      
+      <mat-grid-tile [colspan]="3" [rowspan]="3">
+        <!-- canvas cantidad de motivos de rechazos -->
+        <div class="grafic-content" *ngIf="barChartData">
+        <canvas baseChart 
+            [datasets]="barChartData"
+            [labels]="barChartLabels"
+            [options]="barChartOptions" 
+            [legend]="barChartLegend"
+            [chartType]="barChartType" 
+            >
+          </canvas>
+        </div>
+      </mat-grid-tile>
+      <mat-grid-tile [colspan]="3" [rowspan]="3">
+        <!-- canvas cantidad de tipos de solicitudes -->
+        <div class="grafic-content" *ngIf="barChartData2">
+          <canvas baseChart 
+            [datasets]="barChartData2"
+            [labels]="barChartLabels2"
+            [options]="barChartOptions2" 
+            [legend]="barChartLegend2"
+            [chartType]="barChartType2"  >
+          </canvas>
+        </div>
+      </mat-grid-tile>
+      <mat-grid-tile [colspan]="3" [rowspan]="3">
+        <!-- canvas porcentaje de solicitudes por status -->
+        <div class="grafic-content" *ngIf="pieChartData">
+          <canvas class="pie" baseChart 
+            [data]="pieChartData" 
+            [labels]="pieChartLabels" 
+            [chartType]="pieChartType"
+            [options]="pieChartOptions" 
+            [legend]="pieChartLegend"  
+            >
+          </canvas>
+        </div>
+        </mat-grid-tile>
+    </mat-grid-list>
+    
+  </div>
+
 </div>

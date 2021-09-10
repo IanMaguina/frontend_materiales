@@ -5,8 +5,8 @@
                 {{vista.nombre}}
             </h3>
             <br>
-            <mat-grid-list cols="3" rowHeight="75px">
-                <mat-grid-tile *ngFor="let campo of vista.campos">
+            <mat-grid-list cols="3" rowHeight="90px">
+                <mat-grid-tile *ngFor="let campo of vista.campos" colspan="{{anchoCampo(campo)}}">
                     <mat-form-field
                         *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_DENOMINACION"
                         class="example-form-field" appearance="outline">
@@ -43,6 +43,14 @@
                         <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span>
                         </mat-label>
                         <textarea matInput type="text" formControlName={{campo.codigo_interno}}></textarea>
+                    </mat-form-field>
+                    <mat-form-field
+                        *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXTAREA && campo.codigo_interno==CODIGO_INTERNO_MOTIVO"
+                        class="example-form-field" appearance="outline">
+                        <mat-label>{{campo.etiqueta}} <span *ngIf="campo.regla_campo=='M'" class="label-error">*</span>
+                        </mat-label>
+                        <textarea matInput type="text" formControlName={{campo.codigo_interno}}
+                            class="{{colorCampo(campo)}}" matTooltip="{{getToolTip(campo)}}"></textarea>
                     </mat-form-field>
                     <mat-form-field
                         *ngIf="campo.tipo_objeto==TIPO_OBJETO_INPUT_TEXT && campo.codigo_interno==CODIGO_INTERNO_CODIGO_EAN"

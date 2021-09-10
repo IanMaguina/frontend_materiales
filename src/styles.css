@@ -171,3 +171,15 @@ table {
     color: #1C313A;
 }
 
+.valorModificado {
+    background-color: #24ec0a !important;
+}
+
+.red-text {
+    font-size: 10px;
+    color: rgb(109, 3, 3) !important;
+  }
+  .black-text {
+    font-size: 10px;
+    color: rgb(0, 0, 0) !important;
+  }

@@ -190,8 +190,14 @@ const TREE_DATA: MenuNode[] = [
       }
     ]
   },
-
   {
+    "name": "Reportes",
+    "children": [
+      { "name": "Cantidad de Solicitudes", "link": "/dashboard/cantidadSolicitudes" },
+      { "name": "Tiempo de Solicitudes", "link": "/dashboard/TiempoSolicitudes" },
+    ]
+  },
+   {
     "name": "Consulta Materiales",
     "children": [
       { "name": "Por Codigo/Denominacion", "link": "/shared/bandejaMaterialesSap" },

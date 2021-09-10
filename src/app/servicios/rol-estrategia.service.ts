@@ -69,6 +69,33 @@ export class RolEstrategiaService {
     );
 
   }
+  getListarRoles(): Promise<any> {
+
+    let roles:any[]=[];
+
+    return new Promise(
+      (resolve, reject) => {
+        this.resourceService.getResource("/rol/listarTodo").toPromise().then((data) => {
+         // console.log("roles asignados data=" + JSON.stringify(data));
+          if (data && Object.keys(data).length !== 0) {
+            roles= data['lista'];
+            resolve(roles);
+          } else {
+            console.log("roles no encontrados...");
+            resolve([]);
+          }
+        }
+        ).catch(
+          (error) => {
+            console.log("error status=" + error.status + ", msg=" + error.message);
+            reject(error);
+          }
+        );
+
+      }
+    );
+
+  }
 
   crearRolEstrategia(estrategiaRol: EstrategiaRol): Promise<any> {
 

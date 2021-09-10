@@ -14,6 +14,9 @@ export const Messages = Object.freeze({
         MENSAJE_QUITAR_EQUIVALENCIA : "Se eliminó la equivalencia!",
     },
     error: {
+        MENSAJE_ERROR_BLOQUEADO_ALMACEN: 'Petición de borrado fijado a nivel de almacén.',
+        MENSAJE_ERROR_BLOQUEADO_CENTRO: 'Como mínimo se han fijado dos peticiones de borrado.',
+        MENSAJE_ERROR_BLOQUEADO_CODIGO_MATERIAL: 'Petición de borrado fijada a nivel de mandante.',
         MENSAJE_ERROR_DENOMINACION_NO_EXISTE_SAP: 'Material no existe en SAP',
         MENSAJE_ERROR_DENOMINACION_SAP: 'Material ya existe',
         MENSAJE_ERROR_DENOMINACION_BD: 'Material ya existe en tramite de solicitud',

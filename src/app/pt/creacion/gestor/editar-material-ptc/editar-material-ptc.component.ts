@@ -78,6 +78,8 @@ export class EditarMaterialPtcComponent implements OnInit {
   itemForm!: FormGroup;
   filtroForm!: FormGroup;
   itemMaterialOld: any;
+  listadoCamposMaterialSAP: any[] = [];
+  listadoCamposMaterialSAPTransformado: any;
   TIPO_SOLICITUD: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
   TIPO_SOLICITUD_CREACION: number = GlobalSettings.TIPO_SOLICITUD_CREACION;
   TIPO_SOLICITUD_AMPLIACION: number = GlobalSettings.TIPO_SOLICITUD_AMPLIACION;
@@ -222,10 +224,13 @@ export class EditarMaterialPtcComponent implements OnInit {
   CODIGO_INTERNO_VISTA_PLANIFICACION: string = GlobalSettings.CODIGO_INTERNO_VISTA_PLANIFICACION;
   CODIGO_INTERNO_PRECIO_COTIZACION: string = GlobalSettings.CODIGO_INTERNO_PRECIO_COTIZACION;
   CODIGO_INTERNO_PERIODO_VIDA: string = GlobalSettings.CODIGO_INTERNO_PERIODO_VIDA;
+  CODIGO_INTERNO_MOTIVO: string = GlobalSettings.CODIGO_INTERNO_MOTIVO;
   MENSAJE_ACTUALIZAR_MATERIAL: string = GlobalSettings.MENSAJE_ACTUALIZAR_MATERIAL;
 
   vistaDisabled = false;
   submitted = false;
+  organizacionVentaCodigoSap: string = "";
+  canalDistribucionCodigoSap: string = "";
 
   formErrorsItem = {
     //'denominacion': ""
@@ -295,7 +300,9 @@ export class EditarMaterialPtcComponent implements OnInit {
     this.id_rol = this.rol.id_rol;
     this.id_tipo_solicitud = this.data.id_tipo_solicitud;
     this.sociedad = this.data.sociedad;
+    await this.listarCamposReglasxEscenario3();
     await this.getVistaPortalReglas();
+    await this.getListadoCampoReglas();
 
     this.getListarUnidadMedida();
 
@@ -407,7 +414,8 @@ export class EditarMaterialPtcComponent implements OnInit {
       [this.CODIGO_INTERNO_AREA_PLANIFICACION_TAB]: [""],
       [this.CODIGO_INTERNO_VISTA_PLANIFICACION]: [""],
       [this.CODIGO_INTERNO_PRECIO_COTIZACION]: [""],
-      [this.CODIGO_INTERNO_PERIODO_VIDA]: [""]
+      [this.CODIGO_INTERNO_PERIODO_VIDA]: [""],
+      [this.CODIGO_INTERNO_MOTIVO]: "",
 
     })
     this.itemForm.valueChanges.subscribe(() => {
@@ -735,6 +743,7 @@ export class EditarMaterialPtcComponent implements OnInit {
   }
 
   async editarMaterial(item: any) {
+    await this.traerDatosSap(item);
     console.log("editar material-->" + JSON.stringify(item));
     this.filtroForm.get("codigoModelo")?.setValue((item["material_codigo_modelo"] ? item["material_codigo_modelo"] : ""));
     //console.log(" listadoReglasVista editarMaterial-->" + JSON.stringify(this.listadoReglasVista));
@@ -807,111 +816,7 @@ export class EditarMaterialPtcComponent implements OnInit {
       })
     }
 
-  }
 
-  async editarMaterialOLD(item: any) {
-    //console.log('Editar material---->' + JSON.stringify(item));
-    if (item.denominacion) {
-      this.itemForm.get(this.CODIGO_INTERNO_DENOMINACION)?.setValue(item.denominacion);
-    }
-    if (item.unidad_medida_base) {
-      this.itemForm.get(this.CODIGO_INTERNO_UNIDAD_MEDIDA_BASE)?.setValue({ codigo_sap: item.unidad_medida_base_valor });
-    }
-    if (item.peso_bruto) {
-      this.itemForm.get(this.CODIGO_INTERNO_PESO_BRUTO)?.setValue(item.peso_bruto);
-    }
-    if (item.unidad_medida_peso) {
-      this.itemForm.get(this.CODIGO_INTERNO_UNIDAD_MEDIDA_PESO)?.setValue({ codigo_sap: item.unidad_medida_peso_valor });
-    }
-    if (item[this.CODIGO_INTERNO_CENTRO]) {
-      this.getListarAlmacen(item[this.CODIGO_INTERNO_CENTRO + '_valor']);
-      this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_CENTRO + '_valor'] });
-    }
-    if (item.centro_beneficio) {
-      this.itemForm.get(this.CODIGO_INTERNO_CENTRO_BENEFICIO)?.setValue({ codigo_sap: item.centro_beneficio_valor });
-    }
-    if (item.organizacion_ventas) {
-      this.itemForm.get(this.CODIGO_INTERNO_ORGANIZACION_VENTAS)?.setValue({ codigo_sap: item.organizacion_ventas_valor });
-    }
-    if (item.canal_distribucion) {
-      this.itemForm.get(this.CODIGO_INTERNO_CANAL_DISTRIBUCION)?.setValue({ codigo_sap: item.canal_distribucion_valor });
-    }
-    if (item[this.CODIGO_INTERNO_ALMACEN]) {
-      this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_ALMACEN + '_valor'] });
-    }
-    if (item[this.CODIGO_INTERNO_CLASE_TAB]) {
-      let toArray_valor: any[] = item[this.CODIGO_INTERNO_CLASE_TAB + '_valor'].split(",");
-      let toArray_id: any[] = item[this.CODIGO_INTERNO_CLASE_TAB + '_id'].split(",");
-      let toArray_clase_descripcion = item[this.CODIGO_INTERNO_CLASE_TAB + '_descripcion'].split(",");
-      let valores: any[] = [];
-      for (let x = 0; x < toArray_id.length; x++) {
-        valores.push({ "id_clasificacion": toArray_id[x], "codigo_sap": toArray_valor[x], "nombre": toArray_clase_descripcion[x] })
-      }
-      this.itemForm.get('clase')?.setValue(valores);
-    }
-    //Calidad
-    this.itemForm.get(this.CODIGO_INTERNO_ALMACEN_PRODUCCION)?.setValue((item[this.CODIGO_INTERNO_ALMACEN_PRODUCCION + '_valor'] ? item[this.CODIGO_INTERNO_ALMACEN_PRODUCCION + '_valor'] : ""));
-
-    if (item[this.CODIGO_INTERNO_RESPONSABLE_CONTROL_PRODUCCION]) {
-      this.itemForm.get(this.CODIGO_INTERNO_RESPONSABLE_CONTROL_PRODUCCION)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_RESPONSABLE_CONTROL_PRODUCCION + '_valor'] });
-    }
-    if (item[this.CODIGO_INTERNO_PERFIL_CONTROL_FABRICACION]) {
-      this.itemForm.get(this.CODIGO_INTERNO_PERFIL_CONTROL_FABRICACION)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_PERFIL_CONTROL_FABRICACION + '_valor'] });
-    }
-    //Costos
-    if (item[this.CODIGO_INTERNO_CATEGORIA_VALORACION]) {
-      this.itemForm.get(this.CODIGO_INTERNO_CATEGORIA_VALORACION)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_CATEGORIA_VALORACION + '_valor'] });
-    }
-    //Comercial
-    if (item[this.CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA]) {
-      this.itemForm.get(this.CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA + '_valor'] });
-    }
-    if (item[this.CODIGO_INTERNO_GRUPO_ESTADISTICA_MAT]) {
-      this.itemForm.get(this.CODIGO_INTERNO_GRUPO_ESTADISTICA_MAT)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_GRUPO_ESTADISTICA_MAT + '_valor'] });
-    }
-    if (item[this.CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL]) {
-      this.itemForm.get(this.CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL + '_valor'] });
-    }
-    if (item[this.CODIGO_INTERNO_JERARQUIA_PRODUCTO]) {
-      this.itemForm.get(this.CODIGO_INTERNO_JERARQUIA_PRODUCTO)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_JERARQUIA_PRODUCTO + '_valor'] });
-    }
-    if (item[this.CODIGO_INTERNO_GRUPOS_MATERIAL1]) {
-      this.itemForm.get(this.CODIGO_INTERNO_GRUPOS_MATERIAL1)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_GRUPOS_MATERIAL1 + '_valor'] });
-    }
-    if (item[this.CODIGO_INTERNO_GRUPOS_MATERIAL2]) {
-      this.itemForm.get(this.CODIGO_INTERNO_GRUPOS_MATERIAL2)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_GRUPOS_MATERIAL2 + '_valor'] });
-    }
-    let texto_comercial = (item[this.CODIGO_INTERNO_TEXTO_COMERCIAL + '_valor'] == "null" ||
-      item[this.CODIGO_INTERNO_TEXTO_COMERCIAL + '_valor'] == null
-      ? "" : item[this.CODIGO_INTERNO_TEXTO_COMERCIAL + '_valor'])
-    this.itemForm.get(this.CODIGO_INTERNO_TEXTO_COMERCIAL)?.setValue(texto_comercial);
-
-    //administrador  materiales
-    if (item[this.CODIGO_INTERNO_GRUPO_TRANSPORTE]) {
-      this.itemForm.get(this.CODIGO_INTERNO_GRUPO_TRANSPORTE)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_GRUPO_TRANSPORTE + '_valor'] });
-    }
-    if (item[this.CODIGO_INTERNO_GRUPO_CARGA]) {
-      this.itemForm.get(this.CODIGO_INTERNO_GRUPO_CARGA)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_GRUPO_CARGA + '_valor'] });
-    }
-    if (item[this.CODIGO_INTERNO_IDIOMA]) {
-      this.itemForm.get(this.CODIGO_INTERNO_IDIOMA)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_IDIOMA + '_valor'] });
-    }
-    if (item[this.CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO]) {
-      this.itemForm.get(this.CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO)?.setValue({ codigo_sap: item[this.CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO + '_valor'] });
-    }
-    if (item[this.CODIGO_INTERNO_UMP_VAR]) {
-      this.itemForm.get(this.CODIGO_INTERNO_UMP_VAR)?.setValue(item[this.CODIGO_INTERNO_UMP_VAR + '_valor']);
-    }
-    let texto_compra = (item[this.CODIGO_INTERNO_TEXTO_COMPRA + '_valor'] == "null" ||
-      item[this.CODIGO_INTERNO_TEXTO_COMPRA + '_valor'] == null
-      ? "" : item[this.CODIGO_INTERNO_TEXTO_COMPRA + '_valor'])
-    this.itemForm.get(this.CODIGO_INTERNO_TEXTO_COMPRA)?.setValue(texto_compra);
-
-
-    //Control de gestiòn
-    if (item[this.CODIGO_INTERNO_PRECIO_ESTANDAR]) {
-      this.itemForm.get(this.CODIGO_INTERNO_PRECIO_ESTANDAR)?.setValue(item[this.CODIGO_INTERNO_PRECIO_ESTANDAR + '_valor']);
-    }
   }
 
 
@@ -1005,174 +910,6 @@ export class EditarMaterialPtcComponent implements OnInit {
     return campos;
   }
 
-  mapearCamposMaterialActualizarOLD(form: any, itemMaterialOld: any) {
-    let campos: any[] = [];
-    this.listadoReglasVista.forEach((vista: any) => {
-      vista["campos"].forEach((campoRegla: any) => {
-        if (form.denominacion && form.denominacion != itemMaterialOld.denominacion_valor
-          && this.CODIGO_INTERNO_DENOMINACION == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_DENOMINACION, 'valor': form.denominacion });
-
-        if (form.unidad_medida_base && form.unidad_medida_base.codigo_sap != itemMaterialOld.unidad_medida_base_valor
-          && this.CODIGO_INTERNO_UNIDAD_MEDIDA_BASE == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_UNIDAD_MEDIDA_BASE, 'valor': form.unidad_medida_base.codigo_sap });
-
-        if (form.peso_bruto && form.peso_bruto != itemMaterialOld.peso_bruto
-          && this.CODIGO_INTERNO_PESO_BRUTO == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_PESO_BRUTO, 'valor': form.peso_bruto });
-
-        if (form.unidad_medida_peso && form.unidad_medida_peso.codigo_sap != itemMaterialOld.unidad_medida_peso_valor
-          && this.CODIGO_INTERNO_UNIDAD_MEDIDA_PESO == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_UNIDAD_MEDIDA_PESO, 'valor': form.unidad_medida_peso.codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_CENTRO] && form[this.CODIGO_INTERNO_CENTRO].codigo_sap != itemMaterialOld[this.CODIGO_INTERNO_CENTRO + '_valor']
-          && this.CODIGO_INTERNO_CENTRO == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_CENTRO, 'valor': form[this.CODIGO_INTERNO_CENTRO].codigo_sap });
-
-        if (form.centro && form.centro.codigo_centro_beneficio != itemMaterialOld.codigo_centro_beneficio_valor
-          && this.CODIGO_INTERNO_CENTRO_BENEFICIO == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_CENTRO_BENEFICIO, 'valor': form.centro.codigo_centro_beneficio });
-
-        if (form.organizacion_ventas && form.organizacion_ventas.codigo_sap != itemMaterialOld.organizacion_ventas_valor
-          && this.CODIGO_INTERNO_ORGANIZACION_VENTAS == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_ORGANIZACION_VENTAS, 'valor': form.organizacion_ventas.codigo_sap });
-
-        if (form.canal_distribucion && form.canal_distribucion.codigo_sap != itemMaterialOld.canal_distribucion_valor
-          && this.CODIGO_INTERNO_CANAL_DISTRIBUCION == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_CANAL_DISTRIBUCION, 'valor': form.canal_distribucion.codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_ALMACEN] && form[this.CODIGO_INTERNO_ALMACEN].codigo_sap != itemMaterialOld[this.CODIGO_INTERNO_ALMACEN + '_valor']
-          && this.CODIGO_INTERNO_ALMACEN == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_ALMACEN, 'valor': form[this.CODIGO_INTERNO_ALMACEN].codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_CLASE_TAB]
-          && this.CODIGO_INTERNO_CLASE_TAB == campoRegla['codigo_interno']) {
-          let valoresCadena = "";
-          let valores: any[] = [];
-          let c = 0;
-          form.clase.forEach((element: { codigo_sap: any; }) => {
-            c++;
-            if (c == 1) {
-              valoresCadena = element.codigo_sap;
-            } else {
-              valoresCadena = valoresCadena + "," + element.codigo_sap;
-            }
-
-            valores.push({ 'valor': element.codigo_sap })
-          });
-          //console.log(valoresCadena + '-------' + itemMaterialOld[this.CODIGO_INTERNO_CLASE_TAB + '_valor'])
-          if (valoresCadena != itemMaterialOld[this.CODIGO_INTERNO_CLASE_TAB + '_valor']) {
-            campos.push({ 'codigo_interno': this.CODIGO_INTERNO_CLASE_TAB, 'valores': valores });
-          }
-
-        }
-
-        // Calidad
-        if (form[this.CODIGO_INTERNO_ALMACEN_PRODUCCION] && form[this.CODIGO_INTERNO_ALMACEN_PRODUCCION] != itemMaterialOld[this.CODIGO_INTERNO_ALMACEN_PRODUCCION + '_valor']
-          && this.CODIGO_INTERNO_ALMACEN_PRODUCCION == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_ALMACEN_PRODUCCION, 'valor': form[this.CODIGO_INTERNO_ALMACEN_PRODUCCION] });
-
-        if (form[this.CODIGO_INTERNO_RESPONSABLE_CONTROL_PRODUCCION] && form[this.CODIGO_INTERNO_RESPONSABLE_CONTROL_PRODUCCION] != itemMaterialOld[this.CODIGO_INTERNO_RESPONSABLE_CONTROL_PRODUCCION + '_valor']
-          && this.CODIGO_INTERNO_RESPONSABLE_CONTROL_PRODUCCION == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_RESPONSABLE_CONTROL_PRODUCCION, 'valor': form[this.CODIGO_INTERNO_RESPONSABLE_CONTROL_PRODUCCION].codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_PERFIL_CONTROL_FABRICACION] && form[this.CODIGO_INTERNO_PERFIL_CONTROL_FABRICACION] != itemMaterialOld[this.CODIGO_INTERNO_PERFIL_CONTROL_FABRICACION + '_valor']
-          && this.CODIGO_INTERNO_PERFIL_CONTROL_FABRICACION == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_PERFIL_CONTROL_FABRICACION, 'valor': form[this.CODIGO_INTERNO_PERFIL_CONTROL_FABRICACION].codigo_sap });
-
-        //Costos
-        if (form[this.CODIGO_INTERNO_CATEGORIA_VALORACION] && form[this.CODIGO_INTERNO_CATEGORIA_VALORACION] != itemMaterialOld[this.CODIGO_INTERNO_CATEGORIA_VALORACION + '_valor']
-          && this.CODIGO_INTERNO_CATEGORIA_VALORACION == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_CATEGORIA_VALORACION, 'valor': form[this.CODIGO_INTERNO_CATEGORIA_VALORACION].codigo_sap });
-
-        //comercial
-
-        if (form[this.CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA] && form[this.CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA].codigo_sap != itemMaterialOld[this.CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA + '_valor']
-          && this.CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA, 'valor': form[this.CODIGO_INTERNO_UNIDAD_MEDIDA_VENTA].codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_GRUPO_ESTADISTICA_MAT] && form[this.CODIGO_INTERNO_GRUPO_ESTADISTICA_MAT] != itemMaterialOld[this.CODIGO_INTERNO_GRUPO_ESTADISTICA_MAT + '_valor']
-          && this.CODIGO_INTERNO_GRUPO_ESTADISTICA_MAT == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_GRUPO_ESTADISTICA_MAT, 'valor': form[this.CODIGO_INTERNO_GRUPO_ESTADISTICA_MAT].codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL] && form[this.CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL] != itemMaterialOld[this.CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL + '_valor']
-          && this.CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL, 'valor': form[this.CODIGO_INTERNO_GRUPO_IMPUTACION_MATERIAL].codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_JERARQUIA_PRODUCTO] && form[this.CODIGO_INTERNO_JERARQUIA_PRODUCTO] != itemMaterialOld[this.CODIGO_INTERNO_JERARQUIA_PRODUCTO + '_valor']
-          && this.CODIGO_INTERNO_JERARQUIA_PRODUCTO == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_JERARQUIA_PRODUCTO, 'valor': form[this.CODIGO_INTERNO_JERARQUIA_PRODUCTO].codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_GRUPOS_MATERIAL1] && form[this.CODIGO_INTERNO_GRUPOS_MATERIAL1] != itemMaterialOld[this.CODIGO_INTERNO_GRUPOS_MATERIAL1 + '_valor']
-          && this.CODIGO_INTERNO_GRUPOS_MATERIAL1 == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_GRUPOS_MATERIAL1, 'valor': form[this.CODIGO_INTERNO_GRUPOS_MATERIAL1].codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_GRUPOS_MATERIAL2] && form[this.CODIGO_INTERNO_GRUPOS_MATERIAL2] != itemMaterialOld[this.CODIGO_INTERNO_GRUPOS_MATERIAL2 + '_valor']
-          && this.CODIGO_INTERNO_GRUPOS_MATERIAL2 == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_GRUPOS_MATERIAL2, 'valor': form[this.CODIGO_INTERNO_GRUPOS_MATERIAL2].codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_TEXTO_COMERCIAL] && form[this.CODIGO_INTERNO_TEXTO_COMERCIAL] != itemMaterialOld[this.CODIGO_INTERNO_TEXTO_COMERCIAL + '_valor']
-          && this.CODIGO_INTERNO_TEXTO_COMERCIAL == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_TEXTO_COMERCIAL, 'valor': form[this.CODIGO_INTERNO_TEXTO_COMERCIAL] });
-
-        //administrador  materiales
-
-        if (form[this.CODIGO_INTERNO_GRUPO_TRANSPORTE] && form[this.CODIGO_INTERNO_GRUPO_TRANSPORTE] != itemMaterialOld[this.CODIGO_INTERNO_GRUPO_TRANSPORTE + '_valor']
-          && this.CODIGO_INTERNO_GRUPO_TRANSPORTE == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_GRUPO_TRANSPORTE, 'valor': form[this.CODIGO_INTERNO_GRUPO_TRANSPORTE].codigo_sap });
-
-
-        if (form[this.CODIGO_INTERNO_GRUPO_CARGA] && form[this.CODIGO_INTERNO_GRUPO_CARGA] != itemMaterialOld[this.CODIGO_INTERNO_GRUPO_CARGA + '_valor']
-          && this.CODIGO_INTERNO_GRUPO_CARGA == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_GRUPO_CARGA, 'valor': form[this.CODIGO_INTERNO_GRUPO_CARGA].codigo_sap });
-
-
-        if (form[this.CODIGO_INTERNO_IDIOMA] && form[this.CODIGO_INTERNO_IDIOMA] != itemMaterialOld[this.CODIGO_INTERNO_IDIOMA + '_valor']
-          && this.CODIGO_INTERNO_IDIOMA == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_IDIOMA, 'valor': form[this.CODIGO_INTERNO_IDIOMA].codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO] && form[this.CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO] != itemMaterialOld[this.CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO + '_valor']
-          && this.CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO, 'valor': form[this.CODIGO_INTERNO_UNIDAD_MEDIDA_PEDIDO].codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_UMP_VAR] && form[this.CODIGO_INTERNO_UMP_VAR] != itemMaterialOld[this.CODIGO_INTERNO_UMP_VAR + '_valor']
-          && this.CODIGO_INTERNO_UMP_VAR == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_UMP_VAR, 'valor': form[this.CODIGO_INTERNO_UMP_VAR] });
-
-        if (form[this.CODIGO_INTERNO_TEXTO_COMPRA] && form[this.CODIGO_INTERNO_TEXTO_COMPRA] != itemMaterialOld[this.CODIGO_INTERNO_TEXTO_COMPRA + '_valor']
-          && this.CODIGO_INTERNO_TEXTO_COMPRA == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_TEXTO_COMPRA, 'valor': form[this.CODIGO_INTERNO_TEXTO_COMPRA] });
-
-        //Control de gestión
-        if (form[this.CODIGO_INTERNO_PRECIO_ESTANDAR] && form[this.CODIGO_INTERNO_PRECIO_ESTANDAR] != itemMaterialOld[this.CODIGO_INTERNO_PRECIO_ESTANDAR + '_valor']
-          && this.CODIGO_INTERNO_PRECIO_ESTANDAR == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_PRECIO_ESTANDAR, 'valor': form[this.CODIGO_INTERNO_PRECIO_ESTANDAR] });
-
-        //otros
-        if (form[this.CODIGO_INTERNO_CODIGO_EAN] && form[this.CODIGO_INTERNO_CODIGO_EAN] != itemMaterialOld[this.CODIGO_INTERNO_CODIGO_EAN + '_valor']
-          && this.CODIGO_INTERNO_CODIGO_EAN == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_CODIGO_EAN, 'valor': form[this.CODIGO_INTERNO_CODIGO_EAN] });
-
-        if (form[this.CODIGO_INTERNO_PRECIO_VARIABLE] && form[this.CODIGO_INTERNO_PRECIO_VARIABLE] != itemMaterialOld[this.CODIGO_INTERNO_PRECIO_VARIABLE + '_valor']
-          && this.CODIGO_INTERNO_PRECIO_VARIABLE == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_PRECIO_VARIABLE, 'valor': form[this.CODIGO_INTERNO_PRECIO_VARIABLE] });
-
-        if (form[this.CODIGO_INTERNO_VERIFICACION_DISPONIBILIDAD] && form[this.CODIGO_INTERNO_VERIFICACION_DISPONIBILIDAD] != itemMaterialOld[this.CODIGO_INTERNO_VERIFICACION_DISPONIBILIDAD + '_valor']
-          && this.CODIGO_INTERNO_VERIFICACION_DISPONIBILIDAD == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_VERIFICACION_DISPONIBILIDAD, 'valor': form[this.CODIGO_INTERNO_VERIFICACION_DISPONIBILIDAD] });
-
-        if (form[this.CODIGO_INTERNO_GRUPO_TIPO_POSICION] && form[this.CODIGO_INTERNO_GRUPO_TIPO_POSICION] != itemMaterialOld[this.CODIGO_INTERNO_GRUPO_TIPO_POSICION + '_valor']
-          && this.CODIGO_INTERNO_GRUPO_TIPO_POSICION == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_GRUPO_TIPO_POSICION, 'valor': form[this.CODIGO_INTERNO_GRUPO_TIPO_POSICION].codigo_sap });
-
-        if (form[this.CODIGO_INTERNO_PARTIDA_ARANCELARIA] && form[this.CODIGO_INTERNO_PARTIDA_ARANCELARIA] != itemMaterialOld[this.CODIGO_INTERNO_PARTIDA_ARANCELARIA + '_valor']
-          && this.CODIGO_INTERNO_PARTIDA_ARANCELARIA == campoRegla['codigo_interno'])
-          campos.push({ 'codigo_interno': this.CODIGO_INTERNO_PARTIDA_ARANCELARIA, 'valor': form[this.CODIGO_INTERNO_PARTIDA_ARANCELARIA].codigo_sap });
-
-      })
-    })
-    return campos;
-  }
 
   cerrarDialog(res: any): void {
     this.dialogRef.close(res);
@@ -1509,17 +1246,244 @@ export class EditarMaterialPtcComponent implements OnInit {
     }
    */
   async habilitarControles() {
-    console.log('entro a habilitarControles')
+    console.log('entro a habilitarControles-->' + JSON.stringify(this.listadoReglasVista));
     this.listadoReglasVista.forEach((vista: any) => {
       vista["campos"].forEach((campo: any) => {
         if (campo["codigo_interno"] == this.CODIGO_INTERNO_AMPLIACION) {
           this.itemForm.get(campo["codigo_interno"])?.disable()
         }
+        switch (this.TIPO_SOLICITUD) {
+          case this.TIPO_SOLICITUD_CREACION:
+            console.log("creacion");
+            break;
+          case this.TIPO_SOLICITUD_AMPLIACION:
+            console.log("ampliacion");
+            break;
+          case this.TIPO_SOLICITUD_MODIFICACION:
+            console.log("modificacion");
+            if (vista["id_vista_portal"] == GlobalSettings.VISTA_PORTAL_BASICO && this.ROL_ADMINISTRADOR_MATERIAL == this.id_rol) {
+              if (campo["codigo_interno"] != this.CODIGO_INTERNO_MOTIVO) {
+                ///this.itemForm.get(campo["codigo_interno"])?.disable();
+              }
+            }
+            this.itemForm.get(this.CODIGO_INTERNO_CENTRO)?.disable();
+            this.itemForm.get(this.CODIGO_INTERNO_ALMACEN)?.disable();
+            break;
+          case this.TIPO_SOLICITUD_BLOQUEO:
+            console.log("bloqueo");
+            if (campo["codigo_interno"] != this.CODIGO_INTERNO_MOTIVO) {
+              this.itemForm.get(campo["codigo_interno"])?.disable();
+            }
+            break;
+        }
+
+
       })
 
     })
     //this.setValorPorDefecto();
   }
 
+  async traerDatosSap(item: any) {
+    if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_MODIFICACION) {
+      let centro = (item[this.CODIGO_INTERNO_CENTRO + "_valor"] ? item[this.CODIGO_INTERNO_CENTRO + "_valor"] : "");
+      let almacen = (item[this.CODIGO_INTERNO_ALMACEN + "_valor"] ? item[this.CODIGO_INTERNO_ALMACEN + "_valor"] : "");
+      let material_codigo_sap = (item[this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP] ? item[this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP] : "");
+      let organizacionVentas = (this.organizacionVentaCodigoSap ? this.organizacionVentaCodigoSap : "");
+      let canalDistribucion = (this.canalDistribucionCodigoSap ? this.canalDistribucionCodigoSap : "");
+      //{"id_solicitud":"1000024","id_material_solicitud":2309,"material_codigo_sap":"004-05305","denominacion":"LATEX MATE SUPERIOR TONO AZUL 4L-PRUEBA","denominacion_valor":"LATEX MATE SUPERIOR TONO AZUL 4L-PRUEBA","denominacion_id":null,"denominacion_descripcion":"LATEX MATE SUPERIOR TONO AZUL 4L-PRUEBA","denominacion_error":false,"denominacion_visible":true,"peso_bruto":"50.000","peso_bruto_valor":"50","peso_bruto_id":null,"peso_bruto_descripcion":"50.000","peso_bruto_error":false,"peso_bruto_visible":true,"centro_codigo_sap":"FPSA - Chemifabrik","centro_codigo_sap_valor":"3005","centro_codigo_sap_id":"3005","centro_codigo_sap_descripcion":"FPSA - Chemifabrik","centro_codigo_sap_error":false,"centro_codigo_sap_visible":true,"centro_beneficio_codigo_sap":"Lima Inventarios","centro_beneficio_codigo_sap_valor":"1030000310","centro_beneficio_codigo_sap_id":"1030000310","centro_beneficio_codigo_sap_descripcion":"Lima Inventarios","centro_beneficio_codigo_sap_error":false,"centro_beneficio_codigo_sap_visible":true,"almacen_codigo_sap":"Alm. P-Chemifabr","almacen_codigo_sap_valor":"3005","almacen_codigo_sap_id":"3005","almacen_codigo_sap_descripcion":"Alm. P-Chemifabr","almacen_codigo_sap_error":false,"almacen_codigo_sap_visible":true,"grupo_articulo":"OTROS: SOLUC. EMBOLS","grupo_articulo_valor":"PT-SE9900","grupo_articulo_id":"PT-SE9900","grupo_articulo_descripcion":"OTROS: SOLUC. EMBOLS","grupo_articulo_error":false,"grupo_articulo_visible":true,"unidad_medida_venta":null,"unidad_medida_venta_valor":"","unidad_medida_venta_id":null,"unidad_medida_venta_descripcion":null,"unidad_medida_venta_error":true,"unidad_medida_venta_visible":true,"grupo_tipo_posicion":"Posición normal","grupo_tipo_posicion_valor":"NORM","grupo_tipo_posicion_id":"NORM","grupo_tipo_posicion_descripcion":"Posición normal","grupo_tipo_posicion_error":false,"grupo_tipo_posicion_visible":true,"grupo_imputacion_material":"Vtas Pinturas","grupo_imputacion_material_valor":"5N","grupo_imputacion_material_id":"5N","grupo_imputacion_material_descripcion":"Vtas Pinturas","grupo_imputacion_material_error":false,"grupo_imputacion_material_visible":true,"jerarquia_producto":"Pinturas","jerarquia_producto_valor":"107500100010000010","jerarquia_producto_id":"107500100010000010","jerarquia_producto_descripcion":"Pinturas","jerarquia_producto_error":false,"jerarquia_producto_visible":true,"grupos_material1":"Cemento Pacasmayo","grupos_material1_valor":"CPS","grupos_material1_id":"CPS","grupos_material1_descripcion":"Cemento Pacasmayo","grupos_material1_error":false,"grupos_material1_visible":true,"grupos_material2":"Mater. más usados","grupos_material2_valor":"001","grupos_material2_id":"001","grupos_material2_descripcion":"Mater. más usados","grupos_material2_error":false,"grupos_material2_visible":true,"grupo_carga":"Grúa","grupo_carga_valor":"0001","grupo_carga_id":"0001","grupo_carga_descripcion":"Grúa","grupo_carga_error":false,"grupo_carga_visible":true,"unidad_medida_pedido":null,"unidad_medida_pedido_valor":"","unidad_medida_pedido_id":null,"unidad_medida_pedido_descripcion":null,"unidad_medida_pedido_error":true,"unidad_medida_pedido_visible":true,"vista_planificacion":"X","vista_planificacion_valor":"X","vista_planificacion_id":null,"vista_planificacion_descripcion":"X","vista_planificacion_error":false,"vista_planificacion_visible":true,"acciones":"","mensaje_error_sap":null,"existe_error_sap":null,"material_codigo_modelo":"004-05305","equivalencia_material_contador":0,"anexo_material_contador":0}
+      console.log("entrando 3");
+      let body = {
+        "material": {
+          "material_codigo_sap": material_codigo_sap,
+          "centro_codigo_sap": (centro ? centro : ""),
+          "almacen_codigo_sap": (almacen ? almacen : ""),
+          "organizacion_ventas": (organizacionVentas ? organizacionVentas : ""),
+          "canal_distribucion": (canalDistribucion ? canalDistribucion : "")
+        }
+      }
+      this.solicitudService.getMaterialSAP(body).then(async mat => {
+        if (mat.length > 0) {
+          this.listadoCamposMaterialSAP = mat;
+          await this.transformarListadoCamposMaterialSAP();
+          console.log("material modelo-->" + material_codigo_sap + "......." + JSON.stringify(mat));
+        }
+      })
+    }
+  }
 
+  getToolTip(campo: any) {
+    if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_MODIFICACION) {
+      if (this.listadoCamposMaterialSAPTransformado) {
+        if (campo.codigo_interno == this.listadoCamposMaterialSAPTransformado["codigo_interno_" + campo.codigo_interno]) {
+          return "Valor Inicial: " + this.listadoCamposMaterialSAPTransformado[campo.codigo_interno];
+        }
+      }
+    }
+    return "";
+  }
+
+  colorCampo(campo: any) {
+    if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_MODIFICACION) {
+      if (this.listadoCamposMaterialSAPTransformado) {
+        if (campo.codigo_interno == this.listadoCamposMaterialSAPTransformado["codigo_interno_" + campo.codigo_interno]) {
+          if (campo['tipo_objeto'] == this.TIPO_OBJETO_INPUT_TEXT) {
+            let valor = this.itemForm.get(campo.codigo_interno)?.value;
+            let valorSAP = this.listadoCamposMaterialSAPTransformado[campo.codigo_interno];
+            if (campo['tipo_dato'] == this.TIPO_DATO_NUM) {
+              valor = parseFloat(valor);
+              valorSAP = parseFloat(valorSAP)
+            }
+            if (valorSAP != valor) {
+              return "valorModificado";
+            }
+          }
+          if (campo['tipo_objeto'] == this.TIPO_OBJETO_COMBO) {
+            if (campo["codigo_interno"].substr(-4) == '_tab') {//if (campoRegla['codigo_interno'] == this.CODIGO_INTERNO_CLASE_TAB) {
+              let valores: any[] = this.itemForm.get(campo.codigo_interno)?.value;
+              let valorSAP = this.listadoCamposMaterialSAPTransformado[campo.codigo_interno];
+              console.log(JSON.stringify(valores) + " color saooo-->" + JSON.stringify(campo) + " valorSAP" + valorSAP);
+              let valoresCadena = "";
+              let c = 0;
+              if (valores) {
+                valores.forEach(item => {
+                  console.log("ahi madre-->" + item.codigo_sap);
+                  c++;
+                  if (c == 1) {
+                    valoresCadena = item.codigo_sap;
+                  } else {
+                    valoresCadena = valoresCadena + "," + item.codigo_sap;
+                  }
+                });
+              }
+              if (valores && valorSAP != valoresCadena) {
+                return "valorModificado";
+              }
+            } else {
+              let valor = this.itemForm.get(campo.codigo_interno)?.value;
+              if (valor && this.listadoCamposMaterialSAPTransformado[campo.codigo_interno] != valor.codigo_sap) {
+                return "valorModificado";
+              }
+              if (!valor && this.listadoCamposMaterialSAPTransformado[campo.codigo_interno] != "") {
+                return "valorModificado";
+              }
+            }
+          }
+
+        }
+      }
+    }
+    return "";
+
+  }
+
+  async transformarListadoCamposMaterialSAP() {
+    let listadoArray: any[] = [];
+    let fila: any = "";
+    let numCampos = 0;
+    console.log("this.listadoCamposMaterialSAP-->" + JSON.stringify(this.listadoCamposMaterialSAP));
+    this.listadoCamposMaterialSAP.forEach(reg => {
+      this.listadoCampoReglas.forEach(campo => {
+        if (campo["codigo_interno"] == reg["codigo_interno"]) {
+          numCampos++;
+          if (numCampos == 1) {
+            if (campo["codigo_interno"].substr(-4) == '_tab') {
+              console.log(numCampos + " antes del material modelo-->" + campo["codigo_interno"] + "---" + JSON.stringify(reg["valores"]))
+              let valoresCadena = "";
+              let valores: any[] = reg['valores'];
+              let c = 0;
+              if (valores) {
+                valores.forEach(item => {
+                  console.log("ahi madre-->" + item.valor);
+                  c++;
+                  if (c == 1) {
+                    valoresCadena = item.valor;
+                  } else {
+                    valoresCadena = valoresCadena + "," + item.valor;
+                  }
+                });
+              }
+              fila = fila + '"' + reg["codigo_interno"] + '": "' + valoresCadena + '"';
+              fila = fila + ',"codigo_interno_' + reg["codigo_interno"] + '": "' + reg["codigo_interno"] + '"';
+              console.log(fila);
+            } else {
+
+              fila = fila + '"' + reg["codigo_interno"] + '": "' + reg["valor"] + '"';
+              fila = fila + ',"codigo_interno_' + reg["codigo_interno"] + '": "' + reg["codigo_interno"] + '"';
+            }
+          } else {
+            if (campo["codigo_interno"].substr(-4) == '_tab') {
+              console.log(numCampos + " antes del material modelo-->" + campo["codigo_interno"] + "---" + JSON.stringify(reg["valores"]))
+              let valoresCadena = "";
+              let valores: any[] = reg['valores'];
+              let c = 0;
+              if (valores) {
+                valores.forEach(item => {
+                  console.log("ahi madre-->" + item.valor);
+                  c++;
+                  if (c == 1) {
+                    valoresCadena = item.valor;
+                  } else {
+                    valoresCadena = valoresCadena + "," + item.valor;
+                  }
+                });
+              }
+              fila = fila + ',"' + reg["codigo_interno"] + '": "' + valoresCadena + '"';
+              fila = fila + ',"codigo_interno_' + reg["codigo_interno"] + '": "' + reg["codigo_interno"] + '"';
+              console.log(fila);
+            } else {
+              fila = fila + ',"' + reg["codigo_interno"] + '": "' + reg["valor"] + '"';
+              fila = fila + ',"codigo_interno_' + reg["codigo_interno"] + '": "' + reg["codigo_interno"] + '"';
+            }
+          }
+        }
+      })
+    })
+    fila = JSON.parse("{" + fila + "}");
+    this.listadoCamposMaterialSAPTransformado = fila;
+    console.log("xx--->" + JSON.stringify(fila));
+  }
+
+  async getListadoCampoReglas() {
+    if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_MODIFICACION) {
+      let lista: any[] = [];
+      this.solicitudService.getListadoCampoReglas(this.id_escenario_nivel3, this.id_rol, this.id_tipo_solicitud).then((data) => {
+        let listadoCampoReglas: ReglasCampo[] = data['lista'];
+        if (data.resultado == 1) {
+          for (let y = 0; y < listadoCampoReglas.length; y++) {
+            if (listadoCampoReglas[y].tipo_objeto != null) {
+              lista.push(listadoCampoReglas[y]);
+            }
+          }
+          this.listadoCampoReglas = lista;
+        }
+      })
+    }
+  }
+
+  async listarCamposReglasxEscenario3() {
+    this.solicitudService.listarCamposReglasxEscenario3(this.id_escenario_nivel3, this.TIPO_SOLICITUD).then(async (data) => {
+      console.log("xxxxx--->" + JSON.stringify(data));
+      if (data.resultado == 1) {
+        let reglasPorescenario3: any[] = data['lista'];
+        reglasPorescenario3.forEach(reg => {
+          if (reg["codigo_interno"] == this.CODIGO_INTERNO_ORGANIZACION_VENTAS) {
+            this.organizacionVentaCodigoSap = reg["valor_defecto"];
+          }
+          if (reg["codigo_interno"] == this.CODIGO_INTERNO_CANAL_DISTRIBUCION) {
+            this.canalDistribucionCodigoSap = reg["valor_defecto"];
+          }
+        })
+      }
+    })
+  }
+
+  anchoCampo(campo: any) {
+    if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_MODIFICACION || this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_BLOQUEO) {
+      if (campo.codigo_interno == this.CODIGO_INTERNO_MOTIVO) {
+        return 2;
+      }
+    }
+    return 1;
+  }
 }

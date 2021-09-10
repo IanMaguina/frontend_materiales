@@ -643,8 +643,12 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
         this.eliminarAmpliacion(item);
         break;
       case this.TIPO_SOLICITUD_MODIFICACION:
+        console.log("modificación");
+        this.eliminarModificacion(item);
         break;
       case this.TIPO_SOLICITUD_BLOQUEO:
+        console.log("bloqueo");
+        this.eliminarBloqueo(item);
         break;
     }
   }
@@ -712,6 +716,70 @@ export class EditarSolicitudGestorPtcComponent implements OnInit {
     });
   }
 
+
+  eliminarModificacion(item: any) {
+    this.itemMaterialOld = item;
+    let mensaje;
+    if (item.ampliacion) {
+      mensaje = Messages.warnig.MENSAJE_DIALOGO_ELIMINAR_MATERIAL;
+    } else {
+      mensaje = Messages.warnig.MENSAJE_DIALOGO_ELIMINAR_MATERIAL_AMPLIADOS;
+    }
+    const dialogRef = this.matDialog.open(ConfirmDialogComponent, {
+      disableClose: true,
+      data: mensaje
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      //vienen los datos del dialog
+      //console.log('The dialog was closed'+JSON.stringify(result));
+      if (result == "CONFIRM_DLG_YES") {
+        this.solicitudService.eliminarMaterialModificacion(this.id_solicitud, this.itemMaterialOld["id_material_solicitud"]).then((res) => {
+          console.log(JSON.stringify(res));
+          this._snack.open(this.MENSAJE_ELIMINAR_MATERIAL, 'cerrar', {
+            duration: 1800,
+            horizontalPosition: "end",
+            verticalPosition: "top"
+          });
+          this.getListadoMateriales();
+        })
+      } else {
+        // this.solicitudForm.get('selectecLineaNegocio').setValue(this.EscenarioNivel3_Old ? this.EscenarioNivel3_Old : null);
+        this.getListadoMateriales();
+      }
+    });
+  }
+
+  eliminarBloqueo(item: any) {
+    this.itemMaterialOld = item;
+    let mensaje;
+    if (item.ampliacion) {
+      mensaje = Messages.warnig.MENSAJE_DIALOGO_ELIMINAR_MATERIAL;
+    } else {
+      mensaje = Messages.warnig.MENSAJE_DIALOGO_ELIMINAR_MATERIAL_AMPLIADOS;
+    }
+    const dialogRef = this.matDialog.open(ConfirmDialogComponent, {
+      disableClose: true,
+      data: mensaje
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      //vienen los datos del dialog
+      //console.log('The dialog was closed'+JSON.stringify(result));
+      if (result == "CONFIRM_DLG_YES") {
+        this.solicitudService.eliminarMaterialBloqueo(this.id_solicitud, this.itemMaterialOld["id_material_solicitud"]).then((res) => {
+          console.log(JSON.stringify(res));
+          this._snack.open(this.MENSAJE_ELIMINAR_MATERIAL, 'cerrar', {
+            duration: 1800,
+            horizontalPosition: "end",
+            verticalPosition: "top"
+          });
+          this.getListadoMateriales();
+        })
+      } else {
+        // this.solicitudForm.get('selectecLineaNegocio').setValue(this.EscenarioNivel3_Old ? this.EscenarioNivel3_Old : null);
+        this.getListadoMateriales();
+      }
+    });
+  }
 
   compareLineaNegocio(o1: any, o2: any) {
     //console.log('arsa-->'+JSON.stringify(o1)+'------'+JSON.stringify(o2))

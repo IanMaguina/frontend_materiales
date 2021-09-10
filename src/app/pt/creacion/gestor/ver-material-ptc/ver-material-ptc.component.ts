@@ -73,6 +73,8 @@ export class VerMaterialPtcComponent implements OnInit {
 
   itemForm!: FormGroup;
   itemMaterialOld: any;
+  listadoCamposMaterialSAP: any[] = [];
+  listadoCamposMaterialSAPTransformado: any;
 
   displayedColumns: any[] = [];
   listadoCampoReglas: ReglasCampo[] = [];
@@ -206,10 +208,12 @@ export class VerMaterialPtcComponent implements OnInit {
   CODIGO_INTERNO_VISTA_PLANIFICACION: string = GlobalSettings.CODIGO_INTERNO_VISTA_PLANIFICACION;
   CODIGO_INTERNO_PRECIO_COTIZACION: string = GlobalSettings.CODIGO_INTERNO_PRECIO_COTIZACION;
   CODIGO_INTERNO_PERIODO_VIDA: string = GlobalSettings.CODIGO_INTERNO_PERIODO_VIDA;  
-
+  CODIGO_INTERNO_MOTIVO: string = GlobalSettings.CODIGO_INTERNO_MOTIVO;
   MENSAJE_ACTUALIZAR_MATERIAL: string = GlobalSettings.MENSAJE_ACTUALIZAR_MATERIAL;
 
   vistaDisabled = false;
+  organizacionVentaCodigoSap: string = "";
+  canalDistribucionCodigoSap: string = "";
 
   formErrorsItem = {
     //'denominacion': ""
@@ -278,8 +282,9 @@ export class VerMaterialPtcComponent implements OnInit {
     this.id_rol = this.rol.id_rol;
     this.id_tipo_solicitud = this.data.id_tipo_solicitud;
     this.sociedad = this.data.sociedad;
+    await this.listarCamposReglasxEscenario3();
     await this.getVistaPortalReglas();
-
+    await this.getListadoCampoReglas();
     this.getListarUnidadMedida();
     this.getListarCanalDistribucion();
     this.getListarClasificacion();
@@ -373,7 +378,8 @@ export class VerMaterialPtcComponent implements OnInit {
       [this.CODIGO_INTERNO_AREA_PLANIFICACION_TAB]: [""],
       [this.CODIGO_INTERNO_VISTA_PLANIFICACION]: [""],
       [this.CODIGO_INTERNO_PRECIO_COTIZACION]: [""],
-      [this.CODIGO_INTERNO_PERIODO_VIDA]: [""]
+      [this.CODIGO_INTERNO_PERIODO_VIDA]: [""],
+      [this.CODIGO_INTERNO_MOTIVO]: "",
 
     })
     this.itemForm.valueChanges.subscribe(() => {
@@ -1272,4 +1278,207 @@ export class VerMaterialPtcComponent implements OnInit {
     //this.setValorPorDefecto();
   }
 
+  async traerDatosSap(item: any) {
+    if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_MODIFICACION) {
+      let centro = (item[this.CODIGO_INTERNO_CENTRO + "_valor"] ? item[this.CODIGO_INTERNO_CENTRO + "_valor"] : "");
+      let almacen = (item[this.CODIGO_INTERNO_ALMACEN + "_valor"] ? item[this.CODIGO_INTERNO_ALMACEN + "_valor"] : "");
+      let material_codigo_sap = (item[this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP] ? item[this.CODIGO_INTERNO_MATERIAL_CODIGO_SAP] : "");
+      let organizacionVentas = (this.organizacionVentaCodigoSap ? this.organizacionVentaCodigoSap : "");
+      let canalDistribucion = (this.canalDistribucionCodigoSap ? this.canalDistribucionCodigoSap : "");
+      //{"id_solicitud":"1000024","id_material_solicitud":2309,"material_codigo_sap":"004-05305","denominacion":"LATEX MATE SUPERIOR TONO AZUL 4L-PRUEBA","denominacion_valor":"LATEX MATE SUPERIOR TONO AZUL 4L-PRUEBA","denominacion_id":null,"denominacion_descripcion":"LATEX MATE SUPERIOR TONO AZUL 4L-PRUEBA","denominacion_error":false,"denominacion_visible":true,"peso_bruto":"50.000","peso_bruto_valor":"50","peso_bruto_id":null,"peso_bruto_descripcion":"50.000","peso_bruto_error":false,"peso_bruto_visible":true,"centro_codigo_sap":"FPSA - Chemifabrik","centro_codigo_sap_valor":"3005","centro_codigo_sap_id":"3005","centro_codigo_sap_descripcion":"FPSA - Chemifabrik","centro_codigo_sap_error":false,"centro_codigo_sap_visible":true,"centro_beneficio_codigo_sap":"Lima Inventarios","centro_beneficio_codigo_sap_valor":"1030000310","centro_beneficio_codigo_sap_id":"1030000310","centro_beneficio_codigo_sap_descripcion":"Lima Inventarios","centro_beneficio_codigo_sap_error":false,"centro_beneficio_codigo_sap_visible":true,"almacen_codigo_sap":"Alm. P-Chemifabr","almacen_codigo_sap_valor":"3005","almacen_codigo_sap_id":"3005","almacen_codigo_sap_descripcion":"Alm. P-Chemifabr","almacen_codigo_sap_error":false,"almacen_codigo_sap_visible":true,"grupo_articulo":"OTROS: SOLUC. EMBOLS","grupo_articulo_valor":"PT-SE9900","grupo_articulo_id":"PT-SE9900","grupo_articulo_descripcion":"OTROS: SOLUC. EMBOLS","grupo_articulo_error":false,"grupo_articulo_visible":true,"unidad_medida_venta":null,"unidad_medida_venta_valor":"","unidad_medida_venta_id":null,"unidad_medida_venta_descripcion":null,"unidad_medida_venta_error":true,"unidad_medida_venta_visible":true,"grupo_tipo_posicion":"Posición normal","grupo_tipo_posicion_valor":"NORM","grupo_tipo_posicion_id":"NORM","grupo_tipo_posicion_descripcion":"Posición normal","grupo_tipo_posicion_error":false,"grupo_tipo_posicion_visible":true,"grupo_imputacion_material":"Vtas Pinturas","grupo_imputacion_material_valor":"5N","grupo_imputacion_material_id":"5N","grupo_imputacion_material_descripcion":"Vtas Pinturas","grupo_imputacion_material_error":false,"grupo_imputacion_material_visible":true,"jerarquia_producto":"Pinturas","jerarquia_producto_valor":"107500100010000010","jerarquia_producto_id":"107500100010000010","jerarquia_producto_descripcion":"Pinturas","jerarquia_producto_error":false,"jerarquia_producto_visible":true,"grupos_material1":"Cemento Pacasmayo","grupos_material1_valor":"CPS","grupos_material1_id":"CPS","grupos_material1_descripcion":"Cemento Pacasmayo","grupos_material1_error":false,"grupos_material1_visible":true,"grupos_material2":"Mater. más usados","grupos_material2_valor":"001","grupos_material2_id":"001","grupos_material2_descripcion":"Mater. más usados","grupos_material2_error":false,"grupos_material2_visible":true,"grupo_carga":"Grúa","grupo_carga_valor":"0001","grupo_carga_id":"0001","grupo_carga_descripcion":"Grúa","grupo_carga_error":false,"grupo_carga_visible":true,"unidad_medida_pedido":null,"unidad_medida_pedido_valor":"","unidad_medida_pedido_id":null,"unidad_medida_pedido_descripcion":null,"unidad_medida_pedido_error":true,"unidad_medida_pedido_visible":true,"vista_planificacion":"X","vista_planificacion_valor":"X","vista_planificacion_id":null,"vista_planificacion_descripcion":"X","vista_planificacion_error":false,"vista_planificacion_visible":true,"acciones":"","mensaje_error_sap":null,"existe_error_sap":null,"material_codigo_modelo":"004-05305","equivalencia_material_contador":0,"anexo_material_contador":0}
+      console.log("entrando 3");
+      let body = {
+        "material": {
+          "material_codigo_sap": material_codigo_sap,
+          "centro_codigo_sap": (centro ? centro : ""),
+          "almacen_codigo_sap": (almacen ? almacen : ""),
+          "organizacion_ventas": (organizacionVentas ? organizacionVentas : ""),
+          "canal_distribucion": (canalDistribucion ? canalDistribucion : "")
+        }
+      }
+      this.solicitudService.getMaterialSAP(body).then(async mat => {
+        if (mat.length > 0) {
+          this.listadoCamposMaterialSAP = mat;
+          await this.transformarListadoCamposMaterialSAP();
+          console.log("material modelo-->" + material_codigo_sap + "......." + JSON.stringify(mat));
+        }
+      })
+    }
+  }
+
+  getToolTip(campo: any) {
+    if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_MODIFICACION) {
+      if (this.listadoCamposMaterialSAPTransformado) {
+        if (campo.codigo_interno == this.listadoCamposMaterialSAPTransformado["codigo_interno_" + campo.codigo_interno]) {
+          return "Valor Inicial: " + this.listadoCamposMaterialSAPTransformado[campo.codigo_interno];
+        }
+      }
+    }
+    return "";
+  }
+
+  colorCampo(campo: any) {
+    if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_MODIFICACION) {
+      if (this.listadoCamposMaterialSAPTransformado) {
+        if (campo.codigo_interno == this.listadoCamposMaterialSAPTransformado["codigo_interno_" + campo.codigo_interno]) {
+          if (campo['tipo_objeto'] == this.TIPO_OBJETO_INPUT_TEXT) {
+            let valor = this.itemForm.get(campo.codigo_interno)?.value;
+            let valorSAP = this.listadoCamposMaterialSAPTransformado[campo.codigo_interno];
+            if (campo['tipo_dato'] == this.TIPO_DATO_NUM) {
+              valor = parseFloat(valor);
+              valorSAP = parseFloat(valorSAP)
+            }
+            if (valorSAP != valor) {
+              return "valorModificado";
+            }
+          }
+          if (campo['tipo_objeto'] == this.TIPO_OBJETO_COMBO) {
+            if (campo["codigo_interno"].substr(-4) == '_tab') {//if (campoRegla['codigo_interno'] == this.CODIGO_INTERNO_CLASE_TAB) {
+              let valores: any[] = this.itemForm.get(campo.codigo_interno)?.value;
+              let valorSAP = this.listadoCamposMaterialSAPTransformado[campo.codigo_interno];
+              console.log(JSON.stringify(valores) + " color saooo-->" + JSON.stringify(campo) + " valorSAP" + valorSAP);
+              let valoresCadena = "";
+              let c = 0;
+              if (valores) {
+                valores.forEach(item => {
+                  console.log("ahi madre-->" + item.codigo_sap);
+                  c++;
+                  if (c == 1) {
+                    valoresCadena = item.codigo_sap;
+                  } else {
+                    valoresCadena = valoresCadena + "," + item.codigo_sap;
+                  }
+                });
+              }
+              if (valores && valorSAP != valoresCadena) {
+                return "valorModificado";
+              }
+            } else {
+              let valor = this.itemForm.get(campo.codigo_interno)?.value;
+              if (valor && this.listadoCamposMaterialSAPTransformado[campo.codigo_interno] != valor.codigo_sap) {
+                return "valorModificado";
+              }
+              if (!valor && this.listadoCamposMaterialSAPTransformado[campo.codigo_interno] != "") {
+                return "valorModificado";
+              }
+            }
+          }
+
+        }
+      }
+    }
+    return "";
+
+  }
+
+  async transformarListadoCamposMaterialSAP() {
+    let listadoArray: any[] = [];
+    let fila: any = "";
+    let numCampos = 0;
+    console.log("this.listadoCamposMaterialSAP-->" + JSON.stringify(this.listadoCamposMaterialSAP));
+    this.listadoCamposMaterialSAP.forEach(reg => {
+      this.listadoCampoReglas.forEach(campo => {
+        if (campo["codigo_interno"] == reg["codigo_interno"]) {
+          numCampos++;
+          if (numCampos == 1) {
+            if (campo["codigo_interno"].substr(-4) == '_tab') {
+              console.log(numCampos + " antes del material modelo-->" + campo["codigo_interno"] + "---" + JSON.stringify(reg["valores"]))
+              let valoresCadena = "";
+              let valores: any[] = reg['valores'];
+              let c = 0;
+              if (valores) {
+                valores.forEach(item => {
+                  console.log("ahi madre-->" + item.valor);
+                  c++;
+                  if (c == 1) {
+                    valoresCadena = item.valor;
+                  } else {
+                    valoresCadena = valoresCadena + "," + item.valor;
+                  }
+                });
+              }
+              fila = fila + '"' + reg["codigo_interno"] + '": "' + valoresCadena + '"';
+              fila = fila + ',"codigo_interno_' + reg["codigo_interno"] + '": "' + reg["codigo_interno"] + '"';
+              console.log(fila);
+            } else {
+
+              fila = fila + '"' + reg["codigo_interno"] + '": "' + reg["valor"] + '"';
+              fila = fila + ',"codigo_interno_' + reg["codigo_interno"] + '": "' + reg["codigo_interno"] + '"';
+            }
+          } else {
+            if (campo["codigo_interno"].substr(-4) == '_tab') {
+              console.log(numCampos + " antes del material modelo-->" + campo["codigo_interno"] + "---" + JSON.stringify(reg["valores"]))
+              let valoresCadena = "";
+              let valores: any[] = reg['valores'];
+              let c = 0;
+              if (valores) {
+                valores.forEach(item => {
+                  console.log("ahi madre-->" + item.valor);
+                  c++;
+                  if (c == 1) {
+                    valoresCadena = item.valor;
+                  } else {
+                    valoresCadena = valoresCadena + "," + item.valor;
+                  }
+                });
+              }
+              fila = fila + ',"' + reg["codigo_interno"] + '": "' + valoresCadena + '"';
+              fila = fila + ',"codigo_interno_' + reg["codigo_interno"] + '": "' + reg["codigo_interno"] + '"';
+              console.log(fila);
+            } else {
+              fila = fila + ',"' + reg["codigo_interno"] + '": "' + reg["valor"] + '"';
+              fila = fila + ',"codigo_interno_' + reg["codigo_interno"] + '": "' + reg["codigo_interno"] + '"';
+            }
+          }
+        }
+      })
+    })
+    fila = JSON.parse("{" + fila + "}");
+    this.listadoCamposMaterialSAPTransformado = fila;
+    console.log("xx--->" + JSON.stringify(fila));
+  }
+
+  async getListadoCampoReglas() {
+    if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_MODIFICACION) {
+      let lista: any[] = [];
+      this.solicitudService.getListadoCampoReglas(this.id_escenario_nivel3, this.id_rol, this.id_tipo_solicitud).then((data) => {
+        let listadoCampoReglas: ReglasCampo[] = data['lista'];
+        if (data.resultado == 1) {
+          for (let y = 0; y < listadoCampoReglas.length; y++) {
+            if (listadoCampoReglas[y].tipo_objeto != null) {
+              lista.push(listadoCampoReglas[y]);
+            }
+          }
+          this.listadoCampoReglas = lista;
+        }
+      })
+    }
+  }
+
+  async listarCamposReglasxEscenario3() {
+    this.solicitudService.listarCamposReglasxEscenario3(this.id_escenario_nivel3, this.TIPO_SOLICITUD).then(async (data) => {
+      console.log("xxxxx--->" + JSON.stringify(data));
+      if (data.resultado == 1) {
+        let reglasPorescenario3: any[] = data['lista'];
+        reglasPorescenario3.forEach(reg => {
+          if (reg["codigo_interno"] == this.CODIGO_INTERNO_ORGANIZACION_VENTAS) {
+            this.organizacionVentaCodigoSap = reg["valor_defecto"];
+          }
+          if (reg["codigo_interno"] == this.CODIGO_INTERNO_CANAL_DISTRIBUCION) {
+            this.canalDistribucionCodigoSap = reg["valor_defecto"];
+          }
+        })
+      }
+    })
+  }
+
+  anchoCampo(campo: any) {
+    if (this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_MODIFICACION || this.TIPO_SOLICITUD == this.TIPO_SOLICITUD_BLOQUEO) {
+      if (campo.codigo_interno == this.CODIGO_INTERNO_MOTIVO) {
+        return 2;
+      }
+    }
+    return 1;
+  }
+  
 }

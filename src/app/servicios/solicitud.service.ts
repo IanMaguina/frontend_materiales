@@ -230,7 +230,7 @@ export class SolicitudService {
 
         this.resourceService.postResource("/solicitud/" + id_solicitud + "/materialSolicitud/agregarMaterial?id_rol=" + id_rol, data).toPromise().then((data) => {
 
-          console.log("response data=" + JSON.stringify(data));
+          console.log("response data arsa=" + JSON.stringify(data));
           resolve(data);
 
         }).catch((error) => {
@@ -1207,6 +1207,7 @@ export class SolicitudService {
       (resolve, reject) => {
         //this.resourceService.postResource("/materialSolicitud/consultaCodigoMaterialSAP", body).toPromise().then((data) => {
         this.resourceService.postResource("/materialSolicitud/consultarMaterialSAP", body).toPromise().then((data) => {
+          console.log("Recibe esto-->" + JSON.stringify(data));
           if (data.resultado == 1) {
             material = data['lista'];
             resolve(material);
@@ -1395,7 +1396,7 @@ export class SolicitudService {
     console.log(idSolicitud + "------" + idmaterial + " sending eliminarMaterialModificacion...");
     return new Promise(
       (resolve, reject) => {
-        this.resourceService.postResource("/solicitud/" + idSolicitud + "/materialSolicitud/" + idmaterial + "/eliminarModificacion", {}).toPromise().then((data) => {
+        this.resourceService.postResource("/solicitud/" + idSolicitud + "/materialSolicitud/" + idmaterial + "/eliminarMaterial", {}).toPromise().then((data) => {
           material = data;
           resolve(material);
         }
@@ -1554,7 +1555,7 @@ export class SolicitudService {
     console.log(idSolicitud + "------" + idmaterial + " sending eliminarMaterialBloqueo...");
     return new Promise(
       (resolve, reject) => {
-        this.resourceService.postResource("/solicitud/" + idSolicitud + "/materialSolicitud/" + idmaterial + "/eliminarModificacion", {}).toPromise().then((data) => {
+        this.resourceService.postResource("/solicitud/" + idSolicitud + "/materialSolicitud/" + idmaterial + "/eliminarMaterial", {}).toPromise().then((data) => {
           material = data;
           resolve(material);
         }

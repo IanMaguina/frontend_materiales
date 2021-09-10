@@ -6,3 +6,31 @@
     width: 40%;
     height: 40%;
 }
+
+.cardview{
+    height: 90%;
+    width: 90%;
+    padding: 5px;
+    align-items: center;
+    text-align: center;
+    border-radius: 10px;
+    border-color: grey;
+    border-style: solid;
+}
+.grafic-content{
+    padding: 5px;
+    height: 96%;
+    width: 90%;
+    align-items: center;
+    text-align: center;
+    border-radius: 10px;
+    border-color: grey;
+    border-style: solid;
+}
+
+.filtros .ng-tns-c148-7{
+    width: 80% !important;
+}
+.filtros .ng-tns-c148-8{
+    width: 80% !important;
+} 
